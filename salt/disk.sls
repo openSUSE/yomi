@@ -183,23 +183,29 @@ umount_root_partition_{{ disk_name }}{{ loop.index }}:
 {% endfor %}
 
 # Reboot via kexec
-{% for partition in disk.get('partitions', []) %}
-  {% if partition.get("mountpoint", None)  == "/" %}
-mount_root_partition_{{ disk_name }}{{ loop.index }}:
+{% for disk_name, disk in storage.disk.items() %}
+  {% for partition in disk.get('partitions', []) %}
+    {% if partition.get("mountpoint", None)  == "/" %}
+mount_root_partition_kexec_{{ disk_name }}{{ loop.index }}:
   mount.mounted:
     - name: /mnt
     - device: {{ disk_name }}{{ loop.index }}
     - fstype: {{ partition.get("type", "ext3") }}
     - persist: False
 
-    {% set cmdline = salt['cmd.run']("grep -E '^[[:space:]]*linux[[:space:]]+[^[:space:]]+vmlinux.*$' | cut -d ' ' -f 2-") %}
+grub_command_line:
+  cmd.run:
+    - name: grep -m 1 -E '^[[:space:]]*linux[[:space:]]+[^[:space:]]+vmlinuz.*$' /mnt/boot/grub2/grub.cfg | cut -d ' ' -f 2- > /tmp/command_line
+    - create: /tmp/command_line
 
 prepare_kexec_for_{{ disk_name }}{{ loop.index }}:
   cmd.run:
-    - name: kexec -l --initrd /mnt/boot/initrd --command-line="{{ cmdline }}" /mnt/boot/vmlinuz
+    - name: kexec -l --initrd /mnt/boot/initrd --command-line=`cat /tmp/command_line` /mnt/boot/vmlinuz
+    - onlyif: "[ -e /tmp/command_line ]"
 
 execute_kexec_for_{{ disk_name }}{{ loop.index }}:
   cmd.run:
     - name: kexec -e
-  {% endif %}
+    {% endif %}
+  {% endfor %}
 {% endfor %}
