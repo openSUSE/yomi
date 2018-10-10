@@ -49,6 +49,10 @@ except NameError:
     __states__ = {}
 
 
+class ParseException(Exception):
+    pass
+
+
 class EnumerateException(Exception):
     pass
 
@@ -288,6 +292,7 @@ def _parse_value_with_units(value, default='MB'):
         unit = unit if unit else default
         if unit in valid_units:
             return (str(value), unit)
+    raise ParseException('{} not recognized as a valid unit'.format(value))
 
 
 def _check_partition(device, number, part_type, start, end):
