@@ -90,7 +90,7 @@ def labeled(name, label):
         Device name (/dev/sda, /dev/disk/by-id/scsi-...)
 
     label
-        Label of the partition (usually 'gpd' or 'msdos')
+        Label of the partition (usually 'gpt' or 'msdos')
 
     '''
     ret = {
