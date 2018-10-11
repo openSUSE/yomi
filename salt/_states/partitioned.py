@@ -405,8 +405,8 @@ def _get_partition_number(device, part_type, start, end):
     unit = _parse_value_with_units(start)[1]
     partitions = _get_cached_partitions(device, unit)
 
-    # Check if there is a partition in the system that start at
-    # specified point and match the same type.
+    # Check if there is a partition in the system that start or
+    # containst the start point
     number = _get_first_overlapping_partition(device, start)
     if number:
         if partitions[number]['type'] == part_type:
@@ -487,6 +487,13 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None):
         ret['comment'].append('Partition type not recognized')
     if not start or not end:
         ret['comment'].append('Parameters start and end are not optional')
+    try:
+        start_unit = _parse_value_with_units(start)[1]
+        end_unit = _parse_value_with_units(end)[1]
+        if start_unit != end_unit:
+            ret['comment'].append('start and end units are different')
+    except ParseException as e:
+        ret['comment'].append(str(e))
 
     # If the user do not provide any partition number we get generate
     # the next available for the partition type
@@ -503,35 +510,45 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None):
 
     # Check if the partition is already there or we need to create a
     # new one
-    partition_match = _check_partition(name, device, number,
-                                       part_type, fs_type, start, end)
+    partition_match = _check_partition(device, number, part_type,
+                                       start, end)
 
     if partition_match:
+        ret['result'] = True
         ret['comment'].append('Partition {}{} already '
                               'in place'.format(device, number))
+        return ret
     elif partition_match is None:
         ret['changes']['new'] = 'Partition {}{} will ' \
             'be created'.format(device, number)
     elif partition_match is False:
         ret['comment'].append('Partition {}{} cannot '
                               'be replaced'.format(device, number))
+        return ret
 
     if __opts__['test']:
         ret['result'] = None
         return ret
 
-    if partition_match is False:
+    if partition_match is None:
         # TODO(aplanas) with parted we cannot force a partition number
         res = __salt__['partition.mkpart'](device, part_type, fs_type,
                                            start, end)
-        ret['changed']['output'] = res
+        ret['changes']['output'] = res
+        _invalidate_cached_info()
+        _invalidate_cached_partitions()
 
-    partition_match = _check_partition(name, device, number,
-                                       part_type, fs_type, start, end)
+    # The first time that we create a partition we do not have a
+    # partition number for it
+    if not number:
+        number = _get_partition_number(device, part_type, start, end)
+
+    partition_match = _check_partition(device, number, part_type,
+                                       start, end)
     if partition_match:
         ret['result'] = True
     elif not partition_match:
-        ret['commend'].append('Partition {}{} fail to '
+        ret['comment'].append('Partition {}{} fail to '
                               'be created'.format(device, number))
         ret['result'] = False
 
