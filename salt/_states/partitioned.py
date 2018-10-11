@@ -281,7 +281,7 @@ def _get_cached_partitions(device, unit='s'):
 
 def _parse_value_with_units(value, default='MB'):
     '''
-    Split a value with (optionally) is expressed in units.
+    Split a value expressed (optionally) with units.
 
     Returns the tuple (value, unit)
     '''
@@ -292,7 +292,7 @@ def _parse_value_with_units(value, default='MB'):
         value, unit = match.groups()
         unit = unit if unit else default
         if unit in valid_units:
-            return (str(value), unit)
+            return (float(value), unit)
     raise ParseException('{} not recognized as a valid unit'.format(value))
 
 

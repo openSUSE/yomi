@@ -199,11 +199,12 @@ Number  Start   End     Size    Type      File system  Flags
         )
 
     def test_parse_value_with_units(self):
-        self.assertEqual(partitioned._parse_value_with_units(1), ('1', 'MB'))
-        self.assertEqual(partitioned._parse_value_with_units('1'), ('1', 'MB'))
-        self.assertEqual(partitioned._parse_value_with_units('1.0'),
-                         ('1.0', 'MB'))
-        self.assertEqual(partitioned._parse_value_with_units('1s'), ('1', 's'))
+        self.assertEqual(partitioned._parse_value_with_units(1), (1, 'MB'))
+        self.assertEqual(partitioned._parse_value_with_units('1'), (1, 'MB'))
+        self.assertEqual(partitioned._parse_value_with_units('1.0'), (1, 'MB'))
+        self.assertEqual(partitioned._parse_value_with_units('1s'), (1, 's'))
+        self.assertEqual(partitioned._parse_value_with_units('1.1s'),
+                         (1.1, 's'))
         self.assertRaises(partitioned.ParseException,
                           partitioned._parse_value_with_units, 's1')
 
