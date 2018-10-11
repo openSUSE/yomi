@@ -256,6 +256,14 @@ def _get_cached_info(device):
     return info[device]
 
 
+def _invalidate_cached_info():
+    '''
+    Invalidate the cached information about devices
+
+    '''
+    delattr(_get_cached_info, 'info')
+
+
 def _get_cached_partitions(device, unit='s'):
     '''
     Get the partitions as a dictionary
@@ -281,6 +289,14 @@ def _get_cached_partitions(device, unit='s'):
             partitions[unit]['partitions'][number]['type'] = type_
 
     return partitions[unit]['partitions']
+
+
+def _invalidate_cached_partitions():
+    '''
+    Invalidate the cached information about partitions
+
+    '''
+    delattr(_get_cached_partitions, 'partitions')
 
 
 def _parse_value_with_units(value, default='MB'):
