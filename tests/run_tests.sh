@@ -42,7 +42,7 @@ else
     export PYTHONPATH="$PATHONPATH":"$test_env":.
 fi
 
-if [ -z "$@" ]; then
+if [ -z "$*" ]; then
     python3 -m unittest discover
 else
     python3 -m unittest "$@"
