@@ -248,8 +248,12 @@ def _get_cached_info(device):
 
     '''
     if not hasattr(_get_cached_info, 'info'):
-        _get_cached_info.info = __salt__['partition.list'](device)['info']
-    return _get_cached_partitions.info
+        _get_cached_info.info = {}
+    info = _get_cached_info.info
+
+    if device not in info:
+        info[device] = __salt__['partition.list'](device)['info']
+    return info[device]
 
 
 def _get_cached_partitions(device, unit='s'):
