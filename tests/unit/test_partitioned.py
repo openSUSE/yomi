@@ -61,7 +61,7 @@ class PartitionedTestCase(unittest.TestCase):
                 'name': '/dev/sda',
                 'result': True,
                 'changes': {
-                    'label': True,
+                    'label': 'Label set to msdos in /dev/sda',
                 },
                 'comment': ['Label set to msdos in /dev/sda'],
             }

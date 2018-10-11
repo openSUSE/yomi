@@ -116,12 +116,13 @@ def labeled(name, label):
         ret['changes']['label'] = 'Will be set to {}'.format(label)
         return ret
 
-    changes = __salt__['partition.mklabel'](name, label)
+    __salt__['partition.mklabel'](name, label)
 
     if _check_label(name, label):
         ret['result'] = True
-        ret['comment'].append('Label set to {} in {}'.format(label, name))
-        ret['changes']['label'] = changes
+        msg = 'Label set to {} in {}'.format(label, name)
+        ret['comment'].append(msg)
+        ret['changes']['label'] = msg
     else:
         ret['comment'].append('Failed to set label to {}'.format(label))
 
