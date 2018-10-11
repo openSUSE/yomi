@@ -228,12 +228,30 @@ Number  Start   End     Size    Type      File system  Flags
                                                       'primary', '10s', '20s'),
                          None)
 
+        _get_cached_partitions.return_value = {
+            '1': {
+                'type': 'primary',
+                'size': '100kB',
+                'start': '0.5kB',
+                'end': '100kB',
+            }
+        }
+        self.assertTrue(partitioned._check_partition('/dev/sda', '1',
+                                                     'primary', '0kB',
+                                                     '100kB'))
+        self.assertTrue(partitioned._check_partition('/dev/sda', '1',
+                                                     'primary', '1kB',
+                                                     '100kB'))
+        self.assertFalse(partitioned._check_partition('/dev/sda', '1',
+                                                      'primary', '1.5kB',
+                                                      '100kB'))
+
     @patch('states.partitioned._get_cached_partitions')
     def test_get_first_overlapping_partition(self, _get_cached_partitions):
         _get_cached_partitions.return_value = {}
         self.assertEqual(
-            partitioned._get_first_overlapping_partition('/dev/sda', '0s'),
-            None)
+            partitioned._get_first_overlapping_partition('/dev/sda',
+                                                         '0s'), None)
 
         _get_cached_partitions.return_value = {
             '1': {
@@ -245,8 +263,21 @@ Number  Start   End     Size    Type      File system  Flags
             }
         }
         self.assertEqual(
-            partitioned._get_first_overlapping_partition('/dev/sda', '0s'),
-            '1')
+            partitioned._get_first_overlapping_partition('/dev/sda',
+                                                         '0s'), '1')
+
+        _get_cached_partitions.return_value = {
+            '1': {
+                'number': '1',
+                'type': 'primary',
+                'size': '100kB',
+                'start': '0.51kB',
+                'end': '100kB',
+            }
+        }
+        self.assertEqual(
+            partitioned._get_first_overlapping_partition('/dev/sda',
+                                                         '0kB'), '1')
 
         _get_cached_partitions.return_value = {
             '1': {
@@ -265,12 +296,12 @@ Number  Start   End     Size    Type      File system  Flags
             }
         }
         self.assertEqual(
-            partitioned._get_first_overlapping_partition('/dev/sda', '0s'),
-            '1')
+            partitioned._get_first_overlapping_partition('/dev/sda',
+                                                         '0s'), '1')
 
         self.assertEqual(
-            partitioned._get_first_overlapping_partition('/dev/sda', '1s'),
-            '5')
+            partitioned._get_first_overlapping_partition('/dev/sda',
+                                                         '1s'), '5')
 
     @patch('states.partitioned._get_cached_info')
     @patch('states.partitioned._get_cached_partitions')

@@ -316,6 +316,9 @@ def _parse_value_with_units(value, default='MB'):
     raise ParseException('{} not recognized as a valid unit'.format(value))
 
 
+OVERLAPPING_ERROR = 0.75
+
+
 def _check_partition(device, number, part_type, start, end):
     '''
     Check if the proposed partition match the current one.
@@ -331,7 +334,7 @@ def _check_partition(device, number, part_type, start, end):
     # use to read the current partitions. A good candidate is sector
     # ('s'). The problem is that we need to reimplement the same
     # conversion logic from `parted` here [1], as we need the same
-    # round logic when we covert from 'MiB' to 's', for example.
+    # round logic when we convert from 'MiB' to 's', for example.
     #
     # To avoid this duplicity of code we can do a trick: for each
     # field in the proposed partition we request a `partition.list`
@@ -352,9 +355,11 @@ def _check_partition(device, number, part_type, start, end):
 
     for value, name in ((start, 'start'), (end, 'end')):
         value, unit = _parse_value_with_units(value)
-        current_value = _get_cached_partitions(device, unit)[number][name]
-        current_value, _ = _parse_value_with_units(current_value)
-        if value != current_value:
+        p_value = _get_cached_partitions(device, unit)[number][name]
+        p_value = _parse_value_with_units(p_value)[0]
+        min_value = value - OVERLAPPING_ERROR
+        max_value = value + OVERLAPPING_ERROR
+        if not min_value <= p_value <= max_value:
             return False
 
     return True
@@ -362,23 +367,24 @@ def _check_partition(device, number, part_type, start, end):
 
 def _get_first_overlapping_partition(device, start):
     '''
-    Return the partition that contains the start point.
+    Return the first partition that contains the start point.
 
     '''
     # Check if there is a partition in the system that start at
     # specified point.
     value, unit = _parse_value_with_units(start)
-    value = int(value)
+    value += OVERLAPPING_ERROR
+
     partitions = _get_cached_partitions(device, unit)
     partition_number = None
     partition_start = 0
     for number, partition in partitions.items():
-        p_start = int(_parse_value_with_units(partition['start'])[0])
-        p_end = int(_parse_value_with_units(partition['end'])[0])
-        if p_start <= value and p_end >= value:
-            if not partition_number or partition_start >= value:
+        p_start = _parse_value_with_units(partition['start'])[0]
+        p_end = _parse_value_with_units(partition['end'])[0]
+        if p_start <= value <= p_end:
+            if partition_number is None or partition_start < p_start:
                 partition_number = number
-                partition_start = value
+                partition_start = p_start
     return partition_number
 
 
