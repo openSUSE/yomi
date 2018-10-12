@@ -508,7 +508,7 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None):
         try:
             number = _get_partition_number(device, part_type, start, end)
         except EnumerateException as e:
-            ret['comment'].appent(str(e))
+            ret['comment'].append(str(e))
 
     # If at this point we have some comments, we return with a fail
     if ret['comment']:
