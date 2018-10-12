@@ -163,7 +163,7 @@ Number  Start   End     Size    Type     File system     Flags
         """
         self.assertEqual(
             partitioned._get_partition_type('/dev/sda'),
-            [('1', 'primary'), ('2', 'primary'), ('3', 'primary')]
+            {'1': 'primary', '2': 'primary', '3': 'primary'}
         )
 
         __salt__.__getitem__.return_value = lambda _: """

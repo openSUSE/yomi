@@ -234,12 +234,13 @@ def _get_partition_type(device):
     '''
     Get partition type of each partition
 
-    Return a list of tuples: [(number, type), ...]
+    Return dictionary: {number: type, ...}
 
     '''
     cmd = 'parted -s {0} print'.format(device)
     out = __salt__['cmd.run_stdout'](cmd)
-    return re.findall(r'\s*(\d+).*(primary|extended|logical).*', out)
+    types = re.findall(r'\s*(\d+).*(primary|extended|logical).*', out)
+    return dict(types)
 
 
 def _get_cached_info(device):
