@@ -493,6 +493,19 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None):
     except ParseException as e:
         ret['comment'].append(str(e))
 
+    # Normalize fs_type. Some versions of salt contains a bug were
+    # only a subset of file systems are valid for mkpart, even if are
+    # supported by parted. As mkpart do not format the partition, is
+    # safe to make a normalization here. Eventually this is only used
+    # to set the type in the flag section (partition id).
+    #
+    # We can drop this check in the next version of salt.
+    if fs_type and fs_type not in set(['ext2', 'fat32', 'fat16',
+                                       'linux-swap', 'reiserfs',
+                                       'hfs', 'hfs+', 'hfsx', 'NTFS',
+                                       'ufs', 'xfs', 'zfs']):
+        fs_type = 'ext2'
+
     # If the user do not provide any partition number we get generate
     # the next available for the partition type
     device, number = re.search(r'(\D+)(\d*)', name).groups()
