@@ -561,11 +561,22 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None):
     return ret
 
 
-def _check_partition_name(device, partition, name):
+def _check_partition_name(device, number, name):
     '''
     Check if the partition have this name.
+
+    Returns a tri-state value:
+      - `True`: the partition already have this label
+      - `False`: the partition do not have this label
+      - `None`: there is not such partition
     '''
-    pass
+    number = str(number)
+    partitions = _get_cached_partitions(device)
+    if number in partitions:
+        # There is a bug in Salt parted execution module that set the
+        # name of the partition in the 'file system' entry
+        # https://github.com/saltstack/salt/pull/49804
+        return partitions[number]['file system'] == name
 
 
 def named(name, device, partition=None):
@@ -597,10 +608,14 @@ def named(name, device, partition=None):
     if not _check_label(device, 'gpt'):
         ret['comment'].append('Only gpt partitions can be named')
 
-    if _check_partition_name(device, partition, name):
+    name_match = _check_partition_name(device, partition, name)
+    if name_match:
         ret['result'] = True
         ret['comment'].append('Name of the partition {}{} is '
                               'already "{}"'.format(device, partition, name))
+    elif name_match is None:
+        ret['comment'].append('Partition {}{} not found'.format(device,
+                                                                partition))
 
     if ret['comment']:
         return ret
@@ -612,6 +627,8 @@ def named(name, device, partition=None):
         return ret
 
     changes = __salt__['partition.name'](device, partition, name)
+    _invalidate_cached_info()
+    _invalidate_cached_partitions()
 
     if _check_partition_name(device, partition, name):
         ret['result'] = True
