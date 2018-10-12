@@ -286,9 +286,11 @@ def _get_cached_partitions(device, unit='s'):
 
     if unit not in partitions:
         partitions[unit] = __salt__['partition.list'](device, unit=unit)
-        # We manually add the types in the partition information
-        for number, type_ in _get_cached_partitions.types:
-            partitions[unit]['partitions'][number]['type'] = type_
+        # If the partition comes from a gpt disk, we assign the type
+        # as 'primary'
+        types = _get_cached_partitions.types
+        for number, partition in partitions[unit]['partitions'].items():
+            partition['type'] = types.get(number, 'primary')
 
     return partitions[unit]['partitions']
 

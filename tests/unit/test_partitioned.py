@@ -180,13 +180,27 @@ Number  Start   End     Size    Type      File system  Flags
         """
         self.assertEqual(
             partitioned._get_partition_type('/dev/sda'),
-            [('1', 'extended'), ('5', 'logical'), ('3', 'primary')]
+            {'1': 'extended', '5': 'logical', '3': 'primary'}
         )
 
     @patch('states.partitioned.__salt__')
     def test_get_cached_partitions(self, __salt__):
         __salt__.__getitem__.side_effect = [
-            lambda _: '1 primary',
+            lambda _: '1 extended',
+            lambda _, unit: {
+                'info': None,
+                'partitions': {'1': {}},
+            },
+        ]
+
+        self.assertEqual(
+            partitioned._get_cached_partitions('/dev/sda', 's'),
+            {'1': {'type': 'extended'}}
+        )
+        partitioned._invalidate_cached_partitions()
+
+        __salt__.__getitem__.side_effect = [
+            lambda _: '',
             lambda _, unit: {
                 'info': None,
                 'partitions': {'1': {}},
