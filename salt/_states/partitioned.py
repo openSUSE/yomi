@@ -261,7 +261,8 @@ def _invalidate_cached_info():
     Invalidate the cached information about devices
 
     '''
-    delattr(_get_cached_info, 'info')
+    if hasattr(_get_cached_info, 'info'):
+        delattr(_get_cached_info, 'info')
 
 
 def _get_cached_partitions(device, unit='s'):
@@ -296,7 +297,9 @@ def _invalidate_cached_partitions():
     Invalidate the cached information about partitions
 
     '''
-    delattr(_get_cached_partitions, 'partitions')
+    if hasattr(_get_cached_partitions, 'partitions'):
+        delattr(_get_cached_partitions, 'partitions')
+        delattr(_get_cached_partitions, 'types')
 
 
 def _parse_value_with_units(value, default='MB'):
