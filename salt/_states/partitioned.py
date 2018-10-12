@@ -25,13 +25,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 import re
 
-import salt.utils.path
-
-
 LOG = logging.getLogger(__name__)
 
 __virtualname__ = 'partitioned'
-
 
 # Define not exported variables from Salt, so this can be imported as
 # a normal module
@@ -63,11 +59,7 @@ def __virtual__():
 
     '''
 
-    # TODO(aplanas) For now fail if the requirements are not meet.
-    # Evaluate if makes sense to install the requirements inside the
-    # state (parted, xfsprogs, btrfsprogs, lvm2)
-    requirements = ('parted',)
-    return all(salt.utils.path.which(req) for req in requirements)
+    return 'partition.mkpart' in __salt__
 
 
 def _check_label(device, label):
