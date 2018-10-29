@@ -55,7 +55,7 @@ class EnumerateException(Exception):
 
 def __virtual__():
     '''
-    Storage is only useful for images properly taylored.
+    Partitioned depends on partition.mkpart module
 
     '''
 
