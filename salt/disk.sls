@@ -96,11 +96,11 @@ grub2_mkconfig_chroot:
     - unless: "[ -e /mnt/boot/grub2/grub.cfg ]"
 
 grub2_install:
-   cmd.run:
-     - name: grub2-install --boot-directory=/mnt/boot {{ bootloader.device }} --force
-    # TODO(aplanas) use unless and detect that GRUB2 is already installed
-     - require:
-       - module: grub2_mkconfig_chroot
+  cmd.run:
+    - name: grub2-install --boot-directory=/mnt/boot {{ bootloader.device }} --force
+    - require:
+      - module: grub2_mkconfig_chroot
+    - unless: file -s {{ bootloader.device }} | grep -q 'DOS/MBR boot sector'
 
 umount_root_partition_{{ device }}:
   mount.unmounted:
