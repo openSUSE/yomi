@@ -89,17 +89,16 @@ update_user_{{ user.username }}:
     {% endfor %}
 
 grub2_mkconfig_chroot:
-  module.run:
-    - name: cmd.run_chroot
+  cmd.run:
+    - name: grub2-mkconfig -o /boot/grub2/grub.cfg
     - root: /mnt
-    - cmd: grub2-mkconfig -o /boot/grub2/grub.cfg
-    - unless: "[ -e /mnt/boot/grub2/grub.cfg ]"
+    - creates: /mnt/boot/grub2/grub.cfg
 
 grub2_install:
   cmd.run:
     - name: grub2-install --boot-directory=/mnt/boot {{ bootloader.device }} --force
     - require:
-      - module: grub2_mkconfig_chroot
+      - cmd: grub2_mkconfig_chroot
     - unless: file -s {{ bootloader.device }} | grep -q 'DOS/MBR boot sector'
 
 umount_root_partition_{{ device }}:
