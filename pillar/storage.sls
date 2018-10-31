@@ -28,13 +28,15 @@ bootloader:
   device: /dev/sda
 
 software:
-  repo: "http://download.opensuse.org/tumbleweed/repo/oss"
+  repositories:
+    - "http://download.opensuse.org/tumbleweed/repo/oss"
   packages:
     - patterns-base-base
     - grub2
     - kernel-default
-  users:
-    - username: root
-      password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
-    - username: aplanas
-      password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
+
+users:
+  - username: root
+    password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
+  - username: aplanas
+    password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
