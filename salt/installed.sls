@@ -69,25 +69,6 @@ mkinitrd_{{ device }}:
     - name: mkinitrd -d /mnt -b /mnt/boot
     - creates: /mnt/boot/initrd
 
-    {% for user in software.users %}
-create_user_{{ user.username }}:
-  module.run:
-    - name: user.add
-    - m_name: {{ user.username }}
-    - createhome: yes
-    - root: /mnt
-    - unless: grep -q '{{ user.username }}' /mnt/etc/shadow
-
-update_user_{{ user.username }}:
-  module.run:
-    - name: shadow.set_password
-    - m_name: {{ user.username }}
-    - password: {{ user.password }}
-    - use_usermod: yes
-    - root: /mnt
-    - unless: grep -q '{{ user.username }}:{{ user.password }}' /mnt/etc/shadow
-    {% endfor %}
-
 grub2_mkconfig_chroot:
   cmd.run:
     - name: grub2-mkconfig -o /boot/grub2/grub.cfg
@@ -100,6 +81,25 @@ grub2_install:
     - require:
       - cmd: grub2_mkconfig_chroot
     - unless: file -s {{ bootloader.device }} | grep -q 'DOS/MBR boot sector'
+
+    {% for user in software.users %}
+create_user_{{ user.username }}:
+  module.run:
+    - user.add:
+      - name: {{ user.username }}
+      - createhome: yes
+      - root: /mnt
+    - unless: grep -q '{{ user.username }}' /mnt/etc/shadow
+
+update_user_{{ user.username }}:
+  module.run:
+    - shadow.set_password:
+      - name: {{ user.username }}
+      - password: {{ user.password }}
+      - use_usermod: yes
+      - root: /mnt
+    - unless: grep -q '{{ user.username }}:{{ user.password }}' /mnt/etc/shadow
+    {% endfor %}
 
 umount_root_partition_{{ device }}:
   mount.unmounted:
