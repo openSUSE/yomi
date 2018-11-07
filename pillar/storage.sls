@@ -2,6 +2,7 @@ config:
   conflict:
     - reuse_if_mountpoint_/home
     - fail
+  kexec: no
 
 partitions:
   config:
