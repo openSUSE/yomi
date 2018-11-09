@@ -115,14 +115,10 @@ def call(name, function, *args, **kwargs):
         extra_mods=__salt__['config.option']('thin_extra_mods', ''),
         so_mods=__salt__['config.option']('thin_so_mods', '')
     )
-    untar_cmd = ['python', '-c', (
-        'import tarfile; '
-        'tarfile.open("{}").extractall(path="{}")'
-    ).format(thin_path, thin_dest_path)]
-    ret = __salt__['cmd.run_all'](untar_cmd)
-    if ret['retcode'] != 0:
-        __utils__['files.rm_rf'](thin_dest_path)
-        return {'result': False, 'comment': ret['stderr']}
+    __salt__['archive.tar']('xzf', thin_path, dest=thin_dest_path)
+    if stdout:
+       __utils__['files.rm_rf'](thin_dest_path)
+       return {'result': False, 'comment': stdout}
 
     chroot_path = os.path.join(os.path.sep,
                                os.path.relpath(thin_dest_path, name))
