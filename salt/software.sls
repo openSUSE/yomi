@@ -10,10 +10,10 @@ mount_root_partition_software:
     - fstype: {{ info.filesystem }}
     - persist: False
 
-      {% for repo in software.repositories %}
+      {% for name, repo in software.repositories.items() %}
 add_repository_{{ repo }}:
   pkgrepo.managed:
-    - name: repo-oss
+    - name: {{ name }}
     - baseurl: {{ repo }}
     - refresh: yes
     - gpgautoimport: yes

@@ -30,7 +30,7 @@ bootloader:
 
 software:
   repositories:
-    - "http://download.opensuse.org/tumbleweed/repo/oss"
+    repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
   packages:
     - patterns-base-base
     - grub2
