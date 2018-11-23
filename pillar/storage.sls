@@ -20,8 +20,23 @@ partitions:
 
 filesystems:
   /dev/sda1:
-    filesystem: ext3
+    filesystem: btrfs
     mountpoint: /
+    subvolumes:
+      prefix: '@'
+      subvolume:
+        - path: home
+        - path: opt
+        - path: root
+        - path: srv
+        - path: tmp
+        - path: usr/local
+        - path: var
+          copy_on_write: no
+        - path: boot/grub2/i386-pc
+          archs: ['i386', 'x86_64']
+        - path: boot/grub2/x86_64-efi
+          archs: ['x86_64']
   /dev/sda2:
     filesystem: swap
 
