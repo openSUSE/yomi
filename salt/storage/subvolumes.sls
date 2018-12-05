@@ -2,7 +2,7 @@
 
 {% for device, info in filesystems.items() %}
   {% if info.filesystem == 'btrfs' and info.get('subvolumes') %}
-    # TODO(aplanas) is prefix optional?
+    {# TODO(aplanas) is prefix optional? #}
     {% set prefix = info.subvolumes.get('prefix', '') %}
     {% if prefix %}
 subvol_create_{{ device }}_prefix:
