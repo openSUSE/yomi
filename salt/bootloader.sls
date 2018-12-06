@@ -1,16 +1,6 @@
-{% set filesystems = pillar['filesystems'] %}
 {% set bootloader = pillar['bootloader'] %}
 
-{% for device, info in filesystems.items() %}
-  {% if info.get('mountpoint') == '/' %}
-mount_root_partition_bootloader:
-  mount.mounted:
-    - name: /mnt
-    - device: {{ device }}
-    - fstype: {{ info.filesystem }}
-    - persist: False
-
-mkinitrd_{{ device }}:
+mkinitrd:
   cmd.run:
     - name: mkinitrd -d /mnt -b /mnt/boot
     - creates: /mnt/boot/initrd
@@ -27,10 +17,3 @@ grub2_install:
     - require:
       - cmd: grub2_mkconfig_chroot
     - unless: file -s {{ bootloader.device }} | grep -q 'DOS/MBR boot sector'
-
-umount_root_partition_bootloader:
-  mount.unmounted:
-    - name: /mnt
-    - requires: mount_root_partition_bootloader
-  {% endif %}
-{% endfor %}

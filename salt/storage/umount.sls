@@ -1,7 +1,8 @@
 {% set config = pillar['config'] %}
 
 include:
-  - .btrfs.subvolume
 {% if config.get('snapper', False) %}
-  - .snapper.subvolume
+  - .snapper.umount
 {% endif %}
+  - .btrfs.umount
+  - .device.umount

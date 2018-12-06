@@ -3,4 +3,4 @@ include:
   - .storage.format
   - .storage.subvolumes
   - .storage.fstab
-  # - .storage.snapper
+  - .storage.mount

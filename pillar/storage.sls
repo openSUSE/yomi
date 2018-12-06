@@ -3,6 +3,7 @@ config:
     - reuse_if_mountpoint_/home
     - fail
   kexec: no
+  snapper: yes
 
 partitions:
   config:
