@@ -1,6 +1,9 @@
 install_snapper:
   pkg.installed:
-    - name: snapper
+    - pkgs:
+      - snapper
+      - grub2-snapper-plugin
+      - snapper-zypp-plugin
     - no_recommends: yes
     - root: /mnt
     - require:

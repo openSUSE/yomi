@@ -5,10 +5,7 @@ include:
   - software
   - users
   - bootloader
-{% if config.get('snapper', False) %}
-  # - .storage.snapper_post_install
-{% endif %}
-  - .storage.umount
+  - post_install
 {% if config.get('kexec', True) %}
   - kexec
 {% endif %}

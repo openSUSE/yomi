@@ -31,6 +31,7 @@ import traceback
 log = logging.getLogger(__name__)
 
 INSTALLATION_HELPER = '/usr/lib/snapper/installation-helper'
+SNAPPER = '/usr/bin/snapper'
 
 __virtualname__ = 'snapper_install'
 
@@ -91,7 +92,7 @@ def __mount_device(action):
     '''
     @functools.wraps(action)
     def wrapper(*args, **kwargs):
-        device = kwargs['name']
+        device = kwargs['device']
 
         ret = {
             'name': device,
@@ -115,11 +116,14 @@ def __mount_device(action):
     return wrapper
 
 
-def step_one(name, description):
+def step_one(name, device, description):
     '''
     Step one of the installation-helper tool
 
     name
+        Name of the state
+
+    device
         Device where to install snapper
 
     description
@@ -134,10 +138,10 @@ def step_one(name, description):
     }
 
     # Mount the device and check if /etc/snapper/configs is present
-    dest = _mount(name)
+    dest = _mount(device)
     if not dest:
         ret['comment'].append('Fail mounting {} in temporal directory {}'
-                              .format(name, dest))
+                              .format(device, dest))
         return ret
 
     is_configs = os.path.exists(os.path.join(dest, 'etc/snapper/configs'))
@@ -145,14 +149,14 @@ def step_one(name, description):
 
     if is_configs:
         ret['result'] = None if __opts__['test'] else True
-        ret['comment'].append('Step one already applied to {}'.format(name))
+        ret['comment'].append('Step one already applied to {}'.format(device))
         return ret
 
     if __opts__['test']:
-        ret['comment'].append('Step one will be applied to {}'.format(name))
+        ret['comment'].append('Step one will be applied to {}'.format(device))
         return ret
 
-    cmd = [INSTALLATION_HELPER, '--step', '1', '--device', name,
+    cmd = [INSTALLATION_HELPER, '--step', '1', '--device', device,
            '--description', description]
     res = __salt__['cmd.run_all'](cmd)
 
@@ -166,11 +170,14 @@ def step_one(name, description):
 
 
 @__mount_device
-def step_two(name, prefix=None, __dest=None):
+def step_two(name, device, prefix=None, __dest=None):
     '''
     Step two of the installation-helper tool
 
     name
+       Name of the state
+
+    device
         Device where to install snapper
 
     prefix
@@ -187,14 +194,14 @@ def step_two(name, prefix=None, __dest=None):
     snapshots = os.path.join(__dest, '.snapshots')
     if os.path.exists(snapshots):
         ret['result'] = None if __opts__['test'] else True
-        ret['comment'].append('Step two aleady applied to {}'.format(name))
+        ret['comment'].append('Step two aleady applied to {}'.format(device))
         return ret
 
     if __opts__['test']:
-        ret['comment'].append('Step two will be applied to {}'.format(name))
+        ret['comment'].append('Step two will be applied to {}'.format(device))
         return ret
 
-    cmd = [INSTALLATION_HELPER, '--step', '2', '--device', name,
+    cmd = [INSTALLATION_HELPER, '--step', '2', '--device', device,
            '--root-prefix', __dest]
 
     if prefix:
@@ -223,4 +230,138 @@ def step_two(name, prefix=None, __dest=None):
         ret['comment'].append('Failed to umount {}: {}'
                               .format(snapshots, res))
 
+    return ret
+
+
+def step_four(name, root):
+    '''
+    Step four of the installation-helper tool
+
+    name
+        Name of the state
+
+    root
+        Target directory where to chroot
+
+    '''
+    ret = {
+        'name': name,
+        'result': False,
+        'changes': {},
+        'comment': [],
+    }
+
+    if os.path.exists(os.path.join(root, '.snapshots/grub-snapshot.cfg')):
+        ret['result'] = None if __opts__['test'] else True
+        ret['comment'].append('Step four already applied to {}'.format(root))
+        return ret
+
+    if __opts__['test']:
+        ret['comment'].append('Step four will be applied to {}'.format(root))
+        return ret
+
+    cmd = [INSTALLATION_HELPER, '--step', '4']
+    res = __salt__['cmd.run_chroot'](root, cmd)
+
+    if res['retcode'] or res['stderr']:
+        ret['comment'].append('Failed to execute step four {}'
+                              .format(res['stderr']))
+        return ret
+
+    # Set the initial configuration and quota as YaST is doing
+    cmd = [SNAPPER, '--no-dbus', 'set-config', 'NUMBER_CLEANUP=yes',
+           'NUMBER_LIMIT=2-10', 'NUMBER_LIMIT_IMPORTANT=4-10',
+           'TIMELINE_CREATE=no']
+    res = __salt__['cmd.run_chroot'](root, cmd)
+
+    if res['retcode'] or res['stderr']:
+        ret['comment'].append('Failed to set configuration in step four {}'
+                              .format(res['stderr']))
+        return ret
+
+    cmd = [SNAPPER, '--no-dbus', 'setup-quota']
+    res = __salt__['cmd.run_chroot'](root, cmd)
+
+    if res['retcode'] or res['stderr']:
+        ret['comment'].append('Failed to set quota in step four {}'
+                              .format(res['stderr']))
+        return ret
+
+    ret['result'] = True
+    ret['changes']['step four'] = True
+    return ret
+
+
+def step_five(name, root, snapshot_type, description, important, cleanup):
+    '''
+    Step five of the installation-helper tool
+
+    name
+        Name of the state
+
+    root
+        Target directory where to chroot
+
+    snapshot_type
+        Type of snapshot: {single, pre, post}
+
+    description
+        Description for the snapshot
+
+    important
+        Is the snapshot important
+
+    cleanup
+        Type or snapper cleanup angorithm: {number, timeline,
+        empty-pre-post}
+
+    '''
+    ret = {
+        'name': name,
+        'result': False,
+        'changes': {},
+        'comment': [],
+    }
+
+    if snapshot_type not in ('single', 'pre', 'post'):
+        ret['comment'].append('Value for snapshot_type not recognized')
+        return ret
+
+    if not description:
+        ret['comment'].append('Value for description is empty')
+        return ret
+
+    if cleanup not in ('number', 'timeline', ' empty-pre-post '):
+        ret['comment'].append('Value for cleanup not recognized')
+        return ret
+
+    cmd = [SNAPPER, '--no-dbus', 'list']
+    res = __salt__['cmd.run_chroot'](root, cmd)
+
+    if res['retcode'] or res['stderr']:
+        ret['comment'].append('Failed to list snapshots in step five {}'
+                              .format(res['stderr']))
+        return ret
+
+    if description in res['stdout']:
+        ret['result'] = None if __opts__['test'] else True
+        ret['comment'].append('Step five already applied to {}'.format(root))
+        return ret
+
+    if __opts__['test']:
+        ret['comment'].append('Step five will be applied to {}'.format(root))
+        return ret
+
+    cmd = [INSTALLATION_HELPER, '--step', '5', '--snapshot-type',
+           snapshot_type, '--description', '"{}"'.format(description),
+           '--userdata', 'important={}'.format('yes' if important else
+                                               'no'), '--cleanup', cleanup]
+    res = __salt__['cmd.run_chroot'](root, cmd)
+
+    if res['retcode'] or res['stderr']:
+        ret['comment'].append('Failed to execute step five {}'
+                              .format(res['stderr']))
+    else:
+        ret['result'] = True
+        ret['changes']['step five'] = True
     return ret
