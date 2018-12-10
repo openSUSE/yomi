@@ -10,6 +10,7 @@ subvol_create_{{ device }}_prefix:
     - name: '{{ prefix }}'
     - device: {{ device }}
     - set_default: True
+    - force_set_default: False
     {% endif %}
 
     {% for subvol in info.subvolumes.subvolume %}
