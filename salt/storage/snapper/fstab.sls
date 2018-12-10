@@ -17,7 +17,7 @@ mount_snapper_fstab:
     {% set fs_file = '/'|path_join('.snapshots') %}
     {% set fs_mntops = 'subvol=%s'|format('/'|path_join(prefix, '.snapshots')) %}
 add_fstab_{{ fs_file }}:
-  xmount.fstab_present:
+  mount.fstab_present:
     - name: {{ device }}
     - fs_file: {{ fs_file }}
     - fs_vfstype: {{ info.filesystem }}
