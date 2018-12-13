@@ -25,7 +25,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 import re
 
-LOG = logging.getLogger(__name__)
+from salt.exceptions import CommandExecutionError
+
+log = logging.getLogger(__name__)
 
 __virtualname__ = 'partitioned'
 
@@ -150,7 +152,7 @@ def _match(udev_info, match_info):
         if isinstance(udev_value, dict):
             # If is a dict we probably make a mistake in key from
             # match_info, as is not accessing a final value
-            LOG.warning('The key %s for the udev information '
+            log.warning('The key %s for the udev information '
                         'dictionary is not a leaf element', key)
             continue
 
@@ -450,7 +452,22 @@ def _get_partition_number(device, part_type, start, end):
         return str(candidate + 1)
 
 
-def mkparted(name, part_type, fs_type=None, start=None, end=None):
+def _get_partition_flags(device, number):
+    '''
+    Return the current list of flags for a partition.
+    '''
+    number = str(number)
+    partitions = __salt__['partition.list'](device)['partitions']
+    if number in partitions:
+        # In parted the field for flags is reused to mark other
+        # situations, so we need to remove values that do not
+        # represent flags
+        flags = partitions[number]['flags'].split(', ')
+        not_valid = ['swap']
+        return [flag for flag in flags if flag and flag not in not_valid]
+
+
+def mkparted(name, part_type, fs_type=None, start=None, end=None, flags=None):
     '''
     Make sure that a partition is allocated in the disk.
 
@@ -472,6 +489,9 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None):
 
     end
         End of the partition (in parted units)
+
+    flags
+        List of flags present in the partition
 
     '''
     ret = {
@@ -505,6 +525,8 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None):
                                        'hfs', 'hfs+', 'hfsx', 'NTFS',
                                        'ufs', 'xfs', 'zfs']):
         fs_type = 'ext2'
+
+    flags = flags if flags else []
 
     # If the user do not provide any partition number we get generate
     # the next available for the partition type
@@ -563,6 +585,35 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None):
                               'be created'.format(device, number))
         ret['result'] = False
 
+    # We set the correct flags for the partition
+    current_flags = _get_partition_flags(device, number)
+    flags_to_set = set(flags) - set(current_flags)
+    flags_to_unset = set(current_flags) - set(flags)
+
+    for flag in flags_to_set:
+        try:
+            out = __salt__['partition.set'](device, number, flag, 'on')
+        except CommandExecutionError as e:
+            out = e
+        if out:
+            ret['comment'].append('Error setting flag {} in {}{}: {}'
+                                  .format(flag, device, number, out))
+            ret['result'] = False
+        else:
+            ret['changes'][flag] = True
+
+    for flag in flags_to_unset:
+        try:
+            out = __salt__['partition.set'](device, number, flag, 'off')
+        except CommandExecutionError as e:
+            out = e
+        if out:
+            ret['comment'].append('Error unsetting flag {} in {}{}: {}'
+                                  .format(flag, device, number, out))
+            ret['result'] = False
+        else:
+            ret['changes'][flag] = False
+
     return ret
 
 
@@ -578,10 +629,7 @@ def _check_partition_name(device, number, name):
     number = str(number)
     partitions = _get_cached_partitions(device)
     if number in partitions:
-        # There is a bug in Salt parted execution module that set the
-        # name of the partition in the 'file system' entry
-        # https://github.com/saltstack/salt/pull/49804
-        return partitions[number]['file system'] == name
+        return partitions[number]['name'] == name
 
 
 def named(name, device, partition=None):
@@ -606,7 +654,7 @@ def named(name, device, partition=None):
     }
 
     if not partition:
-        device, partition = re.search(r'(\D+)(\d*)', name).groups()
+        device, partition = re.search(r'(\D+)(\d*)', device).groups()
     if not partition:
         ret['comment'].append('Partition number not provided')
 
@@ -643,4 +691,160 @@ def named(name, device, partition=None):
     else:
         ret['comment'].append('Failed to set name to {}'.format(name))
 
+    return ret
+
+
+def _check_disk_flags(device, flag):
+    '''
+    Return True if the flag for a device is already set.
+    '''
+    flags = __salt__['partition.list'](device)['info']['disk flags']
+    return flag in flags
+
+
+def disk_set(name, flag, enabled=True):
+    '''
+    Make sure that a disk flag is set or unset.
+
+    name
+        Device name (/dev/sda, /dev/disk/by-id/scsi-...)
+
+    flag
+        A valid parted disk flag (see ``parted.disk_set``)
+
+    enabled
+        Boolean value
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' partitioned.disk_set /dev/sda pmbr_boot
+        salt '*' partitioned.disk_set /dev/sda pmbr_boot False
+
+    '''
+    ret = {
+        'name': name,
+        'result': False,
+        'changes': {},
+        'comment': [],
+    }
+
+    is_flag = _check_disk_flags(name, flag)
+    if enabled == is_flag:
+        ret['result'] = True
+        ret['comment'].append('Flag {} in {} already {}'
+                              .format(flag, name,
+                                      'set' if enabled else 'unset'))
+        return ret
+
+    if __opts__['test']:
+        ret['comment'].append('Flag {} in {} will be {}'
+                              .format(flag, name,
+                                      'set' if enabled else 'unset'))
+        ret['changes'][flag] = enabled
+        return ret
+
+    __salt__['partition.disk_set'](name, flag, 'on' if enabled else 'off')
+
+    is_flag = _check_disk_flags(name, flag)
+    if enabled == is_flag:
+        ret['result'] = True
+        ret['comment'].append('Flag {} {} in {}'
+                              .format(flag,
+                                      'set' if enabled else 'unset', name))
+        ret['changes'][flag] = enabled
+    else:
+        ret['comment'].append('Failed to {} {} in {}'
+                              .format('set' if enabled else 'unset', flag,
+                                      name))
+
+    return ret
+
+
+def _check_partition_flags(device, number, flag):
+    '''
+    Return True if the flag for a partition is already set.
+
+    Returns a tri-state value:
+      - `True`: the partition already have this flag
+      - `False`: the partition do not have this flag
+      - `None`: there is not such partition
+    '''
+    number = str(number)
+    partitions = __salt__['partition.list'](device)['partitions']
+    if number in partitions:
+        return flag in partitions[number]['flags']
+
+
+def partition_set(name, flag, partition=None, enabled=True):
+    '''
+    Make sure that a partition flag is set or unset.
+
+    name
+        Device name (/dev/sda, /dev/disk/by-id/scsi-...) or partition
+
+    flag
+        A valid parted disk flag (see ``parted.disk_set``)
+
+    partition
+        Partition number (can be in the device name)
+
+    enabled
+        Boolean value
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' partitioned.partition_set /dev/sda1 bios_grub
+        salt '*' partitioned.partition_set /dev/sda bios_grub 1 False
+
+    '''
+    ret = {
+        'name': name,
+        'result': False,
+        'changes': {},
+        'comment': [],
+    }
+
+    if not partition:
+        name, partition = re.search(r'(\D+)(\d*)', name).groups()
+    if not partition:
+        ret['comment'].append('Partition number not provided')
+
+    is_flag = _check_partition_flags(name, partition, flag)
+    if enabled == is_flag:
+        ret['result'] = True
+        ret['comment'].append('Flag {} in {}{} already {}'
+                              .format(flag, name, partition,
+                                      'set' if enabled else 'unset'))
+    elif is_flag is None:
+        ret['comment'].append('Partition {}{} not found'
+                              .format(name, partition))
+
+    if ret['comment']:
+        return ret
+
+    if __opts__['test']:
+        ret['comment'].append('Flag {} in {}{} will be {}'
+                              .format(flag, name, partition,
+                                      'set' if enabled else 'unset'))
+        ret['changes'][flag] = enabled
+        return ret
+
+    __salt__['partition.set'](name, partition, flag,
+                              'on' if enabled else 'off')
+
+    is_flag = _check_partition_flags(name, partition, flag)
+    if enabled == is_flag:
+        ret['result'] = True
+        ret['comment'].append('Flag {} {} in {}{}'
+                              .format(flag, 'set' if enabled else 'unset',
+                                      name, partition))
+        ret['changes'][flag] = enabled
+    else:
+        ret['comment'].append('Failed to {} {} in {}{}'
+                              .format('set' if enabled else 'unset', flag,
+                                      name, partition))
     return ret

@@ -3,24 +3,29 @@ config:
     - reuse_if_mountpoint_/home
     - fail
   kexec: no
-  snapper: yes
+  snapper: no
 
 partitions:
   config:
     label: gpt
+    # Units in MB
+    alignment: 1
   devices:
     /dev/sda:
       # label: gpt
       partitions:
         - number: 1
+          size: 4
+          type: boot
+        - number: 2
           size: 20000
           type: linux
-        - number: 2
+        - number: 3
           size: 500
           type: swap
 
 filesystems:
-  /dev/sda1:
+  /dev/sda2:
     filesystem: btrfs
     mountpoint: /
     subvolumes:
@@ -38,7 +43,7 @@ filesystems:
           archs: ['i386', 'x86_64']
         - path: boot/grub2/x86_64-efi
           archs: ['x86_64']
-  /dev/sda2:
+  /dev/sda3:
     filesystem: swap
 
 bootloader:

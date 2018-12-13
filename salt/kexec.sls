@@ -11,7 +11,7 @@ mount_root_partition_kexec:
 
 grub_command_line:
   cmd.run:
-    - name: grep -m 1 -E '^[[:space:]]*linux[[:space:]]+[^[:space:]]+vmlinuz.*$' /mnt/boot/grub2/grub.cfg | cut -d ' ' -f 2- > /tmp/command_line
+    - name: grep -m 1 -E '^[[:space:]]*linux[[:space:]]+[^[:space:]]+vmlinuz.*$' /mnt/boot/grub2/grub.cfg | cut -d ' ' -f 2 > /tmp/command_line
     - create: /tmp/command_line
 
 prepare_kexec:

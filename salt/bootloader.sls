@@ -16,4 +16,4 @@ grub2_install:
     - name: grub2-install --boot-directory=/mnt/boot {{ bootloader.device }} --force
     - require:
       - cmd: grub2_mkconfig_chroot
-    - unless: file -s {{ bootloader.device }} | grep -q 'DOS/MBR boot sector'
+    - unless: dd bs=512 count=1 if={{ bootloader.device }} 2>/dev/null | strings | grep -q 'GRUB'
