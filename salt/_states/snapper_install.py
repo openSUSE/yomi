@@ -1,4 +1,4 @@
-# Copyright (c) 2018 SUSE LINUX GmbH, Nuernberg, Germany.
+# Copyright (c) 2019 SUSE LINUX GmbH, Nuernberg, Germany.
 
 # This file is part of Salt-autoinstaller.
 
