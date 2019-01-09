@@ -1,7 +1,6 @@
 {% set config = pillar['config'] %}
 
 include:
-  {% if config.get('snapper', False) %}
-  - .storage.snapper.grub2
-  {% endif %}
-  - grub2
+  - .bootloader.mkinitrd
+  - .bootloader.grub2-mkconfig
+  - .bootloader.grub2-install

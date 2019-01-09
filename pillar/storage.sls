@@ -2,8 +2,9 @@ config:
   conflict:
     - reuse_if_mountpoint_/home
     - fail
-  kexec: no
+  kexec: yes
   snapper: yes
+  grub2_theme: yes
 
 partitions:
   config:
@@ -14,9 +15,12 @@ partitions:
     /dev/sda:
       # label: gpt
       partitions:
+        # - number: 1
+        #   size: 4
+        #   type: boot
         - number: 1
-          size: 4
-          type: boot
+          size: 512
+          type: efi
         - number: 2
           size: 20000
           type: linux
@@ -25,6 +29,10 @@ partitions:
           type: swap
 
 filesystems:
+  /dev/sda1:
+    filesystem: vfat
+    mountpoint: /boot/efi
+    # fat: 32
   /dev/sda2:
     filesystem: btrfs
     mountpoint: /
@@ -55,6 +63,8 @@ software:
   packages:
     - patterns-base-base
     - grub2
+    - grub2-x86_64-efi
+    - shim
     - kernel-default
 
 users:
