@@ -64,6 +64,7 @@ software:
     - patterns-base-base
     - grub2
     - grub2-x86_64-efi
+    - grub2-branding-openSUSE
     - shim
     - kernel-default
 
