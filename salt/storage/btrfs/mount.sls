@@ -1,3 +1,5 @@
+{% import 'macros.yml' as macros %}
+
 {% set filesystems = pillar['filesystems'] %}
 
 {% for device, info in filesystems.items() %}
@@ -9,6 +11,7 @@
       {% if not subvol.get('copy_on_write', True) %}
         {% set fs_mntops = fs_mntops ~ ',nodatacow' %}
       {% endif %}
+{{ macros.log('mount', 'mount_' ~ fs_file) }}
 mount_{{ fs_file }}:
   mount.mounted:
     - name: {{ fs_file }}

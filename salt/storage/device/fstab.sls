@@ -1,7 +1,10 @@
+{% import 'macros.yml' as macros %}
+
 {% set filesystems = pillar['filesystems'] %}
 
 {% for device, info in filesystems.items() %}
   {% if info.get('mountpoint') == '/' %}
+{{ macros.log('mount', 'mount_device_fstab') }}
 mount_device_fstab:
   mount.mounted:
     - name: /mnt
@@ -13,6 +16,7 @@ mount_device_fstab:
 
 {% for device, info in filesystems.items() %}
   {% set fs_file = 'swap' if info.filesystem == 'swap' else info.mountpoint %}
+{{ macros.log('mount', 'add_fstab_' ~ fs_file) }}
 add_fstab_{{ fs_file }}:
   mount.fstab_present:
     - name: {{ device }}
@@ -27,6 +31,7 @@ add_fstab_{{ fs_file }}:
       - mount: mount_device_fstab
 {% endfor %}
 
+{{ macros.log('mount', 'umount_device_fstab') }}
 umount_device_fstab:
   mount.unmounted:
     - name: /mnt

@@ -1,7 +1,10 @@
+{% import 'macros.yml' as macros %}
+
 {% set filesystems = pillar['filesystems'] %}
 
 {% for device, info in filesystems.items() %}
   {% if info.get('mountpoint') == '/' %}
+{{ macros.log('mount', 'mount_create_fstab') }}
 mount_create_fstab:
   mount.mounted:
     - name: /mnt
@@ -9,6 +12,7 @@ mount_create_fstab:
     - fstype: {{ info.filesystem }}
     - persist: False
 
+{{ macros.log('file', 'create_fstab') }}
 create_fstab:
   file.managed:
     - name: /mnt/etc/fstab
@@ -20,7 +24,8 @@ create_fstab:
     - replace: False
     - requires: mount_create_fstab
 
-umount_root_partition_fstab:
+{{ macros.log('mount', 'umount_create_fstab') }}
+umount_create_fstab:
   mount.unmounted:
     - name: /mnt
     - requires: mount_create_fstab

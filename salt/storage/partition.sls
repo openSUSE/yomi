@@ -1,3 +1,5 @@
+{% import 'macros.yml' as macros %}
+
 {% set partitions = pillar['partitions'] %}
 {% set is_uefi = grains['efi'] %}
 
@@ -5,6 +7,8 @@
 {% set label = partition_config.get('label', 'msdos') %}
 {% set is_uefi = grains['efi'] %}
 {% for device, info in partitions.devices.items() %}
+
+{{ macros.log('partitioned', 'create_disk_label_' ~ device) }}
 create_disk_label_{{ device }}:
   partitioned.labeled:
     - name: {{ device }}
@@ -12,6 +16,7 @@ create_disk_label_{{ device }}:
 
   {% set size_ns = namespace(end_size=partition_config.get('alignment', 1)) %}
   {% if label == 'gpt' and not is_uefi %}
+{{ macros.log('partitioned', 'set_pmbr_boot_' ~ device) }}
 set_pmbr_boot_{{ device }}:
   partitioned.disk_set:
     - name: {{ device }}
@@ -23,6 +28,7 @@ set_pmbr_boot_{{ device }}:
     # TODO(aplanas) When moving it to Python, the partition number will be
     # deduced, so the require section in mkfs_partition will fail
     {% set device = device ~ info.get('number', loop.index) %}
+{{ macros.log('partitioned', 'create_partition_' ~ device) }}
 create_partition_{{ device }}:
   partitioned.mkparted:
     - name: {{ device }}

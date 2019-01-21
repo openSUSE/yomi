@@ -1,7 +1,10 @@
+{% import 'macros.yml' as macros %}
+
 {% set bootloader = pillar['bootloader'] %}
 {% set is_uefi = grains['efi'] %}
 {% set is_secure_boot = grains['efi-secure-boot'] %}
 
+{{ macros.log('cmd', 'grub2_install') }}
 grub2_install:
   cmd.run:
 {% if is_uefi %}

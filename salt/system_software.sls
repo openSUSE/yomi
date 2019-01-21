@@ -1,6 +1,9 @@
+{% import 'macros.yml' as macros %}
+
 {% set software = pillar['software'] %}
 
 {% for name, repo in software.repositories.items() %}
+{{ macros.log('pkgrepo', 'add_repository_' ~ repo) }}
 add_repository_{{ repo }}:
   pkgrepo.managed:
     - name: {{ name }}
@@ -12,6 +15,7 @@ add_repository_{{ repo }}:
       - mount: mount_/mnt
 {% endfor %}
 
+{{ macros.log('pkg', 'install_packages') }}
 install_packages:
   pkg.installed:
     - pkgs: {{ software.packages }}

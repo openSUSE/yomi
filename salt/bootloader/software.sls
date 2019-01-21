@@ -1,7 +1,10 @@
+{% import 'macros.yml' as macros %}
+
 {% set config = pillar['config'] %}
 {% set is_uefi = grains['efi'] %}
 {% set is_secure_boot = grains['efi-secure-boot'] %}
 
+{{ macros.log('pkg', 'install_grub2') }}
 install_grub2:
   pkg.installed:
     - pkgs:

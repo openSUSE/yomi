@@ -1,3 +1,6 @@
+{% import 'macros.yml' as macros %}
+
+{{ macros.log('pkg', 'install_snapper') }}
 install_snapper:
   pkg.installed:
     - pkgs:

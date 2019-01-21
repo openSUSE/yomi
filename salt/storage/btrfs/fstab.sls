@@ -1,7 +1,10 @@
+{% import 'macros.yml' as macros %}
+
 {% set filesystems = pillar['filesystems'] %}
 
 {% for device, info in filesystems.items() %}
   {% if info.get('mountpoint') == '/' %}
+{{ macros.log('mount', 'mount_btrfs_fstab') }}
 mount_btrfs_fstab:
   mount.mounted:
     - name: /mnt
@@ -21,6 +24,7 @@ mount_btrfs_fstab:
         {# TODO(aplanas) nodatacow seems optional if chattr was used #}
         {% set fs_mntops = fs_mntops ~ ',nodatacow' %}
       {% endif %}
+{{ macros.log('mount', 'add_fstab' ~ fs_file) }}
 add_fstab_{{ fs_file }}:
   mount.fstab_present:
     - name: {{ device }}
@@ -37,6 +41,7 @@ add_fstab_{{ fs_file }}:
   {% endif %}
 {% endfor %}
 
+{{ macros.log('mount', 'umount_btrfs_fstab') }}
 umount_btrfs_fstab:
   mount.unmounted:
     - name: /mnt

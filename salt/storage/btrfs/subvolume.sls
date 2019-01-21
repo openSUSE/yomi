@@ -1,3 +1,5 @@
+{% import 'macros.yml' as macros %}
+
 {% set filesystems = pillar['filesystems'] %}
 
 {% for device, info in filesystems.items() %}
@@ -5,6 +7,7 @@
     {# TODO(aplanas) is prefix optional? #}
     {% set prefix = info.subvolumes.get('prefix', '') %}
     {% if prefix %}
+{{ macros.log('btrfs', 'subvol_create_' ~ device ~ '_prefix') }}
 subvol_create_{{ device }}_prefix:
   btrfs.subvolume_created:
     - name: '{{ prefix }}'
@@ -19,6 +22,7 @@ subvol_create_{{ device }}_prefix:
       {% else %}
         {% set path = subvol.path %}
       {% endif %}
+{{ macros.log('btrfs', 'subvol_create_' ~ device ~ subvol.path) }}
 subvol_create_{{ device }}_{{ subvol.path }}:
   btrfs.subvolume_created:
     - name: '{{ path }}'

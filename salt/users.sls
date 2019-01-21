@@ -1,6 +1,9 @@
+{% import 'macros.yml' as macros %}
+
 {% set users = pillar['users'] %}
 
 {% for user in users %}
+{{ macros.log('module', 'create_user_' ~ user.username) }}
 create_user_{{ user.username }}:
   module.run:
     - user.add:
@@ -9,6 +12,7 @@ create_user_{{ user.username }}:
       - root: /mnt
     - unless: grep -q '{{ user.username }}' /mnt/etc/shadow
 
+{{ macros.log('module', 'update_user_' ~ user.username) }}
 update_user_{{ user.username }}:
   module.run:
     - shadow.set_password:

@@ -1,7 +1,10 @@
+{% import 'macros.yml' as macros %}
+
 {% set filesystems = pillar['filesystems'] %}
 
 {% for device, info in filesystems.items() %}
   {% if info.get('mountpoint') == '/' %}
+{{ macros.log('mount', 'mount_snapper_fstab') }}
 mount_snapper_fstab:
   mount.mounted:
     - name: /mnt
@@ -16,6 +19,7 @@ mount_snapper_fstab:
     {% set prefix = info.subvolumes.get('prefix', '') %}
     {% set fs_file = '/'|path_join('.snapshots') %}
     {% set fs_mntops = 'subvol=%s'|format('/'|path_join(prefix, '.snapshots')) %}
+{{ macros.log('mount', 'add_fstab_' ~ fs_file) }}
 add_fstab_{{ fs_file }}:
   mount.fstab_present:
     - name: {{ device }}
@@ -31,6 +35,7 @@ add_fstab_{{ fs_file }}:
   {% endif %}
 {% endfor %}
 
+{{ macros.log('mount', 'umount_snapper_fstab') }}
 umount_snapper_fstab:
   mount.unmounted:
     - name: /mnt
