@@ -1,3 +1,112 @@
+# -*- coding: utf-8 -*-
+#
+# Author: Alberto Planas <aplanas@suse.com>
+#
+# Copyright 2019 SUSE LINUX GmbH, Nuernberg, Germany.
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+EQ = '='
+LTE = '<='
+GTE = '>='
+
+MINIMIZE = '-'
+MAXIMIZE = '+'
+
+
+def _vec_scalar(vector, scalar):
+    """Multiply a vector by an scalar."""
+    return [v * scalar for v in vector]
+
+
+def _vec_vec_scalar(vector_a, vector_b, scalar):
+    """Linear combination of two vectors and a scalar."""
+    return [a * scalar + b for a, b in zip(vector_a, vector_b)]
+
+
+class Model:
+    """Class that represent a linear programming problem."""
+
+    def __init__(self, variables):
+        """Create a model with named variables."""
+        # All variables are bound and >= 0. We do not support
+        # unbounded variables.
+        self.variables = variables
+
+        self._slack_variables = []
+        self._constraints = []
+        self._cost_function = None
+
+        self._standard = []
+
+    def add_constraint(self, coefficients, operator, free_term):
+        """Add a constraint in non-standard form."""
+        # We can express constraints in a general form as:
+        #
+        #   a_1 x_1 + a_2 x_2 + ... + a_n x_n <= b
+        #
+        # For this case the values are:
+        #   * coefficients = [a_1, a_2, ..., a_n]
+        #   * operator = '<='
+        #   * free_term = b
+        #
+        assert len(coefficients) == self.variables, 'Coefficients length ' \
+            'must match the number of variables'
+        assert operator in (EQ, LTE, GTE), 'Operator not valid'
+        self._constraints.append((coefficients, operator, free_term))
+
+    def add_cost_function(self, action, coefficients, free_term):
+        """Add a cost function in non-standard form."""
+        # We can express a cost function as:
+        #
+        #   Miminize: z = c_1 x_1 + c_2 x_2 + ... + c_n x_n + z_0
+        #
+        # For this case the values are:
+        #   * action = '-'
+        #   * coefficients = [c_1, c_2, ..., c_n]
+        #   * free_term = z_0
+        #
+        assert action in (MINIMIZE, MAXIMIZE), 'Action not valid'
+        assert len(coefficients) == self.variables, 'Coefficients length ' \
+            'must match the number of variables'
+        self._cost_function = (action, coefficients, free_term)
+
+    def covert_to_standard_form(self):
+        """Convert constraints and cost function to standard form."""
+        slack_vars = len(c for c in self._constraints if c[1] != EQ)
+        standard = []
+        slack_var_idx = 0
+        for coefficients, operator, free_term in self._constraints:
+            slack_coeff = [0] * slack_vars
+            if operator == LTE:
+                slack_coeff[slack_var_idx] = 1
+            elif operator == GTE:
+                slack_coeff[slack_var_idx] = -1
+                slack_var_idx += 1
+            standard.append(coefficients + slack_coeff + [free_term])
+
+        # Adjust the cost function
+        action, coefficients, free_term = self._cost_function
+        slack_coeff = [0] * slack_vars
+        if action == MAXIMIZE:
+            coefficients = _vec_scalar(coefficients, -1)
+        standard.append(coefficients + slack_coeff + [-free_term])
+
 
 class Tableau:
     # To sumarize the steps of the simplex method, starting with the
@@ -107,13 +216,12 @@ class Tableau:
 
     def _scalar(self, row, value):
         """Scalar multiplication of a row and a value."""
-        self._tableau[row] = [a * value for a in self._tableau[row]]
+        self._tableau[row] = _vec_scalar(self._tableau[row], value)
 
     def _linear(self, row_a, row_b, value):
         """Linear combination of two rows and a value."""
-        self._tableau[row_b] = [a * value + b
-                                for a, b in zip(self._tableau[row_a],
-                                                self._tableau[row_b])]
+        self._tableau[row_b] = _vec_vec_scalar(self._tableau[row_a],
+                                               self._tableau[row_a], value)
 
     def _pivote(self, row, column):
         """Pivote the tableau in (row, column)."""
