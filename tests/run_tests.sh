@@ -27,10 +27,10 @@ tear_down() {
 
 trap tear_down EXIT
 
-# Create the temporal Python modules, that once added in the
+# Create the temporary Python modules, that once added in the
 # PYTHON_PATH can be found and imported
 touch "$test_env"/__init__.py
-for module in modules states; do
+for module in modules states grains utils; do
     mkdir "$test_env"/"$module"
     touch "$test_env"/"$module"/__init__.py
     [ "$(ls -A ../salt/_"$module")" ] && ln -sr ../salt/_"$module"/* "$test_env"/"$module"/
