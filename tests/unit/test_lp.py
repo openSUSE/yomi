@@ -60,6 +60,25 @@ class ModelTestCase(unittest.TestCase):
         model.add_cost_function(lp.MINIMIZE, [1, 2], 1)
         self.assertEqual((lp.MINIMIZE, [1, 2], 1), model._cost_function)
 
+    def test__coeff(self):
+        """Test model._coeff method."""
+        model = lp.Model(['x1', 'x2'])
+        self.assertEqual(model._coeff({'x1': 1}), [1, 0])
+        self.assertEqual(model._coeff({'x2': 1}), [0, 1])
+        self.assertEqual(model._coeff({'x1': 1, 'x2': 2}), [1, 2])
+
+    def test_add_constraint_named(self):
+        """Test Model.add_constraint_named success."""
+        model = lp.Model(['x1', 'x2'])
+        model.add_constraint_named({'x1': 1, 'x2': 2}, lp.EQ, 1)
+        self.assertTrue(([1, 2], lp.EQ, 1) in model._constraints)
+
+    def test_add_cost_function_named(self):
+        """Test Model.add_cost_function success."""
+        model = lp.Model(['x1', 'x2'])
+        model.add_cost_function_named(lp.MINIMIZE, {'x1': 1, 'x2': 2}, 1)
+        self.assertEqual((lp.MINIMIZE, [1, 2], 1), model._cost_function)
+
     def test_simplex(self):
         """Test Model.simplex."""
         model = lp.Model(['x1', 'x2', 'x3', 'x4', 'x5'])

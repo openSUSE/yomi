@@ -96,6 +96,21 @@ class Model:
             'length must match the number of variables'
         self._cost_function = (action, coefficients, free_term)
 
+    def _coeff(self, coefficients):
+        """Translate a coefficients dictionary into a list."""
+        coeff = [0] * len(self.variables)
+        for idx, variable in enumerate(self.variables):
+            coeff[idx] = coefficients.get(variable, 0)
+        return coeff
+
+    def add_constraint_named(self, coefficients, operator, free_term):
+        """Add a constraint in non-standard form."""
+        self.add_constraint(self._coeff(coefficients), operator, free_term)
+
+    def add_cost_function_named(self, action, coefficients, free_term):
+        """Add a cost function in non-standard form."""
+        self.add_cost_function(action, self._coeff(coefficients), free_term)
+
     def simplex(self):
         """Resolve a linear programing model."""
         self._convert_to_standard_form()
