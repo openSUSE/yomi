@@ -80,7 +80,7 @@ class ModelTestCase(unittest.TestCase):
         self.assertEqual((lp.MINIMIZE, [1, 2], 1), model._cost_function)
 
     def test_simplex(self):
-        """Test Model.simplex."""
+        """Test Model.simplex method."""
         model = lp.Model(['x1', 'x2', 'x3', 'x4', 'x5'])
         model.add_constraint([-6, 0, 1, -2, 2], lp.EQ, 6)
         model.add_constraint([-3, 1, 0, 6, 3], lp.EQ, 15)
@@ -200,6 +200,20 @@ class ModelTestCase(unittest.TestCase):
                           [1, -1, 2, 1, 0, 1, 11],
                           [2, -3, 1, 1, 0, 0, 0],
                           [-2, 3, 1, 1, 0, 0, -14]])
+
+    def test___str__(self):
+        """Test Model.__str__ method."""
+        model = lp.Model(['x1', 'x2', 'x3', 'x4', 'x5'])
+        model.add_constraint([-6, 0, 1, -2, 2], lp.LTE, 6)
+        model.add_constraint([-3, 1, 0, 6, 3], lp.EQ, 15)
+        model.add_cost_function(lp.MINIMIZE, [5, 0, 0, 3, -2], -21)
+        self.assertEqual(model.__str__(), """Minimize:
+  5 x1 + 0 x2 + 0 x3 + 3 x4 - 2 x5 = -21
+
+Subject to:
+  -6 x1 + 0 x2 + 1 x3 - 2 x4 + 2 x5 <= 6
+  -3 x1 + 1 x2 + 0 x3 + 6 x4 + 3 x5 = 15
+  x1, x2, x3, x4, x5 >= 0""")
 
 
 class TableauTestCase(unittest.TestCase):

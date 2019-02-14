@@ -199,6 +199,39 @@ class Model:
         tableau.add_artificial_function(coefficients + [free_term])
         return tableau
 
+    def _str_coeff(self, coefficients):
+        """Transform a coefficient array into a string."""
+        result = []
+        for coefficient, variable in zip(coefficients, self.variables):
+            if result:
+                result.append('+' if coefficient >= 0 else '-')
+                coefficient = abs(coefficient)
+            result.append('{} {}'.format(coefficient, variable))
+        return ' '.join(result)
+
+    def __str__(self):
+        result = []
+        """String representation of a model."""
+        if self._cost_function:
+            result.append({
+                MINIMIZE: 'Minimize:',
+                MAXIMIZE: 'Maximize:'}[self._cost_function[0]])
+            z = ' '.join((self._str_coeff(self._cost_function[1]),
+                          EQ, str(self._cost_function[2])))
+            result.append('  ' + z)
+            result.append('')
+
+        result.append('Subject to:')
+        for constraint in self._constraints:
+            c = ' '.join((self._str_coeff(constraint[0]),
+                          constraint[1], str(constraint[2])))
+            result.append('  ' + c)
+
+        c = ', '.join(self.variables) + ' >= 0'
+        result.append('  ' + c)
+
+        return '\n'.join(result)
+
 
 class Tableau:
     # To sumarize the steps of the simplex method, starting with the
