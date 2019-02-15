@@ -216,8 +216,10 @@ class Model:
             result.append({
                 MINIMIZE: 'Minimize:',
                 MAXIMIZE: 'Maximize:'}[self._cost_function[0]])
+            free_term = self._cost_function[2]
+            free_term_sign = '+' if free_term >= 0 else '-'
             z = ' '.join((self._str_coeff(self._cost_function[1]),
-                          EQ, str(self._cost_function[2])))
+                          free_term_sign, str(abs(free_term))))
             result.append('  ' + z)
             result.append('')
 

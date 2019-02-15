@@ -208,7 +208,7 @@ class ModelTestCase(unittest.TestCase):
         model.add_constraint([-3, 1, 0, 6, 3], lp.EQ, 15)
         model.add_cost_function(lp.MINIMIZE, [5, 0, 0, 3, -2], -21)
         self.assertEqual(model.__str__(), """Minimize:
-  5 x1 + 0 x2 + 0 x3 + 3 x4 - 2 x5 = -21
+  5 x1 + 0 x2 + 0 x3 + 3 x4 - 2 x5 - 21
 
 Subject to:
   -6 x1 + 0 x2 + 1 x3 - 2 x4 + 2 x5 <= 6
