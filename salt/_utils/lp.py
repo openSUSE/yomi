@@ -123,8 +123,11 @@ class Model:
         constraints = tableau.constraints()
         solution = {i: 0 for i in self.variables}
         for idx_cons, idx_var in enumerate(tableau._basic_variables):
-            variable = self.variables[idx_var]
-            solution[variable] = constraints[idx_cons][-1]
+            try:
+                variable = self.variables[idx_var]
+                solution[variable] = constraints[idx_cons][-1]
+            except IndexError:
+                pass
         return solution
 
     def _convert_to_standard_form(self):
@@ -157,7 +160,10 @@ class Model:
 
         self._canonical_constraints = []
         artificial_var_idx = 0
-        coeff_acc = [0] * len(self.variables)
+
+        slack_vars = len([c for c in self._constraints if c[1] != EQ])
+        coeff_acc = [0] * (len(self.variables) + slack_vars)
+
         free_term_acc = 0
         for coefficients, free_term in self._standard_constraints:
             if free_term < 0:

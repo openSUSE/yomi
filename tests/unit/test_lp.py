@@ -142,7 +142,7 @@ class ModelTestCase(unittest.TestCase):
                          ([3, 2, 4, 0, 0], 0))
 
     def test__convert_to_standard_form_maximize(self):
-        """Test Model.c_onvert_to_standard_form when maximizing."""
+        """Test Model._convert_to_standard_form when maximizing."""
         model = lp.Model(['x1', 'x2', 'x3'])
         model.add_constraint([30, 100, 85], lp.EQ, 2500)
         model.add_constraint([6, 2, 3], lp.EQ, 90)
@@ -184,6 +184,22 @@ class ModelTestCase(unittest.TestCase):
         self.assertEqual(model._canonical_cost_function, ([3, 2, 4, 0, 0], 0))
         self.assertEqual(model._canonical_artificial_function,
                          ([24, 98, 82, 0, 0], -2590))
+
+    def test__convert_to_canonical_form_artificial(self):
+        """Test Model._convert_to_canonical_form when not in standard form."""
+        model = lp.Model(['x1', 'x2', 'x3', 'x4'])
+        model.add_constraint([1, -2, -3, -2], lp.LTE, 3)
+        model.add_constraint([1, -1, 2, 1], lp.GTE, 11)
+        model.add_cost_function(lp.MAXIMIZE, [2, -3, 1, 1], 10)
+        model._convert_to_standard_form()
+        model._convert_to_canonical_form()
+        self.assertEqual(model._canonical_constraints,
+                         [([1, -2, -3, -2, 1, 0, 1, 0], 3),
+                          ([1, -1, 2, 1, 0, -1, 0, 1], 11)])
+        self.assertEqual(model._canonical_cost_function,
+                         ([-2, 3, -1, -1, 0, 0, 0, 0], -10))
+        self.assertEqual(model._canonical_artificial_function,
+                         ([-2, 3, 1, 1, -1, 1, 0, 0], -14))
 
     def test__build_tableau_canonical_form(self):
         """Test Model._build_tableau_canonical_form method."""
