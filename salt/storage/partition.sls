@@ -34,10 +34,12 @@ create_partition_{{ device }}:
     - name: {{ device }}
     # TODO(aplanas) If msdos we need to create extended and logical
     - part_type: primary
-    - fs_type: {{ {'swap': 'linux-swap', 'linux': 'ext2', 'boot': 'ext2', 'efi': 'fat16'}[partition.type] }}
+    - fs_type: {{ {'swap': 'linux-swap', 'linux': 'ext2', 'boot': 'ext2', 'efi': 'fat16', 'lvm': 'ext2'}[partition.type] }}
     - start: {{ size_ns.end_size }}MB
     - end: {{ size_ns.end_size + partition.size }}MB
-    {% if label == 'gpt' and not is_uefi and partition.type == 'boot' %}
+    {% if partition.type == 'lvm' %}
+    - flags: [lvm]
+    {% elif label == 'gpt' and not is_uefi and partition.type == 'boot' %}
     - flags: [bios_grub]
     {% elif label == 'gpt' and is_uefi and partition.type == 'efi' %}
     - flags: [esp]
