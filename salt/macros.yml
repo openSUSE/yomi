@@ -18,6 +18,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+{% set config = pillar['config'] %}
 
 {% macro send_enter(name) -%}
 event_{{ name }}_enter:
@@ -48,8 +49,10 @@ event_{{ name }}_fail:
 {%- endmacro %}
 
 {% macro log(state, name) -%}
+{% if config.get('events', True) %}
 {{ send_enter(name) }}
 {{ send_success(state, name) }}
 {{ send_fail(state, name) }}
+{% endif %}
 {%- endmacro %}
 
