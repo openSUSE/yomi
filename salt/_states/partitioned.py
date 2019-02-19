@@ -40,12 +40,14 @@ __virtualname__ = 'partitioned'
 # Define not exported variables from Salt, so this can be imported as
 # a normal module
 try:
+    __context__
     __grains__
     __opts__
     __pillars__
     __salt__
     __states__
 except NameError:
+    __context__ = {}
     __grains__ = {}
     __opts__ = {}
     __pillars__ = {}
@@ -282,7 +284,10 @@ def _get_cached_partitions(device, unit='s'):
         # the file system information, to workaround this we get the
         # partition type using parted and attach it here.
         _get_cached_partitions.types = _get_partition_type(device)
-    partitions = _get_cached_partitions.partitions
+
+    if device not in _get_cached_partitions.partitions:
+        _get_cached_partitions.partitions[device] = {}
+    partitions = _get_cached_partitions.partitions[device]
 
     if unit not in partitions:
         partitions[unit] = __salt__['partition.list'](device, unit=unit)
