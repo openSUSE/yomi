@@ -11,6 +11,4 @@ mkfs_partition_{{ device }}:
   {% if info.filesystem in ('fat', 'vfat') and info.get('fat') %}
     - fat: {{ info.fat }}
   {% endif %}
-    - require:
-      - partitioned: create_partition_{{ device }}
 {% endfor %}

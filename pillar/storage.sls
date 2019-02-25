@@ -40,24 +40,26 @@ lvm:
       - /dev/sdc1
     lvs:
       - name: swap
-        size: 2000
+        size: 2000M
       - name: root
-        size: 30000
+        size: 30000M
       - name: home
-        size: 20000
+        size: 20000M
         
 filesystems:
   /dev/sda1:
     filesystem: vfat
     mountpoint: /boot/efi
     # fat: 32
-  /dev/sda2:
+  /dev/system/swap:
+    filesystem: swap
+  /dev/system/root:
     filesystem: btrfs
     mountpoint: /
     subvolumes:
       prefix: '@'
       subvolume:
-        - path: home
+        # - path: home
         - path: opt
         - path: root
         - path: srv
@@ -69,8 +71,9 @@ filesystems:
           archs: ['i386', 'x86_64']
         - path: boot/grub2/x86_64-efi
           archs: ['x86_64']
-  /dev/sda3:
-    filesystem: swap
+  /dev/system/home:
+    filesystem: xfs
+    mountpoint: /home
 
 bootloader:
   device: /dev/sda
