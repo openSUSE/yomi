@@ -6,6 +6,7 @@ config:
   kexec: yes
   snapper: yes
   grub2_theme: yes
+  grub2_console: yes
 
 partitions:
   config:

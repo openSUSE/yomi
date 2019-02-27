@@ -36,9 +36,15 @@ config_grub2_resume:
     - name: /mnt/etc/default/grub
     - text:
       - GRUB_TIMEOUT=8
+{% if 'lvm' not in pillar %}
       - GRUB_DEFAULT="saved"
       - GRUB_SAVEDEFAULT="true"
+{% endif %}
+{% if config.get('grub2_console', False) %}
+      - GRUB_CMDLINE_LINUX_DEFAULT="splash=silent quiet console=tty0 console=ttyS0,115200"
+{% else %}
       - GRUB_CMDLINE_LINUX_DEFAULT="splash=silent quiet"
+{% endif %}
       - GRUB_DISABLE_OS_PROBER="false"
 
 {{ macros.log('file', 'grub2_mkconfig') }}
