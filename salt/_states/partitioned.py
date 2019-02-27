@@ -40,19 +40,13 @@ __virtualname__ = 'partitioned'
 # Define not exported variables from Salt, so this can be imported as
 # a normal module
 try:
-    __context__
     __grains__
     __opts__
-    __pillars__
     __salt__
-    __states__
 except NameError:
-    __context__ = {}
     __grains__ = {}
     __opts__ = {}
-    __pillars__ = {}
     __salt__ = {}
-    __states__ = {}
 
 
 class ParseException(Exception):

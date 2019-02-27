@@ -47,16 +47,12 @@ __virtualname__ = 'snapper_install'
 try:
     __grains__
     __opts__
-    __pillars__
     __salt__
-    __states__
     __utils__
 except NameError:
     __grains__ = {}
     __opts__ = {}
-    __pillars__ = {}
     __salt__ = {}
-    __states__ = {}
     __utils__ = {}
 
 

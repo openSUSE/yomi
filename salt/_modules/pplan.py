@@ -43,19 +43,9 @@ __virtualname__ = 'pplan'
 # Define not exported variables from Salt, so this can be imported as
 # a normal module
 try:
-    __grains__
-    __opts__
-    __pillars__
     __salt__
-    __states__
-    __utils__
 except NameError:
-    __grains__ = {}
-    __opts__ = {}
-    __pillars__ = {}
     __salt__ = {}
-    __states__ = {}
-    __utils__ = {}
 
 
 PENALIZATION = {
