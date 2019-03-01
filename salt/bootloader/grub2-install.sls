@@ -18,6 +18,11 @@ grub2_install:
     - name: grub2-install --force {{ bootloader.device }}
     - unless: dd bs=512 count=1 if={{ bootloader.device }} 2>/dev/null | strings | grep -q 'GRUB'
 {% endif %}
+{% if 'lvm' in pillar %}
+    - binds: [/run]
+    - env:
+      - LVM_SUPPRESS_FD_WARNINGS: 1
+{% endif %}
     - root: /mnt
     - require:
       - cmd: grub2_mkconfig

@@ -52,4 +52,7 @@ grub2_mkconfig:
   cmd.run:
     - name: grub2-mkconfig -o /boot/grub2/grub.cfg
     - root: /mnt
+{% if 'lvm' in pillar %}
+    - binds: [/run]
+{% endif %}
     - creates: /mnt/boot/grub2/grub.cfg
