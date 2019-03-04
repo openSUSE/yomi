@@ -27,7 +27,7 @@ config_grub2_theme:
       - GRUB_TERMINAL="gfxterm"
       - GRUB_GFXMODE="auto"
       - GRUB_BACKGROUND=
-      - GRUB_THEME="/boot/grub2/themes/openSUSE/theme.txt"
+      # - GRUB_THEME="/boot/grub2/themes/openSUSE/theme.txt"
 {% endif %}
 
 {{ macros.log('file', 'config_grub2_resume') }}
