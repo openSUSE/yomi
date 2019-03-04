@@ -13,7 +13,7 @@ grub2_install:
   {% else %}
     - name: grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
   {% endif %}
-    - creates: /mnt/boot/efi/EFI/grub2
+    - creates: /mnt/boot/efi/EFI/GRUB
 {% else %}
     - name: grub2-install --force {{ bootloader.device }}
     - unless: dd bs=512 count=1 if={{ bootloader.device }} 2>/dev/null | grep -q 'GRUB'
