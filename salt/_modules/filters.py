@@ -49,3 +49,13 @@ def is_lvm(device):
     devices = ['/dev/{}/'.format(i) for i in __pillar__.get('lvm', {})]
     devices.extend(('/dev/mapper/', '/dev/dm-'))
     return device.startswith(tuple(devices))
+
+
+def is_raid(device):
+    '''Detect if a device name comes from a RAID array.'''
+    return device.startswith('/dev/md')
+
+
+def is_not_raid(device):
+    '''Detect if a device name comes from a RAID array.'''
+    return not is_raid(device)

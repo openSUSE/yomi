@@ -1,6 +1,6 @@
 include:
-  # - .pre-partition
   - .partition
+  - .raid
   - .volumes
   - .format
   - .subvolumes

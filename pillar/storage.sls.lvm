@@ -17,53 +17,50 @@ partitions:
     /dev/sda:
       partitions:
         - number: 1
+          size: 256
+          type: efi
+        - number: 2
           size: 20000
-          type: raid
+          type: lvm
     /dev/sdb:
       partitions:
         - number: 1
           size: 20000
-          type: raid
+          type: lvm
     /dev/sdc:
       partitions:
         - number: 1
           size: 20000
-          type: raid
-    /dev/md0:
-      partitions:
-        - number: 1
-          size: 8
-          type: efi
-        - number: 2
-          size: 500
-          type: swap
-        - number: 3
-          size: 2000
-          type: linux
+          type: lvm
 
-raid:
-  /dev/md0:
-    level: 1
-    devices:
-      - /dev/sda1
+lvm:
+  system:
+    vgs:
+      - /dev/sda2
       - /dev/sdb1
       - /dev/sdc1
-    spare: 1
+    lvs:
+      - name: swap
+        size: 2000M
+      - name: root
+        size: 30000M
+      - name: home
+        size: 20000M
 
 filesystems:
-  /dev/md0p1:
+  /dev/sda1:
     filesystem: vfat
     mountpoint: /boot/efi
     # fat: 32
-  /dev/md0p2:
+  /dev/system/swap:
     filesystem: swap
-  /dev/md0p3:
+  /dev/system/root:
     filesystem: btrfs
     mountpoint: /
     subvolumes:
       prefix: '@'
       subvolume:
-        - path: home
+        # - path: home
         - path: opt
         - path: root
         - path: srv
@@ -75,9 +72,12 @@ filesystems:
           archs: ['i386', 'x86_64']
         - path: boot/grub2/x86_64-efi
           archs: ['x86_64']
+  /dev/system/home:
+    filesystem: xfs
+    mountpoint: /home
 
 bootloader:
-  device: /dev/md0
+  device: /dev/sda
 
 software:
   repositories:

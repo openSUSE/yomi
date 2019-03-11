@@ -461,6 +461,7 @@ def _get_partition_flags(device, number):
     '''
     Return the current list of flags for a partition.
     '''
+    result = []
     number = str(number)
     partitions = __salt__['partition.list'](device)['partitions']
     if number in partitions:
@@ -469,7 +470,8 @@ def _get_partition_flags(device, number):
         # represent flags
         flags = partitions[number]['flags'].split(', ')
         not_valid = ['swap']
-        return [flag for flag in flags if flag and flag not in not_valid]
+        result = [flag for flag in flags if flag and flag not in not_valid]
+    return result
 
 
 def mkparted(name, part_type, fs_type=None, start=None, end=None, flags=None):
@@ -535,7 +537,9 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None, flags=None):
 
     # If the user do not provide any partition number we get generate
     # the next available for the partition type
-    device, number = re.search(r'(\D+)(\d*)', name).groups()
+    device_md, device_no_md, number = re.search(
+        r'(?:(/dev/md[^p]+)p?|(\D+))(\d*)', name).groups()
+    device = device_md if device_md else device_no_md
     if not number:
         try:
             number = _get_partition_number(device, part_type, start, end)
