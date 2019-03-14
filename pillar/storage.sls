@@ -32,13 +32,13 @@ partitions:
     /dev/md0:
       partitions:
         - number: 1
-          size: 8
+          size: 500
           type: efi
         - number: 2
-          size: 500
+          size: 2000
           type: swap
         - number: 3
-          size: 2000
+          size: 15000
           type: linux
 
 raid:
