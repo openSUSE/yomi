@@ -9,5 +9,7 @@ create_raid_{{ device }}:
     - name: {{ device }}
     - level: {{ info.level }}
     - devices: {{ info.devices }}
-    # TODO(aplanas) move kwargs from pillars to here
+  {% for key, value in info.items() if key not in ('level', 'devices') %}
+    - {{ key }}: {{ value }}
+  {% endfor %}
 {% endfor %}
