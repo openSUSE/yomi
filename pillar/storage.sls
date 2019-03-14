@@ -48,7 +48,8 @@ raid:
       - /dev/sda1
       - /dev/sdb1
       - /dev/sdc1
-    spare: 1
+    spare-devices: 1
+    metadata: 1.0
 
 filesystems:
   /dev/md0p1:
