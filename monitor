@@ -297,7 +297,7 @@ if __name__ == '__main__':
                         help='Optional, fail rather than waiting for input.')
     parser.add_argument('-r', '--remove', action='store_true',
                         default=False,
-                        help='Remove the toked cached in the system.')
+                        help='Remove the token cached in the system.')
     parser.add_argument('-i', '--insecure', action='store_true',
                         default=False,
                         help='Ignore any SSL certificate that may be '
