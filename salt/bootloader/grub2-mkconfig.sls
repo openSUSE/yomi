@@ -47,7 +47,7 @@ config_grub2_resume:
 {% endif %}
       - GRUB_DISABLE_OS_PROBER="false"
 
-{{ macros.log('file', 'grub2_mkconfig') }}
+{{ macros.log('cmd', 'grub2_mkconfig') }}
 grub2_mkconfig:
   cmd.run:
     - name: grub2-mkconfig -o /boot/grub2/grub.cfg

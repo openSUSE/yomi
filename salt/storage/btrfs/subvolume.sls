@@ -22,7 +22,7 @@ subvol_create_{{ device }}_prefix:
       {% else %}
         {% set path = subvol.path %}
       {% endif %}
-{{ macros.log('btrfs', 'subvol_create_' ~ device ~ subvol.path) }}
+{{ macros.log('btrfs', 'subvol_create_' ~ device ~ '_' ~ subvol.path) }}
 subvol_create_{{ device }}_{{ subvol.path }}:
   btrfs.subvolume_created:
     - name: '{{ path }}'

@@ -24,7 +24,7 @@ mount_btrfs_fstab:
         {# TODO(aplanas) nodatacow seems optional if chattr was used #}
         {% set fs_mntops = fs_mntops ~ ',nodatacow' %}
       {% endif %}
-{{ macros.log('mount', 'add_fstab' ~ fs_file) }}
+{{ macros.log('mount', 'add_fstab' ~ '_' ~ fs_file) }}
 add_fstab_{{ fs_file }}:
   mount.fstab_present:
     - name: {{ device }}
