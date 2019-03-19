@@ -17,7 +17,7 @@ create_virtual_group_{{ group }}:
     - devices: [{{ ', '.join(group_info['vgs']) }}]
 
   {% for volume in group_info['lvs'] %}
-{{ macros.log('lvm', 'create_logical_volume_' ~ volume) }}
+{{ macros.log('lvm', 'create_logical_volume_' ~ volume['name']) }}
 create_logical_volume_{{ volume['name'] }}:
   lvm.lv_present:
     - name: {{ volume['name'] }}
