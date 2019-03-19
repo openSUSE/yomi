@@ -40,6 +40,18 @@ import urllib.request
 LOG = logging.getLogger(__name__)
 TOKEN_FILE = '~/.salt-api-token'
 
+# ANSI color codes
+BLACK = '\033[1;30m'
+RED = '\033[1;31m'
+GREEN = '\033[0;32m'
+YELLOW = '\033[0;33m'
+BLUE  = '\033[1;34m'
+MAGENTA = '\033[1;35m'
+CYAN  = '\033[1;36m'
+WHITE = '\033[1;37m'
+RESET = "\033[0;0m"
+
+
 class SaltAPI():
     def __init__(self, url, username, password, eauth, insecure,
                  token_file=TOKEN_FILE, debug=False):
@@ -271,6 +283,30 @@ def print_job(job):
     pprint.pprint(job)
 
 
+def print_raw_event(tag, data):
+    """Print raw event without format."""
+    print('- {}'.format(tag))
+    pprint.pprint(data)
+
+
+def print_yomi_event(tag, data):
+    """Print a Yomi event with format."""
+    if tag.startswith('yomi/'):
+        id_ = data['data']['id']
+        stamp = data['data']['_stamp']
+        tag = tag.split('/', 1)[1]
+        tag, section = tag.rsplit('/', 1)
+        if section == 'enter':
+            print('[{}{}{}] {} -> [{}STARTING{}] {}'.format(
+                YELLOW, id_, RESET, stamp, BLUE, RESET, tag))
+        elif section == 'success':
+            print('[{}{}{}] {} -> [{}SUCCESS{}]  {}'.format(
+                YELLOW, id_, RESET, stamp, GREEN, RESET, tag))
+        elif section == 'fail':
+            print('[{}{}{}] {} -> [{}FAIL{}]     {}'.format(
+                YELLOW, id_, RESET, stamp, RED, RESET, tag))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='salt-autoinstaller monitor tool via salt-api.')
@@ -319,6 +355,9 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--events',  action='store_true',
                         default=False,
                         help='Show events from salt-master.')
+    parser.add_argument('-y', '--yomi-events',  action='store_true',
+                        default=False,
+                        help='Show only Yomi events from salt-master.')
     parser.add_argument('target', nargs='?',
                         help='Minion ID where to launch the installer.')
     args = parser.parse_args()
@@ -365,7 +404,9 @@ if __name__ == '__main__':
     if args.target:
         print_job(api.run_job(args.target, 'state.highstate'))
 
-    if args.events:
+    if args.events or args.yomi_events:
         for tag, data in api.events():
-            print('- {}'.format(tag))
-            pprint.pprint(data)
+            if args.yomi_events:
+                print_yomi_event(tag, data)
+            else:
+                print_raw_event(tag, data)
