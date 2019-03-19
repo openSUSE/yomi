@@ -1,8 +1,5 @@
 config:
   events: no
-  conflict:
-    - reuse_if_mountpoint_/home
-    - fail
   kexec: yes
   snapper: yes
   grub2_theme: yes
