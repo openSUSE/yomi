@@ -24,7 +24,7 @@
 event_{{ name }}_enter:
   module.run:
     - event.send:
-      - tag: salt-autoinstaller/{{ name.replace('_', '/') }}/enter
+      - tag: yomi/{{ name.replace('_', '/') }}/enter
       # - with_grains: [id, hwaddr_interfaces]
 {%- endmacro %}
 
@@ -32,7 +32,7 @@ event_{{ name }}_enter:
 event_{{ name }}_success:
   module.run:
     - event.send:
-      - tag: salt-autoinstaller/{{ name.replace('_', '/') }}/success
+      - tag: yomi/{{ name.replace('_', '/') }}/success
       # - with_grains: [id, hwaddr_interfaces]
     - require:
       - {{ state }}: {{ name }}
@@ -42,7 +42,7 @@ event_{{ name }}_success:
 event_{{ name }}_fail:
   module.run:
     - event.send:
-      - tag: salt-autoinstaller/{{ name.replace('_', '/') }}/fail
+      - tag: yomi/{{ name.replace('_', '/') }}/fail
       # - with_grains: [id, hwaddr_interfaces]
     - onfail:
       - {{ state }}: {{ name }}
