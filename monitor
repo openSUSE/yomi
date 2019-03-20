@@ -294,17 +294,30 @@ def print_yomi_event(tag, data):
     if tag.startswith('yomi/'):
         id_ = data['data']['id']
         stamp = data['data']['_stamp']
+
+        # Decide the color to represent the node
+        if id_ in print_yomi_event.nodes:
+            color = print_yomi_event.nodes[id_]
+        else:
+            color = print_yomi_event.colors.pop()
+            print_yomi_event.colors.insert(0, color)
+            print_yomi_event.nodes[id_] = color
+
         tag = tag.split('/', 1)[1]
         tag, section = tag.rsplit('/', 1)
         if section == 'enter':
             print('[{}{}{}] {} -> [{}STARTING{}] {}'.format(
-                YELLOW, id_, RESET, stamp, BLUE, RESET, tag))
+                color, id_, RESET, stamp, BLUE, RESET, tag))
         elif section == 'success':
             print('[{}{}{}] {} -> [{}SUCCESS{}]  {}'.format(
-                YELLOW, id_, RESET, stamp, GREEN, RESET, tag))
+                color, id_, RESET, stamp, GREEN, RESET, tag))
         elif section == 'fail':
             print('[{}{}{}] {} -> [{}FAIL{}]     {}'.format(
-                YELLOW, id_, RESET, stamp, RED, RESET, tag))
+                color, id_, RESET, stamp, RED, RESET, tag))
+
+# Static-a-like variables to track the rotating color
+print_yomi_event.nodes = {}
+print_yomi_event.colors = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
 
 
 if __name__ == '__main__':
