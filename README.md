@@ -267,11 +267,7 @@ are like `/dev/md0` or `/dev/md/system`.
   Metadata version for the superblock. Valid values are `0`, `0.9`,
   `1`, `1.0`, `1.1`, `1.2`, `default`, `ddm`, `imsm`.
 
-* : Integer. Optional. Default: 0
-
-  Number if extra devices in the initial array.
-
-The user can specify more parameters, that will be passed directly to
+The user can specify more parameters that will be passed directly to
 `mdadm`, like `spare-devices` to indicate the number of extra devices
 in the initial array, or `chunk` to speficy the chunk size.
 
@@ -291,6 +287,47 @@ raid:
 
 ## `filesystems` section
 
+The partitions, devices or arrays created in previous sections usually
+requires a file system. This section will simply list the device name
+and the file system (and properties) that will be applied to it.
+
+* `filesystem`. String.
+
+  File system to apply in the device. Valid values are `swap`,
+  `linux-swap`, `bfs`, `btrfs`, `cramfs`, `ext2`, `ext3`, `ext4`,
+  `minix`, `msdos`, `vfat`. Technically Salt will search for a command
+  that match `mkfs.<filesystem>`, so the valid options can be more
+  extensive that the one listed here.
+
+* `mountpoint`. String.
+
+  Mount point where the device will be registered in `fstab`.
+
+* `fat`. Integer. Optional.
+
+  If the file system is `vfat` we can force the FAT size, like 12, 16
+  or 32.
+
+* `subvolumes`. Dictionary.
+
+  For `btrfs` file systems we can specify more details.
+
+  * `prefix`. String. Optional.
+
+    `btrfs` sub-volume name where the rest of the sub-volumes will be
+    under. For example, if we set `prefix` as `@` and we create a
+    sub-volume named `var`, Yomi will create it as `@/var`.
+
+  * `subvolume`. Dictionary.
+
+    * `path`. String.
+
+      Path name for the sub-volume.
+
+	* `copy_on_write`. Boolean. Optional. Default: `yes`
+
+      Value for the copy-on-write option in `btrfs`.
+
 Example:
 
 ```YAML
@@ -298,7 +335,7 @@ filesystems:
   /dev/sda1:
     filesystem: vfat
     mountpoint: /boot/efi
-    # fat: 32
+    fat: 32
   /dev/sda2:
     filesystem: swap
   /dev/sda3:
@@ -321,6 +358,10 @@ filesystems:
 
 ## `bootloader` section
 
+* `device`: String.
+
+  Device name where GRUB2 will be installed.
+
 Example:
 
 ```YAML
@@ -329,6 +370,18 @@ bootloader:
 ```
 
 ## `software` section
+
+We can indicate the repositories that will be registered in the new
+installation, and the packages and patterns that will be installed.
+
+* `repositories`. Dictionary.
+
+  Each key of the dictionary will be the name under where this
+  repository is registered, and the key is the URI associated with it.
+
+* `packages`. Array.
+
+  List of packages or patters to be installed.
 
 Example:
 
@@ -342,6 +395,17 @@ software:
 ```
 
 ## `users` section
+
+In this section we can list a simple list of users and passwords that
+we expect to find once the system is booted.
+
+* `username`. String.
+
+  Login or username for the user.
+
+* `password`. String.
+
+  Shadow password hash for the user.
 
 Example:
 
