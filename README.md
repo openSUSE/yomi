@@ -578,6 +578,6 @@ users:
 ```
 
 
-# How Yomi works.
+# How Yomi works
 
 TBD
