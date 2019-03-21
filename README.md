@@ -16,15 +16,144 @@ integration in any workflow were SaltStack is used.
 
 # Installation
 
-TBD
+To execute Yomi we need a modern version of Salt, as we need special
+features are only on the
+[develop](https://github.com/saltstack/salt/tree/develop) branch of
+Salt. Technically we can use the last released version of Salt for
+salt-master, but for the minions we need the most up-to-date version.
 
-##
+For openSUSE Tumbleweed I create a [package of
+Salt](https://build.opensuse.org/package/show/home:aplanas:branches:systemsmanagement:saltstack:testing/salt)
+that contains the last released version and a patch with the missing
+code that only lives on the develop branch of the code. This is the
+package required to be installed where the salt-minion is executed.
 
+To simplify the test and development of Yomi, I also provide a JeOS
+(Tumbleweed) based
+[image](https://build.opensuse.org/package/show/home:aplanas:Images/test-image-iso)
+that includes this patched package. You can use this ISO to boot the node.
+
+## Installing salt-master
+
+You can read the [official
+documentation](https://docs.saltstack.com/en/latest/topics/installation/index.html)
+about how to install salt-master. For this documentation we are going
+to show only the one based on Python virtual environments.
+
+```Bash
+python3 -mvenv venv
+
+source venv/bin/activate
+
+pip install --upgrade pip
+pip install salt
+```
+
+Once the Salt code is living in the venv, we can configure it.
+
+```Bash
+mkdir -p venv/etc/salt/pki/{master,minion} \
+      venv/etc/salt/autosign_grains \
+      venv/var/cache/salt/master/file_lists/roots
+
+cat <<EOF > venv/etc/salt/master
+root_dir: $(pwd)/venv
+
+file_roots:
+  base:
+    - $(pwd)/srv/salt
+
+pillar_roots:
+  base:
+    - $(pwd)/srv/pillar
+EOF
+```
+
+To find more configuration options for salt-master, refer always to
+the official documentation. Here we set a very minimal one, we only
+specify where to find the salt states, the pillars and from where we
+consider the root directory.
 
 ## Enabling Autosign
 
-TBD
+To simplify the discovery and key management of the minions, we can
+use the auto-sign feature of Salt. To do that we need to add a new
+line into the master configuration file.
 
+```Bash
+echo "autosign_grains_dir: /etc/salt/autosign_grains" >> venv/etc/salt/master
+```
+
+The ISO image that I prepared already export some UUIDs generated for
+each minion, so we need to list into the master all the possible valid
+UUIDs.
+
+```Bash
+mkdir -p venv/etc/salt/autosign_grains
+
+for i in $(seq 0 9); do
+  echo $(uuidgen --md5 --namespace @dns --name http://opensuse.org/$i)
+done > venv/etc/salt/autosign_grains/uuid
+```
+
+We can start now the salt-master service manually:
+
+```Bash
+salt-master -c venv/etc/salt &
+```
+
+## Salt API
+
+Yomi includes a monitoring tool, that read from the event bus of
+Salt. To enable the real-time events we need to enable set `events`
+field to `yes` in the configuration section of the pillar. This
+`monitor` tool will connect to the salt-api service to read the status
+and send request to Salt, all done via the REST protocol.
+
+We will use CherryPy to serve the requests of Salt API, and we will
+also install a basic WebSocket Python library. Supposing that the
+virtual environment is activated, we can:
+
+```Bash
+pip install cherrypy ws4py
+```
+
+As configuration example, we will setup Salt API to use CherryPy,
+listen on port 8000, disable SSL and use an eauth based of a plain
+text file. Of course this setup is only for testing.
+
+```Bash
+mkdir -p venv/etc/salt/master.d
+
+cat <<EOF > venv/etc/salt/master.d/salt-api.conf
+rest_cherrypy:
+  port: 8000
+  debug: no
+  disable_ssl: yes
+EOF
+
+cat <<EOF > venv/etc/salt/master.d/eauth.conf
+external_auth: 
+  file:
+    ^filename: $(pwd)/venv/etc/user-list.txt
+    salt:
+      - .*
+      - '@wheel'
+      - '@runner'
+      - '@jobs'
+EOF
+
+echo "salt:linux" > venv/etc/user-list.txt
+```
+
+The last line add the user `salt` (with password `linux`) to the user
+list file.
+
+After launching salt-master, we can start the Salt API service:
+
+```Bash
+salt-api -c venv/etc/salt &
+```
 
 # Pillars in Yomi
 
@@ -68,6 +197,14 @@ affect the installer.
   time information about the installation process.
 
   To disable the events, set this parameter to `no`.
+
+  Note that this option will add three new states for each single Yomi
+  state. One extra state is executed always before the normal state,
+  and is used to signalize that a new state will be executed. If the
+  state is successfully terminated, a second extra state will send an
+  event to signalize that the status of the state is positive. But if
+  the state fails, a third state will send the fail signal. All those
+  extra states will be showed in the final report of Salt.
 
 * `kexec`: Boolean. Optional. Default: `yes`
 
@@ -416,3 +553,8 @@ users:
   - username: aplanas
     password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
 ```
+
+
+# How Yomi works.
+
+TBD
