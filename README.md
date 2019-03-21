@@ -517,7 +517,10 @@ filesystems:
 
 * `device`: String.
 
-  Device name where GRUB2 will be installed.
+  Device name where GRUB2 will be installed. Yomi will take care of
+  detecting if is a BIOS or an UEFI setup, and also if Secure-Boot in
+  activated, to install and configure the bootloader (or the shim
+  loader)
 
 Example:
 
