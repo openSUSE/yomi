@@ -22,7 +22,7 @@ set_pmbr_boot_{{ device }}:
     - enabled: True
   {% endif %}
 
-  {% set size_ns = namespace(end_size=partition_config.get('alignment', 1)) %}
+  {% set size_ns = namespace(end_size=partition_config.get('initial_gap', 1)) %}
   {% for partition in info.get('partitions', []) %}
     # TODO(aplanas) When moving it to Python, the partition number will be
     # deduced, so the require section in mkfs_partition will fail

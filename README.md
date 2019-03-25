@@ -281,11 +281,12 @@ rest of the system.
     `parted` partition recognized by `mklabel`, like `gpt`, `msdos` or
     `bsd`. For UEFI systems, we need to set it to `gpt`.
 
-  * `alignment`: Integer. Optional. Default: `1`
+  * `initial_gap`: Integer. Optional. Default: `1`
 
-    Gap, in MB, leave before the first partition. Usually is 1MB, so
-    GRUB have room to write the code needed after the MBR, and the
-    sectors are aligned for multiple SSD and hard disk devices.
+    Initial gap (empty space), in MB, leave before the first
+    partition. Usually is 1MB, so GRUB have room to write the code
+    needed after the MBR, and the sectors are aligned for multiple SSD
+    and hard disk devices.
 
 * `devices`: Dictionary.
 

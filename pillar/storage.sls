@@ -9,7 +9,7 @@ partitions:
   config:
     label: gpt
     # Units in MB
-    alignment: 1
+    initial_gap: 1
   devices:
     /dev/sda:
       partitions:
