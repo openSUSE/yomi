@@ -316,7 +316,14 @@ rest of the system.
       really optional, when the partitioner can deduce it from other
       parameters. Today is better to be explicit in the partition
       number, as this will guarantee that the partition is found in
-      the hard disk if present.
+      the hard disk if present. If is not set, number will be the
+      current index position in the array.
+
+    * `id`: String. Optional.
+
+      Full name of the partition. For example, valid ids can be
+      `/dev/sda1`, `/dev/md0p1`, etc. Is optional, as the name can be
+      deduced from `number`.
 
     * `size`: Float.
 

@@ -29,11 +29,12 @@ set_pmbr_boot_{{ device }}:
     {% endif %}
     # TODO(aplanas) When moving it to Python, the partition number will be
     # deduced, so the require section in mkfs_partition will fail
-    {% set device = device ~ ('p' if salt.filters.is_raid(device) else '') ~ info.get('number', loop.index) %}
-{{ macros.log('partitioned', 'create_partition_' ~ device) }}
-create_partition_{{ device }}:
+    {% set partition_id = device ~ ('p' if salt.filters.is_raid(device) else '') ~ info.get('number', loop.index) %}
+    {% set partition_id = info.get('id', partition_id) %}
+{{ macros.log('partitioned', 'create_partition_' ~ partition_id) }}
+create_partition_{{ partition_id }}:
   partitioned.mkparted:
-    - name: {{ device }}
+    - name: {{ partition_id }}
     # TODO(aplanas) If msdos we need to create extended and logical
     - part_type: primary
     - fs_type: {{ {'swap': 'linux-swap', 'efi': 'fat16'}.get(partition.type, 'ext2') }}
