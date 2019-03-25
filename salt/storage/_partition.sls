@@ -24,6 +24,9 @@ set_pmbr_boot_{{ device }}:
 
   {% set size_ns = namespace(end_size=partition_config.get('initial_gap', 1)) %}
   {% for partition in info.get('partitions', []) %}
+    {% if partition.type not in ('swap', 'linux', 'boot', 'efi', 'lvm', 'raid') %}
+      {% raise('Partition type {} not recognized'.format(partition.type) %}
+    {% endif %}
     # TODO(aplanas) When moving it to Python, the partition number will be
     # deduced, so the require section in mkfs_partition will fail
     {% set device = device ~ ('p' if salt.filters.is_raid(device) else '') ~ info.get('number', loop.index) %}
@@ -33,14 +36,7 @@ create_partition_{{ device }}:
     - name: {{ device }}
     # TODO(aplanas) If msdos we need to create extended and logical
     - part_type: primary
-    - fs_type: {{ {
-                    'swap': 'linux-swap',
-                    'linux': 'ext2',
-                    'boot': 'ext2',
-                    'efi': 'fat16',
-                    'lvm': 'ext2',
-                    'raid': 'ext2'
-                  }[partition.type] }}
+    - fs_type: {{ {'swap': 'linux-swap', 'efi': 'fat16'}.get(partition.type, 'ext2') }}
     - start: {{ size_ns.end_size }}MB
     - end: {{ size_ns.end_size + partition.size }}MB
     {% if partition.type == 'raid' %}
