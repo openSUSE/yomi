@@ -1,5 +1,4 @@
-#! /bin/bash
-
+# -*- coding: utf-8 -*-
 #
 # Author: Alberto Planas <aplanas@suse.com>
 #
@@ -22,35 +21,28 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Setup the environment so the Python modules living in salt/_* can be
-# found.
+import re
 
-cd "$(dirname "${BASH_SOURCE[0]}")"
 
-test_env=$(mktemp -d -t tmp.XXXX)
-tear_down() {
-    rm -fr "$test_env"
-}
+class ParseException(Exception):
+    pass
 
-trap tear_down EXIT
 
-# Create the temporary Python modules, that once added in the
-# PYTHON_PATH can be found and imported
-touch "$test_env"/__init__.py
-for module in modules states grains utils; do
-    mkdir "$test_env"/"$module"
-    touch "$test_env"/"$module"/__init__.py
-    [ "$(ls -A ../salt/_"$module")" ] && ln -sr ../salt/_"$module"/* "$test_env"/"$module"/
-done
+def units(value, default='MB'):
+    '''
+    Split a value expressed (optionally) with units.
 
-if [ -z $PYTHONPATH ]; then
-    export PYTHONPATH="$test_env":"$test_env"/utils:.
-else
-    export PYTHONPATH="$PATHONPATH":"$test_env":"$test_env"/utils:.
-fi
-
-if [ -z "$*" ]; then
-    python3 -m unittest discover
-else
-    python3 -m unittest "$@"
-fi
+    Returns the tuple (value, unit)
+    '''
+    valid_units = ('s', 'B', 'kB', 'MB', 'MiB', 'GB', 'GiB', 'TB',
+                   'TiB', '%', 'cyl', 'chs', 'compact')
+    match = re.search(r'^([\d.]+)(\D*)$', str(value))
+    if match:
+        value, unit = match.groups()
+        unit = unit if unit else default
+        if unit in valid_units:
+            return (float(value), unit)
+        else:
+            raise ParseException('{} not recognized as a valid '
+                                 'unit'.format(unit))
+    raise ParseException('{} cannot be parsed'.format(value))

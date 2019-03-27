@@ -33,6 +33,9 @@ import re
 
 from salt.exceptions import CommandExecutionError
 
+import disk
+
+
 log = logging.getLogger(__name__)
 
 __virtualname__ = 'partitioned'
@@ -47,10 +50,6 @@ except NameError:
     __grains__ = {}
     __opts__ = {}
     __salt__ = {}
-
-
-class ParseException(Exception):
-    pass
 
 
 class EnumerateException(Exception):
@@ -203,23 +202,6 @@ def _invalidate_cached_partitions():
         delattr(_get_cached_partitions, 'types')
 
 
-def _parse_value_with_units(value, default='MB'):
-    '''
-    Split a value expressed (optionally) with units.
-
-    Returns the tuple (value, unit)
-    '''
-    valid_units = ('s', 'B', 'kB', 'MB', 'MiB', 'GB', 'GiB', 'TB',
-                   'TiB', '%', 'cyl', 'chs', 'compact')
-    match = re.search(r'^([\d.]+)(\D*)$', str(value))
-    if match:
-        value, unit = match.groups()
-        unit = unit if unit else default
-        if unit in valid_units:
-            return (float(value), unit)
-    raise ParseException('{} not recognized as a valid unit'.format(value))
-
-
 OVERLAPPING_ERROR = 0.75
 
 
@@ -258,9 +240,9 @@ def _check_partition(device, number, part_type, start, end):
         return False
 
     for value, name in ((start, 'start'), (end, 'end')):
-        value, unit = _parse_value_with_units(value)
+        value, unit = disk.units(value)
         p_value = _get_cached_partitions(device, unit)[number][name]
-        p_value = _parse_value_with_units(p_value)[0]
+        p_value = disk.units(p_value)[0]
         min_value = value - OVERLAPPING_ERROR
         max_value = value + OVERLAPPING_ERROR
         if not min_value <= p_value <= max_value:
@@ -276,15 +258,15 @@ def _get_first_overlapping_partition(device, start):
     '''
     # Check if there is a partition in the system that start at
     # specified point.
-    value, unit = _parse_value_with_units(start)
+    value, unit = disk.units(start)
     value += OVERLAPPING_ERROR
 
     partitions = _get_cached_partitions(device, unit)
     partition_number = None
     partition_start = 0
     for number, partition in partitions.items():
-        p_start = _parse_value_with_units(partition['start'])[0]
-        p_end = _parse_value_with_units(partition['end'])[0]
+        p_start = disk.units(partition['start'])[0]
+        p_end = disk.units(partition['end'])[0]
         if p_start <= value <= p_end:
             if partition_number is None or partition_start < p_start:
                 partition_number = number
@@ -306,7 +288,7 @@ def _get_partition_number(device, part_type, start, end):
 
     '''
 
-    unit = _parse_value_with_units(start)[1]
+    unit = disk.units(start)[1]
     partitions = _get_cached_partitions(device, unit)
 
     # Check if there is a partition in the system that start or
@@ -411,13 +393,6 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None, flags=None):
         ret['comment'].append('Partition type not recognized')
     if not start or not end:
         ret['comment'].append('Parameters start and end are not optional')
-    try:
-        start_unit = _parse_value_with_units(start)[1]
-        end_unit = _parse_value_with_units(end)[1]
-        if start_unit != end_unit:
-            ret['comment'].append('start and end units are different')
-    except ParseException as e:
-        ret['comment'].append(str(e))
 
     # Normalize fs_type. Some versions of salt contains a bug were
     # only a subset of file systems are valid for mkpart, even if are

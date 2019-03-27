@@ -1,5 +1,4 @@
-#! /bin/bash
-
+# -*- coding: utf-8 -*-
 #
 # Author: Alberto Planas <aplanas@suse.com>
 #
@@ -22,35 +21,16 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Setup the environment so the Python modules living in salt/_* can be
-# found.
+import unittest
 
-cd "$(dirname "${BASH_SOURCE[0]}")"
+from utils import disk
 
-test_env=$(mktemp -d -t tmp.XXXX)
-tear_down() {
-    rm -fr "$test_env"
-}
 
-trap tear_down EXIT
-
-# Create the temporary Python modules, that once added in the
-# PYTHON_PATH can be found and imported
-touch "$test_env"/__init__.py
-for module in modules states grains utils; do
-    mkdir "$test_env"/"$module"
-    touch "$test_env"/"$module"/__init__.py
-    [ "$(ls -A ../salt/_"$module")" ] && ln -sr ../salt/_"$module"/* "$test_env"/"$module"/
-done
-
-if [ -z $PYTHONPATH ]; then
-    export PYTHONPATH="$test_env":"$test_env"/utils:.
-else
-    export PYTHONPATH="$PATHONPATH":"$test_env":"$test_env"/utils:.
-fi
-
-if [ -z "$*" ]; then
-    python3 -m unittest discover
-else
-    python3 -m unittest "$@"
-fi
+class DiskTestCase(unittest.TestCase):
+    def test_units(self):
+        self.assertEqual(disk.units(1), (1, 'MB'))
+        self.assertEqual(disk.units('1'), (1, 'MB'))
+        self.assertEqual(disk.units('1.0'), (1, 'MB'))
+        self.assertEqual(disk.units('1s'), (1, 's'))
+        self.assertEqual(disk.units('1.1s'), (1.1, 's'))
+        self.assertRaises(disk.ParseException, disk.units, 's1')
