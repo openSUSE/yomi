@@ -133,7 +133,7 @@ rest_cherrypy:
 EOF
 
 cat <<EOF > venv/etc/salt/master.d/eauth.conf
-external_auth: 
+external_auth:
   file:
     ^filename: $(pwd)/venv/etc/user-list.txt
     salt:
@@ -279,14 +279,18 @@ rest of the system.
 
     Default label for the partitions of the devices. We use any
     `parted` partition recognized by `mklabel`, like `gpt`, `msdos` or
-    `bsd`. For UEFI systems, we need to set it to `gpt`.
+    `bsd`. For UEFI systems, we need to set it to `gpt`. This value
+    will be used for all the devices if is not overwritten.
 
-  * `initial_gap`: Integer. Optional. Default: `1`
+  * `initial_gap`: Integer. Optional. Default: `0`
 
-    Initial gap (empty space), in MB, leave before the first
-    partition. Usually is 1MB, so GRUB have room to write the code
-    needed after the MBR, and the sectors are aligned for multiple SSD
-    and hard disk devices.
+    Initial gap (empty space) leaved before the first
+    partition. Usually is recommended to be 1MB, so GRUB have room to
+    write the code needed after the MBR, and the sectors are aligned
+    for multiple SSD and hard disk devices. Also is relevant for the
+    sector alignment in devices. The valid units are the same for
+    `parted`. This value will be used for all the devices if is not
+    overwritten.
 
 * `devices`: Dictionary.
 
@@ -303,6 +307,11 @@ rest of the system.
 
     Partition label for the device. The meaning and the possible
     values are identical for `label` in the `config` section.
+
+  * `initial_gap`: Integer. Optional. Default: `0`
+
+    Initial gap (empty space) leave before the first partition for
+    this device.
 
   * `partitions`: Array. Optional.
 
@@ -325,11 +334,17 @@ rest of the system.
       `/dev/sda1`, `/dev/md0p1`, etc. Is optional, as the name can be
       deduced from `number`.
 
-    * `size`: Float.
+    * `size`: Float or String.
 
-      Size of the partition expressed in MB. In future versions this
-      will change, and will be expressed in different absolute and
-      relative units.
+      Size of the partition expressed in `parted` units. All the units
+      needs to match for partitions on the same device. For example,
+      if `initial_gap` or the first partition is expressed in MB, all
+      the sized needs to be expressed in MB too.
+
+      The last partition can use the string `rest` to indicate that
+      this partition will use all the free space available. If after
+      this another partition is defined, Yomi will show a validation
+      error.
 
     * `type`: String.
 
@@ -337,11 +352,11 @@ rest of the system.
       used. Yomi recognize several types:
 
       * `swap`: This partition will be used for SWAP.
-	  * `linux`: Partition used to root, home or any data.
-	  * `boot`: Small partition used for GRUB when in BIOS and `gpt`.
-	  * `efi`: EFI partition used by GRUB when UEFI.
-	  * `lvm`: Partition used to build an LVM physical volume.
-	  * `raid`: Partition that will be a component of an array.
+      * `linux`: Partition used to root, home or any data.
+      * `boot`: Small partition used for GRUB when in BIOS and `gpt`.
+      * `efi`: EFI partition used by GRUB when UEFI.
+      * `lvm`: Partition used to build an LVM physical volume.
+      * `raid`: Partition that will be a component of an array.
 
 Example:
 

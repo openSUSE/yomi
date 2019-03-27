@@ -33,18 +33,21 @@ import logging
 from salt.exceptions import SaltInvocationError
 
 import lp
+import disk
 
 
 LOG = logging.getLogger(__name__)
 
-__virtualname__ = 'pplan'
+__virtualname__ = 'partmod'
 
 
 # Define not exported variables from Salt, so this can be imported as
 # a normal module
 try:
+    __grains__
     __salt__
 except NameError:
+    __grains__ = {}
     __salt__ = {}
 
 
@@ -82,6 +85,13 @@ MIN = 'minimum_recommendation_size'
 MAX = 'maximum_recommendation_size'
 INC = 'decrement_current_partition_size'
 DEC = 'increment_current_partition_size'
+
+# Default values for some partition parameters
+LABEL = 'msdos'
+INITIAL_GAP = 0
+UNITS = 'MB'
+
+VALID_PART_TYPE = ('swap', 'linux', 'boot', 'efi', 'lvm', 'raid')
 
 
 def _penalization(partition=None, section=FREE):
@@ -180,3 +190,130 @@ def plan(name, constraints, unit='MB', export=False):
         __salt__['grains.setvals'](plan)
 
     return plan
+
+
+def prepare_partition_data(partitions):
+    '''Helper function to prepare the patition data from the pillar.'''
+
+    # Validate and normalize the `partitions` pillar. The state will
+    # expect a dictionary with this schema:
+    #
+    # partitions_normalized = {
+    #     '/dev/sda': {
+    #         'label': 'gpt',
+    #         'pmbr_boot': False,
+    #         'partitions': [
+    #             {
+    #                 'part_id': '/dev/sda1',
+    #                 'part_type': 'primary'
+    #                 'fs_type': 'ext2',
+    #                 'flags': ['esp'],
+    #                 'start': '0MB',
+    #                 'end': '100%',
+    #             },
+    #         ],
+    #     },
+    # }
+
+    is_uefi = __grains__['efi']
+
+    # Get the fallback values for label and initial_gap
+    config = partitions.get('config', {})
+    global_label = config.get('label', LABEL)
+    global_initial_gap = config.get('initial_gap', INITIAL_GAP)
+
+    partitions_normalized = {}
+    for device, device_info in partitions['devices'].items():
+        label = device_info.get('label', global_label)
+        initial_gap = device_info.get('initial_gap', global_initial_gap)
+        if initial_gap:
+            initial_gap_num, units = disk.units(initial_gap, default=None)
+        else:
+            initial_gap_num, units = 0, None
+
+        device_normalized = {
+            'label': label,
+            'pmbr_boot': label == 'gpt' and not is_uefi,
+            'partitions': []
+        }
+        partitions_normalized[device] = device_normalized
+
+        # Control the start of the next partition
+        start_size = initial_gap_num
+        # Flag to detect if `rest` size was used before
+        rest = False
+
+        for index, partition in enumerate(device_info.get('partitions', [])):
+            # Detect if there is another partition after we create one
+            # that complete the free space
+            if rest:
+                raise SaltInvocationError(
+                    'Partition defined after one filled all the rest free '
+                    'space. Use `rest` only on the last partition.')
+
+            # Validate the partition type
+            part_type = partition.get('type')
+            if part_type not in VALID_PART_TYPE:
+                raise SaltInvocationError(
+                    'Partition type {} not recognized'.format(part_type))
+
+            # If part_id is not given, we can create a partition name
+            # based on the position of the partition and the name of
+            # the device
+            #
+            # TODO(aplanas) The partition number will be deduced, so
+            # the require section in mkfs_partition will fail
+            part_id = '{}{}{}'.format(
+                device,
+                'p' if __salt__['filters.is_raid'](device) else '',
+                partitions.get('number', index+1))
+            part_id = partition.get('id', part_id)
+
+            # For parted we usually need to set a ext2 filesystem
+            # type, except for SWAP or UEFI
+            fs_type = {
+                'swap': 'linux-swap',
+                'efi': 'fat16'
+            }.get(part_type, 'ext2')
+
+            # Check if we are changing units inside the device
+            if partition['size'] == 'rest':
+                rest = True
+                # If units is not set, we default to '%'
+                units = units or '%'
+                start = '{}{}'.format(start_size, units)
+                end = '100%'
+            else:
+                size, size_units = disk.units(partition['size'])
+                if units and size_units and units != size_units:
+                    raise SaltInvocationError(
+                        'Units needs to be the same for the partitions inside '
+                        'a device. Found {} but expected {}. Note that '
+                        '`initial_gap` is also considered.'.format(size_units,
+                                                                   units))
+                # If units and size_units is not set, we default to UNITS
+                units = units or size_units or UNITS
+                start = '{}{}'.format(start_size, units)
+                end = '{}{}'.format(start_size + size, units)
+                start_size += size
+
+            flags = None
+            if part_type in ('raid', 'lvm'):
+                flags = [part_type]
+            elif part_type == 'boot' and label == 'gpt' and not is_uefi:
+                flags = ['bios_grub']
+            elif part_type == 'efi' and label == 'gpt' and is_uefi:
+                flags = ['esp']
+
+            device_normalized['partitions'].append({
+                'part_id': part_id,
+                # TODO(aplanas) If msdos we need to create extended
+                # and logical
+                'part_type': 'primary',
+                'fs_type': fs_type,
+                'start': start,
+                'end': end,
+                'flags': flags,
+            })
+
+    return partitions_normalized

@@ -8,34 +8,33 @@ config:
 partitions:
   config:
     label: gpt
-    # Units in MB
-    initial_gap: 1
+    initial_gap: 1MB
   devices:
     /dev/sda:
       partitions:
         - number: 1
-          size: 20000
+          size: 20000MB
           type: raid
     /dev/sdb:
       partitions:
         - number: 1
-          size: 20000
+          size: 20000MB
           type: raid
     /dev/sdc:
       partitions:
         - number: 1
-          size: 20000
+          size: 20000MB
           type: raid
     /dev/md0:
       partitions:
         - number: 1
-          size: 500
+          size: 500MB
           type: efi
         - number: 2
-          size: 2000
+          size: 2000MB
           type: swap
         - number: 3
-          size: 15000
+          size: rest #15000MB
           type: linux
 
 raid:
