@@ -1,0 +1,87 @@
+#
+# Storage section for a single device deployment
+#
+
+partitions:
+  config:
+    label: {{ partition }}
+  devices:
+    /dev/sda:
+      initial_gap: 1MB
+      partitions:
+{% set next_partition = 1 %}
+{% if not efi and partition == 'gpt' %}
+        - number: {{ next_partition }}
+          size: 1MB
+          type: boot
+  {% set next_partition = next_partition + 1 %}
+{% endif %}
+{% if efi and partition == 'gpt' %}
+        - number: {{ next_partition }}
+          size: 256MB
+          type: efi
+  {% set next_partition = next_partition + 1 %}
+{% endif %}
+{% if swap %}
+        - number: {{ next_partition }}
+          size: 1024MB
+          type: swap
+  {% set next_partition = next_partition + 1 %}
+{% endif %}
+        - number: {{ next_partition }}
+          size: {{ 'rest' if not home_filesystem else '16384MB' }}
+          type: linux
+{% set next_partition = next_partition + 1 %}
+{% if home_filesystem %}
+        - number: {{ next_partition }}
+          size: rest
+          type: linux
+  {% set next_partition = next_partition + 1 %}
+{% endif %}
+
+filesystems:
+{% set next_partition = 1 %}
+{% if not efi and partition == 'gpt' %}
+  {% set next_partition = next_partition + 1 %}
+{% endif %}
+{% if efi and partition == 'gpt' %}
+  /dev/sda{{ next_partition }}:
+    filesystem: vfat
+    mountpoint: /boot/efi
+  {% set next_partition = next_partition + 1 %}
+{% endif %}
+{% if swap %}
+  /dev/sda{{ next_partition }}:
+    filesystem: swap
+  {% set next_partition = next_partition + 1 %}
+{% endif %}
+  /dev/sda{{ next_partition }}:
+    filesystem: {{ root_filesystem }}
+    mountpoint: /
+{% if root_filesystem == 'btrfs' %}
+    subvolumes:
+      prefix: '@'
+      subvolume:
+  {% if not home_filesystem %}
+        - path: home
+  {% endif %}
+        - path: opt
+        - path: root
+        - path: srv
+        - path: tmp
+        - path: usr/local
+        - path: var
+          copy_on_write: no
+        - path: boot/grub2/i386-pc
+        - path: boot/grub2/x86_64-efi
+{% endif %}
+{% set next_partition = next_partition + 1 %}
+{% if home_filesystem %}
+  /dev/sda{{ next_partition }}:
+    filesystem: {{ home_filesystem }}
+    mountpoint: /home
+  {% set next_partition = next_partition + 1 %}
+{% endif %}
+
+bootloader:
+  device: /dev/sda
