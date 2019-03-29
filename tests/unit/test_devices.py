@@ -66,8 +66,8 @@ class DevicesTestCase(unittest.TestCase):
             'sda': hd, 'sdb': usb, 'sr0': cdrom
         }[d]
 
-        self.assertEqual(devices.filter({'e.id_bus': 'ata'}, {}),
+        self.assertEqual(devices.filter_({'e.id_bus': 'ata'}, {}),
                          ['sda', 'sr0'])
-        self.assertEqual(devices.filter({'e.id_bus': 'usb'}, {}), ['sdb'])
-        self.assertEqual(devices.filter({'e.id_bus': 'ata'},
-                                        {'s': ['cdrom']}), ['sda'])
+        self.assertEqual(devices.filter_({'e.id_bus': 'usb'}, {}), ['sdb'])
+        self.assertEqual(devices.filter_({'e.id_bus': 'ata'},
+                                         {'s': ['cdrom']}), ['sda'])

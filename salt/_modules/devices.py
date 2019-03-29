@@ -35,6 +35,10 @@ LOG = logging.getLogger(__name__)
 
 __virtualname__ = 'devices'
 
+__func_alias__ = {
+    'filter_': 'filter',
+}
+
 # Define not exported variables from Salt, so this can be imported as
 # a normal module
 try:
@@ -87,7 +91,7 @@ def _match(udev_info, match_info):
     return res
 
 
-def filter(udev_in=None, udev_ex=None):
+def filter_(udev_in=None, udev_ex=None):
     '''
     Returns a list of devices, filtered under udev keys.
 
