@@ -364,17 +364,18 @@ Example:
 partitions:
   config:
     label: gpt
+    initial_gap: 1MB
   devices:
     /dev/sda:
       partitions:
         - number: 1
-          size: 512
+          size: 256MB
           type: efi
         - number: 2
-          size: 2048
+          size: 1024MB
           type: swap
         - number: 3
-          size: 20480
+          size: rest
           type: linux
 ```
 
@@ -385,14 +386,25 @@ section) with the `lvm` type set, and in the `lvm` section we describe
 the details. This section is a dictionary, were each key is the name
 of the LVM volume, and inside it we can find:
 
-* `vgs`: Array.
+* `devices`: Array.
 
   List of components (partitions or full devices) that will constitute
-  the physical volumes and the virtual group of the LVM. Note that the
-  name of the virtual group will be the key where this definition is
-  under.
+  the physical volumes and the virtual group of the LVM. If the
+  element of the array is a string, this will be the name of a device
+  (or partition) that belongs to the physical group. If the element is
+  a dictionary it will contains:
 
-* `lvs`: Array.
+  * `name`: String.
+
+    Name of the device or partition.
+
+  The rest of the elements of the dictionary will be passed to the
+  `pvcreate` command.
+
+  Note that the name of the virtual group will be the key where this
+  definition is under.
+
+* `volumes`: Array.
 
   Each element of the array will define:
 
@@ -400,28 +412,33 @@ of the LVM volume, and inside it we can find:
 
     Name of the logical volume under the volume group.
 
-  * `size`: String.
+  The rest of the elements of the dictionary will be passed to the
+  `lvcreate` command. For example, `size` and `extents` are used to
+  indicate the size of the volume, and they can include a suffix to
+  indicate the units. Those units will be the same used for
+  `lvcreate`.
 
-    Size of the logical volume, but can include a prefix to indicate
-    units. Those units are equivalent to the ones that lvcreate can
-    understand.
+The rest of the elements of this section will be passed to the
+`vgcreate` command.
 
 Example:
 
 ```YAML
 lvm:
   system:
-    vgs:
+    devices:
       - /dev/sda1
       - /dev/sdb1
-      - /dev/sdc1
-    lvs:
+      - name: /dev/sdc1
+        dataalignmentoffset: 7s
+    clustered: 'n'
+    volumes:
       - name: swap
-        size: 2048M
+        size: 1024M
       - name: root
-        size: 10240M
+        size: 16384M
       - name: home
-        size: 20480M
+        extents: 100%FREE
 ```
 
 ## `raid` section

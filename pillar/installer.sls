@@ -16,15 +16,15 @@
 # We cannot access to grains['efi'] from the pillar, as this is not
 # yet synchronized
 {% set efi = True %}
-{% set partition = 'msdos' %}
-{% set root_filesystem = 'ext4' %}
+{% set partition = 'gpt' %}
+{% set root_filesystem = 'btrfs' %}
 {% set home_filesystem = False %}
-{% set snapper = False %}
-{% set swap = False %}
-{% set mode = 'single' %}
+{% set snapper = True %}
+{% set swap = True %}
+{% set mode = 'lvm' %}
 
 config:
-  events: yes
+  events: no
   kexec: yes
 {% if snapper and root_filesystem == 'btrfs' %}
   snapper: yes

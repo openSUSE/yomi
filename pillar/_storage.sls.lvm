@@ -39,21 +39,26 @@ partitions:
 
 lvm:
   system:
-    vgs:
+    devices:
       - /dev/sda{{ 2 if efi else 1 }}
       - /dev/sdb1
-      - /dev/sdc1
-    lvs:
+      - name: /dev/sdc1
+        dataalignmentoffset: 7s
+    clustered: 'n'
+    volumes:
 {% if swap %}
       - name: swap
         size: 1024M
 {% endif %}
       - name: root
+{% if home_filesystem %}
         size: 16384M
+{% else %}
+        extents: 100%FREE
+{% endif %}
 {% if home_filesystem %}
       - name: home
-        # TODO(aplanas) use lvcreate extends
-        size: 16384M
+        extents: 100%FREE
 {% endif %}
 
 filesystems:
