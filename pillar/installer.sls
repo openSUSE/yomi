@@ -20,8 +20,8 @@
 {% set root_filesystem = 'btrfs' %}
 {% set home_filesystem = False %}
 {% set snapper = True %}
-{% set swap = True %}
-{% set mode = 'lvm' %}
+{% set swap = False %}
+{% set mode = 'microos' %}
 
 config:
   events: no
@@ -40,8 +40,17 @@ software:
   repositories:
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
   packages:
+{% if mode == 'microos' %}
+    # TODO(aplanas) use pattern names as YaST
+    - patterns-caasp-MicroOS
+    - patterns-caasp-MicroOS-defaults
+    - patterns-caasp-hardware
+    - patterns-caasp-apparmor
+    - patterns-caasp-container-runtime
+{% else %}
     - patterns-base-base
     - kernel-default
+{% endif %}
 
 users:
   - username: root
