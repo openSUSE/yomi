@@ -41,12 +41,11 @@ software:
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
   packages:
 {% if mode == 'microos' %}
-    # TODO(aplanas) use pattern names as YaST
-    - patterns-caasp-MicroOS
-    - patterns-caasp-MicroOS-defaults
-    - patterns-caasp-hardware
-    - patterns-caasp-apparmor
-    - patterns-caasp-container-runtime
+    - pattern:SUSE-MicroOS
+    - pattern:SUSE-MicroOS-defaults
+    - pattern:SUSE-MicroOS-hardware
+    - pattern:SUSE-MicroOS-apparmor
+    - pattern:SUSE-MicroOS-container-runtime
 {% else %}
     - patterns-base-base
     - kernel-default
