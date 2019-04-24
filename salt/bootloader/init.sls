@@ -2,5 +2,5 @@
 
 include:
   - .mkinitrd
-  - .grub2-mkconfig
-  - .grub2-install
+  - .grub2_mkconfig
+  - .grub2_install

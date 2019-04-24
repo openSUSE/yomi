@@ -6,7 +6,7 @@
 {% if config.get('snapper', False) %}
 include:
   {% if config.get('snapper', False) %}
-  - storage.snapper.grub2-mkconfig
+  - storage.snapper.grub2_mkconfig
   {% endif %}
 {% endif %}
 
