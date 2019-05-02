@@ -3,15 +3,13 @@
 {% set filesystems = pillar['filesystems'] %}
 
 {% for device, info in filesystems.items() %}
-  {% if info.filesystem == 'btrfs' and info.get('options') %}
-    {% set fs_file = '/mnt'|path_join(info.mountpoint[1:] if info.mountpoint.startswith('/') else info.mountpoint) %}
-    {% if 'ro' in info['options'] %}
-      {# TODO(aplanas) create an state #}
-{{ macros.log('cmd', 'set_property_ro_' ~ fs_file) }}
-set_property_ro_{{ fs_file }}:
-  cmd.run:
-    - name: btrfs property set -t subvol {{ fs_file }} ro true
-    - onlyif: btrfs property get -t subvol {{ fs_file }} ro | grep -q false
-    {% endif %}
+  {% if info.filesystem == 'btrfs' and 'ro' in info.get('options', []) %}
+{{ macros.log('cmd', 'set_property_ro_' ~ info.mountpoint) }}
+set_property_ro_{{ info.mountpoint }}:
+  btrfs.properties:
+    - name: {{ info.mountpoint }}
+    - device: {{ device }}
+    - use_default: yes
+    - ro: yes
   {% endif %}
 {% endfor %}
