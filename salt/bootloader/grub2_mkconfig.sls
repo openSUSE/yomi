@@ -51,6 +51,15 @@ config_grub2_resume:
       - GRUB_CMDLINE_LINUX_DEFAULT="{{ kernel }}"
       - GRUB_DISABLE_OS_PROBER="{{ true if bootloader.get('disable_os_prober', False) else false }}"
 
+{{ macros.log('cmd', 'grub2_set_default') }}
+grub2_set_default:
+  cmd.run:
+    - name: (source /etc/os-release; grub2-set-default "${PRETTY_NAME}")
+    - root: /mnt
+    - onlyif: "[ -e /mnt/etc/os-release ]"
+    - watch:
+      - file: /mnt/etc/default/grub
+
 {{ macros.log('cmd', 'grub2_mkconfig') }}
 grub2_mkconfig:
   cmd.run:
