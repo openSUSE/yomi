@@ -58,6 +58,7 @@ filesystems:
   /dev/sda{{ next_partition }}:
     filesystem: {{ root_filesystem }}
     mountpoint: /
+    options: [ro]
     subvolumes:
       prefix: '@'
       subvolume:
