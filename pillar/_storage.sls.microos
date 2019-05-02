@@ -76,3 +76,5 @@ filesystems:
 
 bootloader:
   device: /dev/sda
+  kernel: swapaccount=1
+  disable_os_prober: yes
