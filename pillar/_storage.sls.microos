@@ -40,7 +40,7 @@ partitions:
           type: linux
 {% set next_partition = next_partition + 1 %}
         - number: {{ next_partition }}
-          size: 'rest'
+          size: rest
           type: linux
 {% set next_partition = next_partition + 1 %}
 
