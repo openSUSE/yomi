@@ -59,4 +59,5 @@ grub2_mkconfig:
 {% if 'lvm' in pillar %}
     - binds: [/run]
 {% endif %}
-    - creates: /mnt/boot/grub2/grub.cfg
+    - watch:
+      - file: /mnt/etc/default/grub
