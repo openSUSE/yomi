@@ -20,4 +20,5 @@ install_packages:
   pkg.installed:
     - pkgs: {{ software.packages }}
     - no_recommends: yes
+    - includes: [pattern]
     - root: /mnt
