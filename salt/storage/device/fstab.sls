@@ -22,7 +22,7 @@ add_fstab_{{ fs_file }}:
     - name: {{ device }}
     - fs_file: {{ fs_file }}
     - fs_vfstype: {{ info.filesystem }}
-    - fs_mntops: defaults
+    - fs_mntops: {{ ','.join(info.get('options', ['defaults'])) }}
     - fs_freq: 0
     - fs_passno: 0
   {% if not salt.filters.is_lvm(device) %}
