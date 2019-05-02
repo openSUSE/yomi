@@ -41,11 +41,10 @@ software:
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
   packages:
 {% if mode == 'microos' %}
-    - pattern:SUSE-MicroOS
-    - pattern:SUSE-MicroOS-defaults
-    - pattern:SUSE-MicroOS-hardware
-    - pattern:SUSE-MicroOS-apparmor
-    - pattern:SUSE-MicroOS-container-runtime
+    - pattern:microos_base
+    - pattern:microos_defaults
+    - pattern:microos_hardware
+    - pattern:microos_apparmor
 {% else %}
     - patterns-base-base
     - kernel-default
