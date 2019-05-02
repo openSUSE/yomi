@@ -562,6 +562,14 @@ filesystems:
   activated, to install and configure the bootloader (or the shim
   loader)
 
+* `kernel`: String. Optional.
+
+  Line assigned to the `GRUB_CMDLINE_LINUX_DEFAULT` parameter.
+
+* `disable_os_prober`: Boolean. Optional. Default: `False`
+
+  Value for `GRUB_DISABLE_OS_PROBER` parameter.
+
 Example:
 
 ```YAML

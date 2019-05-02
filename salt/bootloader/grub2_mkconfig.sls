@@ -1,6 +1,7 @@
 {% import 'macros.yml' as macros %}
 
 {% set config = pillar['config'] %}
+{% set bootloader = pillar['bootloader'] %}
 {% set is_uefi = grains['efi'] %}
 
 {% if config.get('snapper', False) %}
@@ -30,6 +31,13 @@ config_grub2_theme:
       # - GRUB_THEME="/boot/grub2/themes/openSUSE/theme.txt"
 {% endif %}
 
+{% set kernel = 'splash=silent quiet' %}
+{% if config.get('grub2_console', False) %}
+  {% set kernel = kernel ~ ' console=tty0 console=ttyS0,115200' %}
+{% endif %}
+{% if bootloader.get('kernel', False) %}
+  {% set kernel = kernel ~ ' ' ~ bootloader['kernel'] %}
+{% endif %}
 {{ macros.log('file', 'config_grub2_resume') }}
 config_grub2_resume:
   file.append:
@@ -38,14 +46,10 @@ config_grub2_resume:
       - GRUB_TIMEOUT=8
 {% if 'lvm' not in pillar %}
       - GRUB_DEFAULT="saved"
-      - GRUB_SAVEDEFAULT="true"
+      # - GRUB_SAVEDEFAULT="true"
 {% endif %}
-{% if config.get('grub2_console', False) %}
-      - GRUB_CMDLINE_LINUX_DEFAULT="splash=silent quiet console=tty0 console=ttyS0,115200"
-{% else %}
-      - GRUB_CMDLINE_LINUX_DEFAULT="splash=silent quiet"
-{% endif %}
-      - GRUB_DISABLE_OS_PROBER="false"
+      - GRUB_CMDLINE_LINUX_DEFAULT="{{ kernel }}"
+      - GRUB_DISABLE_OS_PROBER="{{ true if bootloader.get('disable_os_prober', False) else false }}"
 
 {{ macros.log('cmd', 'grub2_mkconfig') }}
 grub2_mkconfig:
