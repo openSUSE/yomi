@@ -1,4 +1,4 @@
 include:
-  - system_software
+  - ._software
   - .bootloader.software
   - .storage.software

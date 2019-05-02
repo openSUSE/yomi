@@ -37,6 +37,8 @@ config:
 {% include "_storage.sls.%s" % mode %}
 
 software:
+  config:
+    minimal: {{ 'yes' if mode == 'microos' else 'no' }}
   repositories:
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
   packages:

@@ -582,6 +582,15 @@ bootloader:
 We can indicate the repositories that will be registered in the new
 installation, and the packages and patterns that will be installed.
 
+* `config`. Dictionary. Optional
+
+  Local configuration for the software section.
+
+  * `minimal`: Boolean. Optional. Default: `no`
+  
+    Configure zypper to make a minimal installation, excluding
+    recommended, documentation and multi-version packages.
+
 * `repositories`. Dictionary.
 
   Each key of the dictionary will be the name under where this
