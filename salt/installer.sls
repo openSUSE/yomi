@@ -5,6 +5,7 @@ include:
   - software
   - users
   - bootloader
+  - services
   - post_install
 {% if config.get('kexec', True) %}
   - kexec
