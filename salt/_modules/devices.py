@@ -159,4 +159,14 @@ def net_name(name):
 
     '''
     full_path = os.path.join('/sys/class/net/', name)
-    return __salt__['udev.info'](full_path)['E']['ID_NET_NAME_SLOT']
+    info_device_e = __salt__['udev.info'](full_path)['E']
+
+    order = ('ID_NET_NAME_FROM_DATABASE',
+             'ID_NET_NAME_ONBOARD',
+             'ID_NET_NAME_SLOT',
+             'ID_NET_NAME_PATH',
+             'ID_NET_NAME_MAC')
+
+    for candidate in order:
+        if candidate in info_device_e:
+            return info_device_e[candidate]
