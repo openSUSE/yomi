@@ -56,6 +56,13 @@ software:
     - kernel-default
 {% endif %}
 
+{% if mode == 'microos' %}
+services:
+  enabled:
+    - crio
+    - kubelet
+{% endif %}
+
 users:
   - username: root
     password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
