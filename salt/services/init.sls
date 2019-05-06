@@ -12,7 +12,7 @@ enable_service_{{ service }}:
     - service.enable:
       - name: {{ service }}
       - root: /mnt
-    - unless: find /mnt/etc/systemd/system -name '{{ service }}*' | grep -q .
+    - unless: systemctl --root=/mnt --quiet is-enabled {{ service }} 2> /dev/null
 {% endfor %}
 
 {% for service in services.get('disabled', []) %}
@@ -22,5 +22,5 @@ disable_service_{{ service }}:
     - service.disable:
       - name: {{ service }}
       - root: /mnt
-    - onlyif: find /mnt/etc/systemd/system -name '{{ service }}*' | grep -q .
+    - onlyif: systemctl --root=/mnt --quiet is-enabled {{ service }} 2> /dev/null
 {% endfor %}
