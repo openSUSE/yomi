@@ -47,6 +47,10 @@ software:
     - pattern:microos_defaults
     - pattern:microos_hardware
     - pattern:microos_apparmor
+    # - pattern:container_runtime
+    # For Kubic
+    - pattern:kubeadm
+    - pattern:container_runtime_kubernetes
 {% else %}
     - patterns-base-base
     - kernel-default
