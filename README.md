@@ -611,6 +611,20 @@ software:
     - kernel-default
 ```
 
+## `services` section
+
+We can list the services that will be enabled or disabled during boot
+time.
+
+* `enabled`. Array. Optional
+
+  List of services that will be enabled and started during the boot.
+
+* `disabled`. Array. Optional
+
+  List of services that will be exclicitly disabled during the boot.
+
+
 ## `users` section
 
 In this section we can list a simple list of users and passwords that
