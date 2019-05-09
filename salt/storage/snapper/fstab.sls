@@ -10,7 +10,7 @@ mount_snapper_fstab:
     - name: /mnt
     - device: {{ device }}
     - fstype: {{ info.filesystem }}
-    - persist: False
+    - persist: no
   {% endif %}
 {% endfor %}
 

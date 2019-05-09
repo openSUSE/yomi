@@ -17,9 +17,9 @@ mount_{{ fs_file }}:
     - name: {{ fs_file }}
     - device: {{ device }}
     - fstype: {{ info.filesystem }}
-    - mkmnt: True
+    - mkmnt: yes
     - opts: {{ fs_mntops }}
-    - persist: False
+    - persist: no
     {% endfor %}
   {% endif %}
 {% endfor %}

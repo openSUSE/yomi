@@ -10,7 +10,7 @@ mount_create_fstab:
     - name: /mnt
     - device: {{ device }}
     - fstype: {{ info.filesystem }}
-    - persist: False
+    - persist: no
 
 {{ macros.log('file', 'create_fstab') }}
 create_fstab:
@@ -19,9 +19,9 @@ create_fstab:
     - user: root
     - group: root
     - mode: 644
-    - makedirs: True
+    - makedirs: yes
     - dir_mode: 755
-    - replace: False
+    - replace: no
     - requires: mount_create_fstab
 
 {{ macros.log('mount', 'umount_create_fstab') }}

@@ -10,7 +10,7 @@ mount_/mnt:
     - name: /mnt
     - device: {{ device }}
     - fstype: {{ info.filesystem }}
-    - persist: False
+    - persist: no
   {% endif %}
 {% endfor %}
 
@@ -23,7 +23,7 @@ mount_{{ fs_file }}:
     - name: {{ fs_file }}
     - device: {{ device }}
     - fstype: {{ info.filesystem }}
-    - mkmnt: True
-    - persist: False
+    - mkmnt: yes
+    - persist: no
   {% endif %}
 {% endfor %}

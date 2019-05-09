@@ -16,7 +16,7 @@ set_pmbr_boot_{{ device }}:
   partitioned.disk_set:
     - name: {{ device }}
     - flag: pmbr_boot
-    - enabled: True
+    - enabled: yes
   {% endif %}
 
   {% for partition in device_info.get('partitions', []) %}

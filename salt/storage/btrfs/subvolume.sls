@@ -12,8 +12,8 @@ subvol_create_{{ device }}_prefix:
   btrfs.subvolume_created:
     - name: '{{ prefix }}'
     - device: {{ device }}
-    - set_default: True
-    - force_set_default: False
+    - set_default: yes
+    - force_set_default: no
     {% endif %}
 
     {% for subvol in info.subvolumes.subvolume %}

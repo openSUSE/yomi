@@ -15,7 +15,7 @@ snapper_step_five_{{ device }}:
     - root: /mnt
     - snapshot_type: single
     - description: 'after installation'
-    - important: True
+    - important: yes
     - cleanup: number
   {% endif %}
 {% endfor %}
