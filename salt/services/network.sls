@@ -1,11 +1,11 @@
 {% import 'macros.yml' as macros %}
 
-{% set net_name = salt.devices.net_name('lan0') %}
+{% set interface = salt.network.interfaces() | select('!=', 'lo') | first %}
 
-{{ macros.log('file', 'create_ifcfg_' ~ net_name) }}
-create_ifcfg_{{ net_name }}:
+{{ macros.log('file', 'create_ifcfg_' ~ interface) }}
+create_ifcfg_{{ interface }}:
   file.append:
-    - name: /mnt/etc/sysconfig/network/ifcfg-{{ net_name }}
+    - name: /mnt/etc/sysconfig/network/ifcfg-{{ interface }}
     - text:
         - BOOTPROTO='dhcp'
         - MTU=''

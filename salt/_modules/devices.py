@@ -29,7 +29,6 @@
 '''
 from __future__ import absolute_import, print_function, unicode_literals
 import logging
-import os.path
 
 
 LOG = logging.getLogger(__name__)
@@ -138,35 +137,3 @@ def filter_(udev_in=None, udev_ex=None):
     }
 
     return sorted(devices_udev_key_in-devices_udev_key_ex)
-
-
-def net_name(name):
-    '''
-    Return the real (udev) name of a network interface.
-
-    name
-        Current name of interface, like eth0 or lan0.
-
-    In JeOS based on KIWI we have a udev rule that map the first
-    interface as 'lan0', but sometimes we need to recover the
-    preficable name of the network device.
-
-    CLI Example:
-
-    .. code-block:: bash
-
-       salt '*' devices.net_name lan0
-
-    '''
-    full_path = os.path.join('/sys/class/net/', name)
-    info_device_e = __salt__['udev.info'](full_path)['E']
-
-    order = ('ID_NET_NAME_FROM_DATABASE',
-             'ID_NET_NAME_ONBOARD',
-             'ID_NET_NAME_SLOT',
-             'ID_NET_NAME_PATH',
-             'ID_NET_NAME_MAC')
-
-    for candidate in order:
-        if candidate in info_device_e:
-            return info_device_e[candidate]
