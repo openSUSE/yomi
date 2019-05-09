@@ -4,6 +4,9 @@
 
 include:
   - .network
+{% if 'salt-minion' in pillar %}
+  - .salt-minion
+{% endif %}
 
 {% for service in services.get('enabled', []) %}
 {{ macros.log('module', 'enable_service_' ~ service) }}

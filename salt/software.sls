@@ -1,4 +1,5 @@
 include:
   - ._software
-  - .bootloader.software
   - .storage.software
+  - .bootloader.software
+  - .services.software

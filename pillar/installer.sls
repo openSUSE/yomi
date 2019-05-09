@@ -56,12 +56,16 @@ software:
     - kernel-default
 {% endif %}
 
-{% if mode == 'microos' %}
+salt-minion:
+  configure: yes
+
 services:
   enabled:
+{% if mode == 'microos' %}
     - crio
     - kubelet
 {% endif %}
+    - salt-minion
 
 users:
   - username: root

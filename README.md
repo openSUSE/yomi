@@ -611,6 +611,25 @@ software:
     - kernel-default
 ```
 
+## `salt-minion` section
+
+Install and configure the salt-minion service.
+
+* `configure`. Boolean. Optional. Default: `no`
+
+  If `yes`, the configuration and cetificates of the new minion will
+  be the same that the current minion that is activated. This will
+  copy the minion configuration, certificates and grains.
+
+  This option will be replaced in the future with more detailed ones.
+
+Example:
+
+```YAML
+salt-minion:
+  configure: yes
+```
+
 ## `services` section
 
 We can list the services that will be enabled or disabled during boot
