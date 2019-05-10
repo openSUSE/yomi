@@ -31,6 +31,7 @@ add_fstab_{{ fs_file }}:
     {% if not salt.filters.is_lvm(device) %}
     - mount_by: uuid
     {% endif %}
+    - not_change: yes
     - config: /mnt/etc/fstab
     - require:
       - mount: mount_snapper_fstab

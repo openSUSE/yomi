@@ -33,9 +33,8 @@ add_fstab_{{ fs_file }}:
     - fs_mntops: {{ fs_mntops }}
     - fs_freq: 0
     - fs_passno: 0
-  {% if not salt.filters.is_lvm(device) %}
     - mount_by: uuid
-  {% endif %}
+    - not_change: yes
     - config: /mnt/etc/fstab
     - require:
       - mount: mount_btrfs_fstab
