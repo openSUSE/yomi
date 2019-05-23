@@ -1,7 +1,8 @@
 {% import 'macros.yml' as macros %}
 
-{% set interface = salt.network.interfaces() | select('!=', 'lo') | first %}
+{% set interfaces = salt.network.interfaces() | select('!=', 'lo') %}
 
+{% for interface in interfaces %}
 {{ macros.log('file', 'create_ifcfg_' ~ interface) }}
 create_ifcfg_{{ interface }}:
   file.append:
@@ -11,3 +12,4 @@ create_ifcfg_{{ interface }}:
         - MTU=''
         - REMOTE_IPADDR=''
         - STARTMODE='onboot'
+{% endfor %}
