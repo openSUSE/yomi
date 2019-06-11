@@ -4,6 +4,7 @@ include:
 {% if config.get('snapper', False) %}
   - .snapper.post_install
 {% endif %}
+  - .mark
   - .btrfs.post_install
 {% if not config.get('kexec', True) %}
   - .umount
