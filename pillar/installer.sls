@@ -33,6 +33,10 @@ config:
 {% if efi %}
   grub2_console: yes
 {% endif %}
+  locale: en_US.UTF-8
+  keymap: jp
+  timezone: UTC
+  hostname: node
 
 {% include "_storage.sls.%s" % mode %}
 
