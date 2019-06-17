@@ -9,7 +9,13 @@ create_ifcfg_{{ interface }}:
     - name: /mnt/etc/sysconfig/network/ifcfg-{{ interface }}
     - text:
         - BOOTPROTO='dhcp'
+        - BROADCAST=''
+        - ETHTOOL_OPTIONS=''
+        - IPADDR=''
         - MTU=''
+        - NAME=''
+        - NETMASK=''
+        - NETWORK=''
         - REMOTE_IPADDR=''
-        - STARTMODE='onboot'
+        - STARTMODE='auto'
 {% endfor %}
