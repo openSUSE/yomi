@@ -153,7 +153,7 @@ is not always the same.
 <!-- Now, in the `master` node all that needs to be done is -->
 
 <!-- ```bash -->
-<!-- kubicctl init --pod-network flannel -->
+<!-- kubicctl init --pod-network flannel --adv-addr 10.0.3.101 -->
 <!-- ``` -->
 
 <!-- As `flannel` is the default network pod configuration, we can omit -->
