@@ -381,7 +381,7 @@ MicroOS (the next MicroOS version will fix that), so for this example
 we need to add a new place where pillars are living: 
 
 ```bash
-cp /usr/share/yomi/pillar.com /etc/salt/master.d/
+cp /usr/share/yomi/pillar.conf /etc/salt/master.d/
 systemctl restart salt-master.service
 ```
 
@@ -397,5 +397,59 @@ Once the node is back, we can proceed as usual:
 
 ```bash
 kubicctl node add 00:00:00:33:33:33
+kubectl get nodes
 ```
 
+## Advanced configuration
+
+### Autosign via UUID
+
+The JeOS image that contains `salt-minion` have already some grains
+that publish some UUIDs from a restricted list. We can use this
+information from the `salt-master` to recognize nodes that are ready
+to be installed, and avoid the acceptance of the key in the master.
+
+You can enable this feature copying the configuration snipped that
+comes from the `yomi-formula` package and restarting the server:
+
+```bash
+cp /usr/share/yomi/autosign.conf /etc/salt/master.d/
+systemctl restart salt-master.service
+```
+
+Now we can skip the `salt-key -A` for nodes booted from JeOS.
+
+### Salt-API and monitoring the installation
+
+We can use the `monitor` CLI tool to inspect the installation of the
+nodes. This tool analyze the event stream, and this require the
+configuration of `salt-api`:
+
+```bash
+cp /usr/share/yomi/salt-api.conf /etc/salt/master.d/
+systemctl restart salt-master.service
+```
+
+Use this configuration as an example to understand Yomi's features, as
+is not using SSL, and the default user and password is located in
+`/usr/share/yomi/user-list.txt` in plain text.
+
+Change in the pillars the `config` section, so you have this:
+
+```yaml
+config:
+  events: yes
+```
+
+Now for each state in Yomi, a two events will be launched. One will
+indicate the moment that the state is starting to run, and other will
+signalize the success or fail of the event. We can monitor them with:
+
+```bash
+export SALTAPI_URL=http://localhost:8000
+export SALTAPI_EAUTH=file
+export SALTAPI_USER=salt
+export SALTAPI_PASS=linux
+
+srv/monitor -r -y
+```
