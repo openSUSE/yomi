@@ -23,7 +23,7 @@ create_ifcfg_{{ interface }}:
 {{ macros.log('file', 'dhcp_hostname') }}
 dhcp_hostname:
   file.append:
-    - name: /mnt/etc/sysconfig/dhcp
+    - name: /mnt/etc/sysconfig/network/dhcp
     - text:
         - DHCLIENT_SET_HOSTNAME="yes"
         - WRITE_HOSTNAME_TO_HOSTS="no"
