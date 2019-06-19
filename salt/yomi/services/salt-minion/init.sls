@@ -3,7 +3,7 @@
 {% set salt_minion = pillar.get('salt-minion', {}) %}
 
 {% if salt_minion.get('configure', False) %}
-{{ macros.log('file', 'create_salt-minion') }}
+{{ macros.log('module', 'create_salt-minion') }}
 create_salt-minion:
   module.run:
     - file.copy:
