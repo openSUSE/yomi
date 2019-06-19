@@ -1,7 +1,7 @@
 {% import 'macros.yml' as macros %}
 
 {% set users = pillar['users'] %}
-{% set public_ip = grains['ip4_interfaces']['ens4'][0] %}
+{% set public_ip = grains['ip4_interfaces']['ens3'][0] %}
 
 {{ macros.log('module', 'install_kubic') }}
 install_kubic:
