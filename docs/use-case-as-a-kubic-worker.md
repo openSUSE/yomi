@@ -328,7 +328,6 @@ you can `wget` it, but if you have `osc` installed you can also
 download it directly:
 
 ```bash
-rm openSUSE-Tumbleweed-JeOS*.iso
 osc getbinaries home:aplanas:Images openSUSE-Tumbleweed-JeOS:Live images x86_64
 mv binaries/*.iso .
 rm -fr binaries
