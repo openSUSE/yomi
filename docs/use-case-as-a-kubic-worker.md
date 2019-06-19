@@ -450,5 +450,5 @@ export SALTAPI_EAUTH=file
 export SALTAPI_USER=salt
 export SALTAPI_PASS=linux
 
-srv/monitor -r -y
+monitor -r -y
 ```
