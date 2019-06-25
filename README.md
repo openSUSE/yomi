@@ -190,16 +190,16 @@ install into a node. This mapping is done via the `top.sls` file:
 ```YAML
 base:
   'C7:7E:55:62:83:17':
-    - controller
+    - installer
 ```
 
-In `controller.sls` we will describe in detail the installation
+In `installer.sls` we will describe in detail the installation
 parameters that will be applied to the node which minion-id match with
 `C7:7E:55:62:83:17`. Note that in this example we are using the MAC
 address of the first interface as a minion-id (check the section
 **Enabling Autosign** for an example).
 
-The `controller.sls` pillar consist on several sections, that we can
+The `installer.sls` pillar consist on several sections, that we can
 describe here.
 
 ## `config` section
