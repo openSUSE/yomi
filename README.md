@@ -250,7 +250,7 @@ affect the installer.
   Linux command line during the boot. This option is help full when
   the we want to have serial access to console to the new machine.
 
-* `locale`: String. Optional. Default : `en_US.utf8`
+* `locale`: String. Optional. Default: `en_US.utf8`
 
   Sets the system locale, more specifically the LANG= and LC\_MESSAGES
   settings. The argument should be a valid locale identifier, such as
@@ -262,13 +262,13 @@ affect the installer.
   settings. The argument should be a valid locale identifier, such as
   `de_DE.UTF-8`. This controls the locale.conf configuration file.
   
-* `keymap`: String. Optional. Default : `us`
+* `keymap`: String. Optional. Default: `us`
 
   Sets the system keyboard layout. The argument should be a valid
   keyboard map, such as `de-latin1`. This controls the "KEYMAP" entry
   in the vconsole.conf configuration file.
 
-* `timezone`: String. Optional. Default : `UTC`
+* `timezone`: String. Optional. Default: `UTC`
 
   Sets the system time zone. The argument should be a valid time zone
   identifier, such as "Europe/Berlin". This controls the localtime
@@ -282,6 +282,10 @@ affect the installer.
 * `machine_id`: String. Optional.
 
   Sets the system's machine ID. This controls the machine-id file.
+
+* `target`: String. Optional. Default: `multi-user.target`
+
+  Set the default target used for the boot process.
 
 Example:
 
@@ -299,6 +303,8 @@ config:
   keymap: jp
   # Universal Timezone
   timezone: UTC
+  # Boot in graphical mode
+  target: graphical.target
 ```
 
 ## `partitions` section
