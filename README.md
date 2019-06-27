@@ -33,6 +33,25 @@ To simplify the test and development of Yomi, I also provide a JeOS
 [image](https://build.opensuse.org/package/show/home:aplanas:Images/test-image-iso)
 that includes this patched package. You can use this ISO to boot the node.
 
+## Image boot parameters
+
+With this image we can set the minion ID of the salt-minion and the
+master address where the minion will connect, via boot parameters.
+
+By default the minion will try to connect to a master that have the
+name `master`. We can change it via the boot parameter `master`. For
+example `master=10.0.2.2` will make the minion to search the master in
+the address `10.0.2.2`.
+
+The rules for the minion ID are a bit more complicated. Salt, by
+default, set the minion ID equal to the IP of the node is none is
+specified. This cannot be a good idea if the IP changes, so the
+current rules are:
+
+- The value from `minion_id` boot parameter.
+- The hostname of the system, if is different from localhost.
+- The MAC address of the first interface of the system.
+
 ## Installing salt-master
 
 You can read the [official
