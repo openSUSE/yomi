@@ -35,7 +35,7 @@ config:
   grub2_console: yes
 {% endif %}
   locale: en_US.UTF-8
-  keymap: jp
+  keymap: us
   timezone: UTC
   hostname: node
 
