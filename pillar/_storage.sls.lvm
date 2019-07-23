@@ -8,7 +8,7 @@ partitions:
     # Same gap for all devices
     initial_gap: 1MB
   devices:
-    /dev/sda:
+    /dev/{{ device_type }}a:
       partitions:
 {% set next_partition = 1 %}
 {% if not efi and partition == 'gpt' %}
@@ -26,12 +26,12 @@ partitions:
         - number: {{ next_partition }}
           size: rest
           type: lvm
-    /dev/sdb:
+    /dev/{{ device_type }}b:
       partitions:
         - number: 1
           size: rest
           type: lvm
-    /dev/sdc:
+    /dev/{{ device_type }}c:
       partitions:
         - number: 1
           size: rest
@@ -40,9 +40,9 @@ partitions:
 lvm:
   system:
     devices:
-      - /dev/sda{{ 2 if efi else 1 }}
-      - /dev/sdb1
-      - name: /dev/sdc1
+      - /dev/{{ device_type }}a{{ 2 if efi else 1 }}
+      - /dev/{{ device_type }}b1
+      - name: /dev/{{ device_type }}c1
         dataalignmentoffset: 7s
     clustered: 'n'
     volumes:
@@ -67,7 +67,7 @@ filesystems:
   {% set next_partition = next_partition + 1 %}
 {% endif %}
 {% if efi and partition == 'gpt' %}
-  /dev/sda{{ next_partition }}:
+  /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: vfat
     mountpoint: /boot/efi
   {% set next_partition = next_partition + 1 %}
@@ -101,4 +101,4 @@ filesystems:
 {% endif %}
 
 bootloader:
-  device: /dev/sda
+  device: /dev/{{ device_type }}a

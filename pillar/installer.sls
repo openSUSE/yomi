@@ -5,6 +5,7 @@
 #
 #   * efi = {True, False}
 #   * partition = {'msdos', 'gpt'}
+#   * device_type = {'sd', 'hd', 'vd'}
 #   * root_filesystem = {'ext{2, 3, 4}', 'btrfs'}
 #   * home_filesystem = {'ext{2, 3, 4}', 'xfs', False}
 #   * snapper = {True, False}
@@ -12,12 +13,15 @@
 #   * mode = {'single', 'lvm', 'raid{0, 1, 4, 5, 6, 10}', 'microos',
 #             'kubic'}
 #
-# This meta-pillar can be used as a template for new installers.
+# This meta-pillar can be used as a template for new installers. This
+# template is expected to be adapted for production systems, as was
+# designed for CI / QA and development.
 
 # We cannot access to grains['efi'] from the pillar, as this is not
 # yet synchronized
 {% set efi = True %}
 {% set partition = 'gpt' %}
+{% set device_type = 'sd' %}
 {% set root_filesystem = 'btrfs' %}
 {% set home_filesystem = False %}
 {% set snapper = True %}

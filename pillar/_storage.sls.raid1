@@ -8,17 +8,17 @@ partitions:
     # Same gap for all devices
     initial_gap: 1MB
   devices:
-    /dev/sda:
+    /dev/{{ device_type }}a:
       partitions:
         - number: 1
           size: rest
           type: raid
-    /dev/sdb:
+    /dev/{{ device_type }}b:
       partitions:
         - number: 1
           size: rest
           type: raid
-    /dev/sdc:
+    /dev/{{ device_type }}c:
       partitions:
         - number: 1
           size: rest
@@ -59,9 +59,9 @@ raid:
   /dev/md0:
     level: 1
     devices:
-      - /dev/sda1
-      - /dev/sdb1
-      - /dev/sdc1
+      - /dev/{{ device_type }}a1
+      - /dev/{{ device_type }}b1
+      - /dev/{{ device_type }}c1
     spare-devices: 1
     metadata: 1.0
 

@@ -19,7 +19,7 @@ partitions:
   config:
     label: {{ partition }}
   devices:
-    /dev/sda:
+    /dev/{{ device_type }}a:
       initial_gap: 1MB
       partitions:
 {% set next_partition = 1 %}
@@ -50,12 +50,12 @@ filesystems:
   {% set next_partition = next_partition + 1 %}
 {% endif %}
 {% if efi and partition == 'gpt' %}
-  /dev/sda{{ next_partition }}:
+  /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: vfat
     mountpoint: /boot/efi
   {% set next_partition = next_partition + 1 %}
 {% endif %}
-  /dev/sda{{ next_partition }}:
+  /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: {{ root_filesystem }}
     mountpoint: /
     options: [ro]
@@ -69,12 +69,12 @@ filesystems:
         - path: boot/grub2/i386-pc
         - path: boot/grub2/x86_64-efi
 {% set next_partition = next_partition + 1 %}
-  /dev/sda{{ next_partition }}:
+  /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: {{ root_filesystem }}
     mountpoint: /var
 {% set next_partition = next_partition + 1 %}
 
 bootloader:
-  device: /dev/sda
+  device: /dev/{{ device_type }}a
   kernel: swapaccount=1
   disable_os_prober: yes

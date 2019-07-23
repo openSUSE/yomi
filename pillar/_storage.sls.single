@@ -6,7 +6,7 @@ partitions:
   config:
     label: {{ partition }}
   devices:
-    /dev/sda:
+    /dev/{{ device_type }}a:
       initial_gap: 1MB
       partitions:
 {% set next_partition = 1 %}
@@ -45,17 +45,17 @@ filesystems:
   {% set next_partition = next_partition + 1 %}
 {% endif %}
 {% if efi and partition == 'gpt' %}
-  /dev/sda{{ next_partition }}:
+  /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: vfat
     mountpoint: /boot/efi
   {% set next_partition = next_partition + 1 %}
 {% endif %}
 {% if swap %}
-  /dev/sda{{ next_partition }}:
+  /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: swap
   {% set next_partition = next_partition + 1 %}
 {% endif %}
-  /dev/sda{{ next_partition }}:
+  /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: {{ root_filesystem }}
     mountpoint: /
 {% if root_filesystem == 'btrfs' %}
@@ -77,11 +77,11 @@ filesystems:
 {% endif %}
 {% set next_partition = next_partition + 1 %}
 {% if home_filesystem %}
-  /dev/sda{{ next_partition }}:
+  /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: {{ home_filesystem }}
     mountpoint: /home
   {% set next_partition = next_partition + 1 %}
 {% endif %}
 
 bootloader:
-  device: /dev/sda
+  device: /dev/{{ device_type }}a
