@@ -9,7 +9,8 @@
 #   * home_filesystem = {'ext{2, 3, 4}', 'xfs', False}
 #   * snapper = {True, False}
 #   * swap = {True, False}
-#   * mode = {'single', 'lvm', 'raid{0, 1, 4, 5, 6, 10}'}
+#   * mode = {'single', 'lvm', 'raid{0, 1, 4, 5, 6, 10}', 'microos',
+#             'kubic'}
 #
 # This meta-pillar can be used as a template for new installers.
 
@@ -21,7 +22,7 @@
 {% set home_filesystem = False %}
 {% set snapper = True %}
 {% set swap = False %}
-{% set mode = 'microos' %}
+{% set mode = 'kubic' %}
 
 config:
   events: no
@@ -42,7 +43,7 @@ config:
 
 software:
   config:
-    minimal: {{ 'yes' if mode == 'microos' else 'no' }}
+    minimal: {{ 'yes' if mode in ('microos', 'kubic') else 'no' }}
   repositories:
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
   packages:
@@ -51,10 +52,12 @@ software:
     - pattern:microos_defaults
     - pattern:microos_hardware
     - pattern:microos_apparmor
-    # - pattern:container_runtime
-    # For Kubic
-    - pattern:kubeadm
-    - pattern:container_runtime_kubernetes
+{% elif mode == 'kubic' %}
+    - pattern:microos_base
+    - pattern:microos_defaults
+    - pattern:microos_hardware
+    - pattern:microos_apparmor
+    - pattern:kubic_worker
 {% else %}
     - patterns-base-base
     - kernel-default
@@ -65,7 +68,7 @@ salt-minion:
 
 services:
   enabled:
-{% if mode == 'microos' %}
+{% if mode in ('microos', 'kubic') %}
     - crio
     - kubelet
 {% endif %}
