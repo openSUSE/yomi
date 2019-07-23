@@ -76,6 +76,5 @@ services:
 
 users:
   - username: root
-    password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
-  - username: aplanas
+    # Set the password as 'linux'. Do not do that in production
     password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
