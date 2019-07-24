@@ -280,7 +280,7 @@ affect the installer.
   Sets the system locale, more specifically the LANG= and LC\_MESSAGES
   settings. The argument should be a valid locale identifier, such as
   `de_DE.UTF-8`. This controls the locale.conf configuration file.
-  
+
 * `keymap`: String. Optional. Default: `us`
 
   Sets the system keyboard layout. The argument should be a valid
@@ -651,7 +651,7 @@ installation, and the packages and patterns that will be installed.
   Local configuration for the software section.
 
   * `minimal`: Boolean. Optional. Default: `no`
-  
+
     Configure zypper to make a minimal installation, excluding
     recommended, documentation and multi-version packages.
 
@@ -707,6 +707,13 @@ time.
 
   List of services that will be exclicitly disabled during the boot.
 
+Example:
+
+```YAML
+services:
+  enabled:
+    - salt-minion
+```
 
 ## `users` section
 
@@ -717,9 +724,15 @@ we expect to find once the system is booted.
 
   Login or username for the user.
 
-* `password`. String.
+* `password`. String. Optional.
 
   Shadow password hash for the user.
+
+* `certificates`. Array. Optional.
+
+  Certificates that will be added to .ssh/authorized_keys. Use only
+  the encoded key (remove the "ssh-rsa" prefix and the "user@host"
+  suffix).
 
 Example:
 
@@ -728,10 +741,12 @@ users:
   - username: root
     password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
   - username: aplanas
-    password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
+    certificates:
+      - "AAAAB3NzaC1yc2EAAAADAQABAAABAQDdP6oez825gnOLVZu70KqJXpqL4fGf\
+        aFNk87GSk3xLRjixGtr013+hcN03ZRKU0/2S7J0T/dICc2dhG9xAqa/A31Qac\
+        hQeg2RhPxM2SL+wgzx0geDmf6XDhhe8reos5jgzw6Pq59gyWfurlZaMEZAoOY\
+        kfNb5OG4vQQN8Z7hldx+DBANPbylApurVz6h5vvRrkPfuRVN5ZxOkI+LeWhpo\
+        vX5XK3eTjetAwWEro6AAXpGoQQQDjSOoYHCUmXzcZkmIWEubCZvAI4RZ+XCZs\
+        +wTeO2RIRsunqP8J+XW4cZ28RZBc9K4I1BV8C6wBxN328LRQcilzw+Me+Lfre\
+        eDPglqx"
 ```
-
-
-# How Yomi works
-
-TBD
