@@ -11,5 +11,5 @@ create_salt-minion:
       - dst: /mnt/etc/salt
       - recurse: yes
       - remove_existing: yes
-    - unless: [ -e /mnt/etc/salt/pki/minion/minion.pem ]
+    - unless: "[ -e /mnt/etc/salt/pki/minion/minion.pem ]"
 {% endif %}
