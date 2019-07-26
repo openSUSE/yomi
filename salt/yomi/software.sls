@@ -3,3 +3,4 @@ include:
   - .storage.software
   - .bootloader.software
   - .services.software
+  - .chroot.software
