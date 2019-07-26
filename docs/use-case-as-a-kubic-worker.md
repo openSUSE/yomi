@@ -188,6 +188,17 @@ Once `/srv/pillar` is writable in MicroOS, the best solution will be
 copying the pillar content from `yomi-formula` to `/srv/pillar`
 directly, and forget about the `pillar.conf` overlay.
 
+The `yomi-formula` package do not include an example `top.sls`, but we
+can create one easily for this example.
+
+```bash
+cat <<EOF > /srv/salt/top.sls
+base:
+  '*':
+    - yomi.installer
+EOF
+```
+
 Finally, to install MicroOS into the new worker, we need to apply the
 high-state into the node:
 
