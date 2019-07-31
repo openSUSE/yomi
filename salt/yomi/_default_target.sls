@@ -6,6 +6,6 @@
 {{ macros.log('cmd', 'systemd_set_target') }}
 systemd_set_target:
   cmd.run:
-    - name: systemctl set-target {{ target }}
+    - name: systemctl set-default {{ target }}
     - unless: readlink -f /mnt/etc/systemd/system/default.target | grep -q {{ target }}
     - root: /mnt
