@@ -199,6 +199,15 @@ base:
 EOF
 ```
 
+Check also that for the pillar we also have a `top.sls`. The one that
+we have in the package as an example is:
+
+```yaml
+base:
+  '*':
+    - installer
+```
+
 Finally, to install MicroOS into the new worker, we need to apply the
 high-state into the node:
 
