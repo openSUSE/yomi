@@ -451,6 +451,12 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None, flags=None):
         res = __salt__['partition.mkpart'](device, part_type, fs_type,
                                            start, end)
         ret['changes']['output'] = res
+
+        # Wipe the filesystem information from the partition to remove
+        # old data that was on the disk.  As a side effect, this will
+        # force the mkfs state to happend.
+        __salt__['disk.wipe']('{}{}'.format(device, number))
+
         _invalidate_cached_info()
         _invalidate_cached_partitions()
 
