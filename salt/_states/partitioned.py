@@ -342,6 +342,13 @@ def _get_partition_flags(device, number):
     '''
     Return the current list of flags for a partition.
     '''
+
+    def _is_valid(flag):
+        '''Return True if is a valid flag'''
+        if flag == 'swap' or flag.startswith('type='):
+            return False
+        return True
+
     result = []
     number = str(number)
     partitions = __salt__['partition.list'](device)['partitions']
@@ -350,8 +357,7 @@ def _get_partition_flags(device, number):
         # situations, so we need to remove values that do not
         # represent flags
         flags = partitions[number]['flags'].split(', ')
-        not_valid = ['swap']
-        result = [flag for flag in flags if flag and flag not in not_valid]
+        result = [flag for flag in flags if flag and _is_valid(flag)]
     return result
 
 
