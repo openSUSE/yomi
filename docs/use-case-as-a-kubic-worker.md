@@ -208,6 +208,28 @@ base:
     - installer
 ```
 
+### Cleaning the disk
+
+Yomi try to be careful with the current data stored in the disks. By
+default will not remove any partition, nor will make an implicit
+decision about the device where the installation will run.
+
+If we want to remove the data from the device, we can use the provided
+`devices.wipe` execution module.
+
+```bash
+# List the partitions
+salt worker2 partition.list /dev/sda
+
+# Make sure that the new modules are in the minion
+salt worker2 saltutil.sync_all
+
+# Remove all the partitions and the filesystem information
+salt worker2 devides.wipe /dev/sda
+```
+
+### Launching Yomi
+
 Finally, to install MicroOS into the new worker, we need to apply the
 high-state into the node:
 

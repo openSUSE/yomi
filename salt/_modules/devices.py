@@ -137,3 +137,28 @@ def filter_(udev_in=None, udev_ex=None):
     }
 
     return sorted(devices_udev_key_in-devices_udev_key_ex)
+
+
+def wipe(device):
+    '''
+    Remove all the partitions in the device.
+
+    device
+        Device name, for example /dev/sda
+
+    Remove all the partitions, labels and flags from the device.
+
+    CLI Example:
+
+    .. code-block:: bash
+
+       salt '*' devices.wipeout /dev/sda
+
+    '''
+
+    partitions = __salt__['partition.list'](device).get('partitions', [])
+    for partition in partitions:
+        # Remove filesystem information the the partition
+        __salt__['disk.wipe']('{}{}'.format(device, partition))
+        __salt__['partition.rm'](device, partition)
+    return True
