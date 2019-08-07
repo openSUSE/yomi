@@ -72,7 +72,7 @@ salt-minion:
 
 services:
   enabled:
-{% if mode in ('microos', 'kubic') %}
+{% if mode == 'kubic' %}
     - crio
     - kubelet
 {% endif %}
