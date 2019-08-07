@@ -62,10 +62,13 @@ filesystems:
     subvolumes:
       prefix: '@'
       subvolume:
-        - path: home
-        - path: opt
         - path: root
         - path: tmp
+        - path: home
+        - path: opt
+        - path: srv
+        - path: boot/writable
+        - path: usr/local
         - path: boot/grub2/i386-pc
         - path: boot/grub2/x86_64-efi
 {% set next_partition = next_partition + 1 %}
