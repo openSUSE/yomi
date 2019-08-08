@@ -245,11 +245,17 @@ affect the installer.
   the state fails, a third state will send the fail signal. All those
   extra states will be showed in the final report of Salt.
 
-* `kexec`: Boolean. Optional. Default: `yes`
+* `reboot`: String. Optional. Default: `yes`
 
-  Instead of rebooting, reload the new kernel installed in the
-  node. If the value is `no` there will be no reboot. This behavior is
-  planned to change.
+  Control the way that the node will reboot. There are three possible
+  values:
+
+  * `yes`: Will produce a full reboot cycle.
+
+  * `no`: Will no reboot after the installation.
+
+  * `kexec`: Instead of rebooting, reload the new kernel installed in
+    the node.
 
 * `snapper`: Boolean. Optional. Default: `no`
 
@@ -313,7 +319,7 @@ config:
   # Do not send events, useful for debugging
   events: no
   # Do not reboot after installation
-  kexec: no
+  reboot: no
   # Always install snapper if possible
   snapper: yes
   # Set language to English / US

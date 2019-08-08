@@ -6,6 +6,6 @@ include:
 {% endif %}
   - .mark
   - .btrfs.post_install
-{% if not config.get('kexec', True) %}
+{% if not config.get('reboot', True) %}
   - .umount
 {% endif %}

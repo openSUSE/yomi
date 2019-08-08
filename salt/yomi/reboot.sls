@@ -1,5 +1,9 @@
 {% import 'macros.yml' as macros %}
 
+{% set config = pillar['config'] %}
+{% set reboot = config.get('reboot', True) %}
+
+{% if reboot == 'kexec' %}
 {{ macros.log('cmd', 'grub_command_line') }}
 grub_command_line:
   cmd.run:
@@ -16,3 +20,10 @@ prepare_kexec:
 execute_kexec:
   cmd.run:
     - name: systemctl kexec
+
+{% elif reboot %}
+{{ macros.log('module', 'reboot') }}
+reboot:
+  module.run:
+    - system.reboot:
+{% endif %}

@@ -26,11 +26,11 @@
 {% set home_filesystem = False %}
 {% set snapper = True %}
 {% set swap = False %}
-{% set mode = 'kubic' %}
+{% set mode = 'microos' %}
 
 config:
   events: no
-  kexec: yes
+  reboot: yes
 {% if snapper and root_filesystem == 'btrfs' %}
   snapper: yes
 {% endif %}
