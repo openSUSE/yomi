@@ -167,3 +167,97 @@ def wipe(device):
     __salt__['cmd.run']('dd bs=512 count=1 if=/dev/zero of={}'.format(device))
 
     return True
+
+
+def _hwinfo_efi():
+    '''Return information about EFI'''
+    return {
+        'efi': __grains__['efi'],
+        'efi-secure-boot': __grains__['efi-secure-boot'],
+    }
+
+
+def _hwinfo_memory():
+    '''Return information about the memory'''
+    return {
+        'mem_total': __grains__['mem_total'],
+    }
+
+
+def _hwinfo_network(short):
+    '''Return network information'''
+    info = {
+        'fqdn': __grains__['fqdn'],
+        'ip_interfaces':  __grains__['ip_interfaces'],
+    }
+
+    if not short:
+        info['dns'] = __grains__['dns']
+
+    return info
+
+
+def hwinfo(items=None, short=True, listmd=False, devices=None):
+    '''
+    Probe for hardware
+
+    items
+        List of hardware items to inspect. Default ['bios', 'cpu', 'disk',
+        'memory', 'network', 'partition']
+
+    short
+        Show only a summary. Default True.
+
+    listmd
+        Report RAID devices. Default False.
+
+    devices
+        List of devices to show information from. Default None.
+
+    CLI Example:
+
+    .. code-block:: bash
+
+       salt '*' devices.hwinfo
+       salt '*' devices.hwinfo items='["disk"]' short=no
+       salt '*' devices.hwinfo items='["disk"]' short=no devices='["/dev/sda"]'
+       salt '*' devices.hwinfo devices=/dev/sda
+
+    '''
+    result = {}
+
+    if not items:
+        items = ['bios', 'cpu', 'disk', 'memory', 'network', 'partition']
+    if not isinstance(items, (list, tuple)):
+        items = [items]
+
+    if not devices:
+        devices = []
+    if devices and not isinstance(devices, (list, tuple)):
+        devices = [devices]
+
+    cmd = ['hwinfo']
+    for item in items:
+        cmd.append('--{}'.format(item))
+
+    if short:
+        cmd.append('--short')
+
+    if listmd:
+        cmd.append('--listmd')
+
+    for device in devices:
+        cmd.append('--only {}'.format(device))
+
+    result['hwinfo'] = __salt__['cmd.run_stdout'](cmd)
+
+    if 'bios' in items:
+        result['bios grains'] = _hwinfo_efi()
+
+    if 'memory' in items:
+        result['memory grains'] = _hwinfo_memory()
+
+    if 'network' in items:
+        result['network grains'] = _hwinfo_network(short)
+
+    return result

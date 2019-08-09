@@ -208,6 +208,38 @@ base:
     - installer
 ```
 
+### Getting hardware information
+
+The provided pillars are only an example of what we can do with
+Yomi. Eventually we need to adapt them based on the hardware that we
+have.
+
+We can discover the hardware configuration with different
+mechanism. One is get the `grains` information directly from the
+minion:
+
+```bash
+salt worker2 grains.items
+```
+
+We can get more detailed information using other Salt modules, like
+`partition.list`, `network.interfaces` or `udev.info`.
+
+With Yomi we provided a simple interface to `hwinfo` that provides in
+a single report some of the information that is required to make
+decisions about the pillars.
+
+```bash
+# Synchronize all the modules to the minion
+salt worker2 saltutil.sync_all
+
+# Get a short report about some devices
+salt worker2 devices.hwinfo
+
+# Get a detailled report about some devices
+salt worker2 devices.hwinfo short=no
+```
+
 ### Cleaning the disk
 
 Yomi try to be careful with the current data stored in the disks. By
