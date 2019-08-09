@@ -16,7 +16,7 @@ grub2_install:
     - creates: /mnt/boot/efi/EFI/GRUB
 {% else %}
     - name: grub2-install --force {{ bootloader.device }}
-    - unless: dd bs=512 count=1 if={{ bootloader.device }} 2>/dev/null | grep -q 'GRUB'
+    - creates: /mnt/boot/grub2/i386-pc/normal.mod
 {% endif %}
 {% if 'lvm' in pillar %}
     - binds: [/run]
