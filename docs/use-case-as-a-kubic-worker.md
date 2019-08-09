@@ -225,7 +225,7 @@ salt worker2 partition.list /dev/sda
 salt worker2 saltutil.sync_all
 
 # Remove all the partitions and the filesystem information
-salt worker2 devides.wipe /dev/sda
+salt worker2 devices.wipe /dev/sda
 ```
 
 ### Launching Yomi

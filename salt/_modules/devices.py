@@ -161,4 +161,9 @@ def wipe(device):
         # Remove filesystem information the the partition
         __salt__['disk.wipe']('{}{}'.format(device, partition))
         __salt__['partition.rm'](device, partition)
+
+    # Remove the MBR information
+    __salt__['disk.wipe']('{}'.format(device))
+    __salt__['cmd.run']('dd bs=512 count=1 if=/dev/zero of={}'.format(device))
+
     return True
