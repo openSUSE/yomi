@@ -14,11 +14,16 @@ from the USB port.
 
 There is an already available image that contains all the requirements
 in
-[OBS](https://build.opensuse.org/package/show/home:aplanas:Images/openSUSE-Tumbleweed-JeOS). This
-is an JeOS based image build from openSUSE Tumbleweed
-repositories. Also contains a version of `salt-minion` with all the
-code that is under review in the SaltStack project, that is required
-to run all the states required by Yomi.
+[Factory](https://build.opensuse.org/package/show/systemsmanagement:yomi/openSUSE-Tumbleweed-Yomi). This
+is an image build from openSUSE Tumbleweed repositories that includes
+a very minimal set of tools, including the openSUSE version of
+`salt-minion`.
+
+To use the last version of the image, together with the last version
+of `salt-minion` that includes all the patches that are under review
+in the SaltStack project, you can always use the version from the
+[devel
+project](https://build.opensuse.org/package/show/systemsmanagement:yomi/openSUSE-Tumbleweed-Yomi)
 
 The image is configured to simplify the discovery and integration of
 systems booted from it. For example, the image is configured to take

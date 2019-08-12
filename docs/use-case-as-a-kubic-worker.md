@@ -128,13 +128,9 @@ enable the auto-sign feature via UUID, as described in the previous
 document.
 
 In the `master` node we will need to install the `yomi-formula`
-package. As today this package is not living in Factory, so we need to
-add the repository manually.
+package from Factory.
 
 ```bash
-zypper ar -g -f \
-  https://download.opensuse.org/repositories/home:/aplanas/openSUSE_Factory/ \
-  yomi-formula
 transactional-update pkg install yomi-formula
 reboot
 ```

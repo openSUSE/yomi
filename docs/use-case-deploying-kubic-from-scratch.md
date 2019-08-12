@@ -28,13 +28,9 @@ patched version for the minion.
 sudo zypper in salt-master salt-standalone-formulas-configuration
 ```
 
-We can now clone the [Yomi](https://github.com/openSUSE/yomi) git
-repository, or install the package in our system.
+We can now install the package in our system.
 
 ```bash
-sudo zypper ar -g -f \
-  https://download.opensuse.org/repositories/home:/aplanas/openSUSE_Factory/ \
-  yomi-formula
 sudo zypper in yomi-formula
 ```
 
@@ -122,14 +118,13 @@ Now we can launch two nodes. One will be used for the control plane,
 and will be assigned with the `cplane` hostname, and the other will be
 the single worker.
 
-First we will need to download a JeOS image with a version of
-`salt-minion` that contains some patches. The image is placed in this
-[repository](https://download.opensuse.org/repositories/home:/aplanas:/Images/images/iso/),
-you can `wget` it, but if you have `osc` installed you can also
-download it directly:
+First we will need to download the Yomi image from
+[Factory](https://build.opensuse.org/package/show/openSUSE:Factory/openSUSE-Tumbleweed-Yomi). This
+image includes the version of `salt-minion` from openSUSE, that
+contains the patches required to execute Yomi.
 
 ```bash
-osc getbinaries home:aplanas:Images openSUSE-Tumbleweed-JeOS:Live images x86_64
+osc getbinaries openSUSE:Factory openSUSE-Tumbleweed-Yomi images x86_64
 mv binaries/*.iso .
 rm -fr binaries
 ```
@@ -184,17 +179,6 @@ will be installed in both nodes, and will automatically reconnect to
 the master after the first boot. We will need to be sure that the
 version of `salt-minion` that is installed is the patched one, so we
 will add one extra repository in the pillars.
-
-Edit the pillar/installer.sls file and check that the `repositories`
-section have this content:
-
-```yaml
-repositories:
-{% if mode == 'microos' %}
-    repo-salt-fix: "https://download.opensuse.org/repositories/home:/aplanas:/branches:/systemsmanagement:/saltstack/testing/openSUSE_Tumbleweed/"
-{% endif %}
-    repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
-```
 
 Now we can orchestrate the Kubic installation. So from your host
 machine where `salt-master` is running we can fire the orchestrator.
