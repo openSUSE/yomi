@@ -31,12 +31,9 @@ config_grub2_theme:
       # - GRUB_THEME="/boot/grub2/themes/openSUSE/theme.txt"
 {% endif %}
 
-{% set kernel = 'splash=silent quiet' %}
+{% set kernel = bootloader.get('kernel', 'splash=silent quiet') %}
 {% if config.get('grub2_console', False) %}
   {% set kernel = kernel ~ ' console=tty0 console=ttyS0,115200' %}
-{% endif %}
-{% if bootloader.get('kernel', False) %}
-  {% set kernel = kernel ~ ' ' ~ bootloader['kernel'] %}
 {% endif %}
 {{ macros.log('file', 'config_grub2_resume') }}
 config_grub2_resume:
