@@ -35,9 +35,7 @@ config:
   snapper: yes
 {% endif %}
   grub2_theme: yes
-{% if efi %}
-  grub2_console: yes
-{% endif %}
+  grub2_console: {{ 'yes' if efi else 'no' }}
   locale: en_US.UTF-8
   keymap: us
   timezone: UTC
