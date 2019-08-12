@@ -63,7 +63,7 @@ software:
     - pattern:microos_apparmor
     - pattern:kubic_worker
 {% else %}
-    - patterns-base-base
+    - pattern:enhanced_base
     - kernel-default
 {% endif %}
 
