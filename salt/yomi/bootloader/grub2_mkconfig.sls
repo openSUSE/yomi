@@ -3,6 +3,7 @@
 {% set config = pillar['config'] %}
 {% set bootloader = pillar['bootloader'] %}
 {% set is_uefi = grains['efi'] %}
+{% set grub2_console = config.get('grub2_console', False) %}
 
 {% if config.get('snapper', False) %}
 include:
@@ -25,16 +26,17 @@ config_grub2_theme:
   file.append:
     - name: /mnt/etc/default/grub
     - text:
-      - GRUB_TERMINAL="gfxterm"
+      - GRUB_TERMINAL={{ "gfxterm" if not grub2_console else "console" }}
       - GRUB_GFXMODE="auto"
       - GRUB_BACKGROUND=
       # - GRUB_THEME="/boot/grub2/themes/openSUSE/theme.txt"
 {% endif %}
 
 {% set kernel = bootloader.get('kernel', 'splash=silent quiet') %}
-{% if config.get('grub2_console', False) %}
+{% if grub2_console %}
   {% set kernel = kernel ~ ' console=tty0 console=ttyS0,115200' %}
 {% endif %}
+
 {{ macros.log('file', 'config_grub2_resume') }}
 config_grub2_resume:
   file.append:
