@@ -256,6 +256,17 @@ salt worker2 saltutil.sync_all
 salt worker2 devices.wipe /dev/sda
 ```
 
+To wipe all the devices defined in the pillars at once, we can apply
+the `yomi.storage.wipe` state.
+
+```bash
+# Make sure that the new modules are in the minion
+salt worker2 saltutil.sync_all
+
+# Remove all the partitions and the filesystem information
+salt worker2 state.apply yomi.storage.wipe
+```
+
 ### Launching Yomi
 
 Finally, to install MicroOS into the new worker, we need to apply the
