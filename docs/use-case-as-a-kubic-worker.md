@@ -8,8 +8,8 @@ nodes in an already deployed Kubic cluster.
 In this section we are going to describe a way to deploy a two-node
 Kubic cluster, and use Yomi to provision a third node.
 
-For this example we can use libvirt, virtualbox, vagrant or
-QEMU.
+For this example we can use `libvirt`, `virtualbox`, `vagrant` or
+`QEMU`.
 
 We will need to allocate three VMs with:
 
@@ -33,13 +33,12 @@ from the [Kubic
 documentation](https://en.opensuse.org/Kubic:kubeadm). In a nutshell
 the process is:
 
-  * Spin two empty nodes with QEMU / libvirt
-  * Boot both nodes using the [Kubic
-    image](http://download.opensuse.org/tumbleweed/iso/openSUSE-Kubic-DVD-x86_64-Current.iso)
-  * Deploy one node with the 'Kubic Admin Node' role, this will
-    install CRI-O, `kubeadn` and `kubicctl`, together with
-    `salt-master`.
-  * Deploy the second node with the system role 'Kubic Worker Node'.
+* Spin two empty nodes with QEMU / libvirt
+* Boot both nodes using the [Kubic
+  image](http://download.opensuse.org/tumbleweed/iso/openSUSE-Kubic-DVD-x86_64-Current.iso)
+* Deploy one node with the 'Kubic Admin Node' role, this will install
+  CRI-O, `kubeadn` and `kubicctl`, together with `salt-master`.
+* Deploy the second node with the system role 'Kubic Worker Node'.
 
 We will use `kubicctl` to deploy Kubernetes in the control plane, and
 use this same tool to join the already installed worker.
@@ -120,12 +119,14 @@ systems. We will need to boot the new node using a JeOS image that
 contains a `salt-minion` service, that later can be controlled from
 the `master` node, that is where `salt-master` is installed.
 
-You can find mode information about this Yomi image in
-[appendix-yomi-image.md](appendix-yomi-image.md) document.
+You can find mode information about this Yomi image in the [Booting a
+new machine](../README.md#booting-a-new-machine) section if the main
+documentation.
 
-Download the image and optionally configure the `salt-master` to
-enable the auto-sign feature via UUID, as described in the previous
-document.
+Download the ISO image or the PXE Boot one (check the previous link
+the learn how to configure the PXE Boot one). Optionally configure the
+`salt-master` to enable the auto-sign feature via UUID, as described
+in the [Enabling auto-sign](../README.md#enabling-auto-sign) section.
 
 In the `master` node we will need to install the `yomi-formula`
 package from Factory.
@@ -140,7 +141,7 @@ using the Yomi image. Be sure (via boot parameter or later
 configuration) that the `salt-minion` can find the already present
 master, and if needed accept the key.
 
-### Setting the pillars
+### Adding the new worker
 
 We need to set the pillar data that Yomi will use to make a new
 installation. This data will describe installation details like how
@@ -150,39 +151,10 @@ will be installed or the services that will be enabled before booting.
 The packages `yomi-formula` already provides and example for a MicroOS
 installation, so we can use it as a template.
 
-As today the `/srv` directory is part of the non-writable subvolume in
-MicroOS (the next MicroOS version will fix that), so for this example
-we need to add a new place where pillars are living: 
-
-```bash
-cp -a /usr/share/yomi/pillar.conf /etc/salt/master.d/
-systemctl restart salt-master.service
-```
-
-This will add a new configuration file that will make
-`/usr/share/yomi/pillar` available for Salt, that is where the example
-pillars are installed.
-
-As today `/usr/share/yomi/pillar/` and `/srv/pillar/` are read-only
-volumes, if we want to tailor the pillars we will need to copy the
-examples in a different way and configure accordingly the master. For
-example:
-
-```bash
-mkdir -p /tmp/pillar
-cp -a /usr/share/yomi/pillar/* /tmp/pillar/
-cat <<EOF > /etc/salt/master.d/pillar.conf
-pillar_roots:
-  base:
-    - /tmp/pillar
-    - /srv/pillar
-EOF
-systemctl restart salt-master.service
-```
-
-Once `/srv/pillar` is writable in MicroOS, the best solution will be
-copying the pillar content from `yomi-formula` to `/srv/pillar`
-directly, and forget about the `pillar.conf` overlay.
+Read the section [Configuring the
+pillar](../README.md#configuring-the-pillar) to learn more about the
+pillar examples provided by the package, and how to copy them in a
+place that we can edit them.
 
 The `yomi-formula` package do not include an example `top.sls`, but we
 can create one easily for this example.
@@ -204,73 +176,12 @@ base:
     - installer
 ```
 
-### Getting hardware information
+Now we can [get information about the
+hardware](../README.md#getting-hardware-information) available in the
+new worker node, and adjust the pillar accordingly.
 
-The provided pillars are only an example of what we can do with
-Yomi. Eventually we need to adapt them based on the hardware that we
-have.
-
-We can discover the hardware configuration with different
-mechanism. One is get the `grains` information directly from the
-minion:
-
-```bash
-salt worker2 grains.items
-```
-
-We can get more detailed information using other Salt modules, like
-`partition.list`, `network.interfaces` or `udev.info`.
-
-With Yomi we provided a simple interface to `hwinfo` that provides in
-a single report some of the information that is required to make
-decisions about the pillars.
-
-```bash
-# Synchronize all the modules to the minion
-salt worker2 saltutil.sync_all
-
-# Get a short report about some devices
-salt worker2 devices.hwinfo
-
-# Get a detailled report about some devices
-salt worker2 devices.hwinfo short=no
-```
-
-### Cleaning the disk
-
-Yomi try to be careful with the current data stored in the disks. By
-default will not remove any partition, nor will make an implicit
-decision about the device where the installation will run.
-
-If we want to remove the data from the device, we can use the provided
-`devices.wipe` execution module.
-
-```bash
-# List the partitions
-salt worker2 partition.list /dev/sda
-
-# Make sure that the new modules are in the minion
-salt worker2 saltutil.sync_all
-
-# Remove all the partitions and the filesystem information
-salt worker2 devices.wipe /dev/sda
-```
-
-To wipe all the devices defined in the pillars at once, we can apply
-the `yomi.storage.wipe` state.
-
-```bash
-# Make sure that the new modules are in the minion
-salt worker2 saltutil.sync_all
-
-# Remove all the partitions and the filesystem information
-salt worker2 state.apply yomi.storage.wipe
-```
-
-### Launching Yomi
-
-Finally, to install MicroOS into the new worker, we need to apply the
-high-state into the node:
+Optionally we can [wipe the disks](../README.md#cleaning-the-disks),
+and then apply the `yomi.installer` state.
 
 ```bash
 salt worker2 state.apply
@@ -280,39 +191,4 @@ Once the node is back, we can proceed as usual:
 
 ```bash
 kubicctl node add worker2
-```
-
-### Salt-API and monitoring the installation
-
-We can use the `monitor` CLI tool to inspect the installation of the
-nodes. This tool analyze the event stream, and this require the
-configuration of `salt-api`:
-
-```bash
-cp /usr/share/yomi/salt-api.conf /etc/salt/master.d/
-systemctl restart salt-master.service
-```
-
-Use this configuration as an example to understand Yomi's features, as
-is not using SSL, and the default user and password is located in
-`/usr/share/yomi/user-list.txt` in plain text.
-
-Change in the pillars the `config` section, so you have this:
-
-```yaml
-config:
-  events: yes
-```
-
-Now for each state in Yomi, a two events will be launched. One will
-indicate the moment that the state is starting to run, and other will
-signalize the success or fail of the event. We can monitor them with:
-
-```bash
-export SALTAPI_URL=http://localhost:8000
-export SALTAPI_EAUTH=file
-export SALTAPI_USER=salt
-export SALTAPI_PASS=linux
-
-monitor -r -y
 ```

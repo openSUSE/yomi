@@ -140,3 +140,28 @@ to the port `22` in the VM. So we can SSH into the node with:
 ```bash
 ssh root@localhost -p 10022
 ```
+
+# PXE Boot with QEMU
+
+We can configure `dnsmasq` also to serve the TFTP assets that are
+required for the [PXE Boot](../README.md#pxe-boot) image. For example,
+this can be used as a base for a local server:
+
+```bash
+mkdir tftpboot
+sudo ./dnsmasq --no-daemon \
+               --interface=vmlan \
+               --except-interface=lo \
+               --except-interface=em1 \
+               --bind-interfaces \
+               --dhcp-range=10.0.3.100,10.0.3.200 \
+               --dhcp-option=option:router,10.0.3.101 \
+               --dhcp-host=00:00:00:11:11:11,10.0.3.101,worker \
+               --host-record=master,10.0.2.2 \
+               --enable-tftp \
+               --dhcp-boot=pxelinux.0,,10.0.3.1 \
+               --tftp-root=$(pwd)/tftpboot
+```
+
+Follow the documentation to create the different configuration files
+and copy the assets in the correct places.

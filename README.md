@@ -6,71 +6,75 @@ Yomi (yet one more installer) is a new proposal for an installer for
 the [open]SUSE family. It is designed as a
 [SaltStack](https://www.saltstack.com/) state, and expected to be used
 in situations were unattended installations for heterogeneous nodes is
-required, and where some bits of intelligence in the configuration file,
-can help to customize the installation.
+required, and where some bits of intelligence in the configuration
+file can help to customize the installation.
 
 Being also a Salt state makes the installation process one more step
 during the provisioning stage, making on Yomi a good candidate for
 integration in any workflow were SaltStack is used.
 
 
-# Installation
+# Overview
 
 To execute Yomi we need a modern version of Salt, as we need special
 features are only on the
 [develop](https://github.com/saltstack/salt/tree/develop) branch of
 Salt. Technically we can use the last released version of Salt for
-salt-master, but for the minions we need the most up-to-date version.
+salt-master, but for the minions we need the most up-to-date
+version. The good news is that most of the patches are currently
+merged in the openSUSE package of Salt.
 
-For openSUSE Tumbleweed I create a [package of
-Salt](https://build.opensuse.org/package/show/home:aplanas:branches:systemsmanagement:saltstack:testing/salt)
-that contains the last released version and a patch with the missing
-code that only lives on the develop branch of the code. This is the
-package required to be installed where the salt-minion is executed.
+Yomi is developed in
+[OBS](https://build.opensuse.org/project/show/systemsmanagement:yomi),
+and actually consists on two components:
 
-To simplify the test and development of Yomi, I also provide a JeOS
-(Tumbleweed) based
-[image](https://build.opensuse.org/package/show/home:aplanas:Images/test-image-iso)
-that includes this patched package. You can use this ISO to boot the node.
+* [yomi-formula](https://build.opensuse.org/package/show/systemsmanagement:yomi/yomi-formula):
+  contains the Salt states and modules requires to drive an
+  installation. The [source code](https://github.com/openSUSE/yomi) of
+  the project in available under the openSUSE group in GitHub.
+* [openSUSE-Tubleweed-Yomi](https://build.opensuse.org/package/show/systemsmanagement:yomi/openSUSE-Tumbleweed-Yomi):
+  is the image that can be used too boot the new nodes, that includes
+  the `salt-minion` service already configured. There are two versions
+  of this image, one that is used as a LiveCD image and other designed
+  to be used from a PXE Boot server.
 
-## Image boot parameters
+The installation process of Yomi will require:
 
-With this image we can set the minion ID of the salt-minion and the
-master address where the minion will connect, via boot parameters.
+* Install and configure the
+  [`salt-master`](#installing-and-configuring-salt-master) service.
+* Install the [`yomi-formula`](#the-yomi-formula) package.
+* Prepare the [pillar](#pillar-in-yomi) for the new installations.
+* Boot the new systems with the [ISO image](#the-iso-image) or via
+  [PXE boot](#pxe-boot)
 
-By default the minion will try to connect to a master that have the
-name `master`. We can change it via the boot parameter `master`. For
-example `master=10.0.2.2` will make the minion to search the master in
-the address `10.0.2.2`.
 
-The rules for the minion ID are a bit more complicated. Salt, by
-default, set the minion ID equal to the IP of the node is none is
-specified. This cannot be a good idea if the IP changes, so the
-current rules are:
+# Installing and configuring salt-master
 
-- The value from `minion_id` boot parameter.
-- The hostname of the system, if is different from localhost.
-- The MAC address of the first interface of the system.
+SaltStack can be deployed with different architectures. The
+recommended one will require the `salt-master` service.
 
-## Installing salt-master
+```bash
+zypper in salt-master
 
-You can read the [official
-documentation](https://docs.saltstack.com/en/latest/topics/installation/index.html)
-about how to install salt-master. For this documentation we are going
-to show only the one based on Python virtual environments.
+systemctl enable --now salt-master.service
+```
 
-```Bash
+## Other ways to install salt-master
+
+For different ways of installation, read the [official
+documentation](https://docs.saltstack.com/en/latest/topics/installation/index.html). For
+example, for development purposes installing it inside a virtual
+environment can be a good idea:
+
+```bash
 python3 -mvenv venv
 
 source venv/bin/activate
 
 pip install --upgrade pip
 pip install salt
-```
 
-Once the Salt code is living in the venv, we can configure it.
-
-```Bash
+# Create the basic layout and config files
 mkdir -p venv/etc/salt/pki/{master,minion} \
       venv/etc/salt/autosign_grains \
       venv/var/cache/salt/master/file_lists/roots
@@ -88,73 +92,93 @@ pillar_roots:
 EOF
 ```
 
-To find more configuration options for salt-master, refer always to
-the official documentation. Here we set a very minimal one, we only
-specify where to find the salt states, the pillars and from where we
-consider the root directory.
+## Looking for the pillar
 
-## Enabling Autosign
+Salt pillar are the data that the Salt states use to decide the
+actions that needs to be done. For example, in the case of Yomi the
+typical data will be the layout of the hard disks, the software
+patterns that will be installed, or the users that will be
+created. For a complete explanation of the pillar required by Yomi,
+check the section [Pillar in Yomi](#pillar-in-yomi)
+
+By default Salt will search the states in `/srv/salt`, and the pillar
+in `/srv/pillar`, as established by `file_roots` and `pillar_roots`
+parameters in the default configuration file (`/etc/salt/master`).
+
+To indicate a different place where to find the pillar, we can add a
+new snippet in the `/etc/salt/master.d` directory:
+
+```bash
+cat <<EOF > /etc/salt/master.d/pillar.conf
+pillar_roots:
+  base:
+    - /srv/pillar
+	- /usr/share/yomi/pillar
+EOF
+```
+
+The `yomi-formula` package already contains an example of such
+configuration. Check section [Looking for the pillar in
+Yomi](#looking-for-the-pillar-in-yomi)
+
+## Enabling auto-sign
 
 To simplify the discovery and key management of the minions, we can
 use the auto-sign feature of Salt. To do that we need to add a new
-line into the master configuration file.
+file in `/etc/salt/master.d`.
 
-```Bash
-echo "autosign_grains_dir: /etc/salt/autosign_grains" >> venv/etc/salt/master
+```bash
+echo "autosign_grains_dir: /etc/salt/autosign_grains" > \
+     /etc/salt/master.d/autosign.conf
 ```
 
-The ISO image that I prepared already export some UUIDs generated for
-each minion, so we need to list into the master all the possible valid
-UUIDs.
+The Yomi ISO image available in Factory already export some UUIDs
+generated for each minion, so we need to list into the master all the
+possible valid UUIDs.
 
-```Bash
-mkdir -p venv/etc/salt/autosign_grains
+```bash
+mkdir -p /etc/salt/autosign_grains
 
 for i in $(seq 0 9); do
   echo $(uuidgen --md5 --namespace @dns --name http://opensuse.org/$i)
-done > venv/etc/salt/autosign_grains/uuid
+done > /etc/salt/autosign_grains/uuid
 ```
 
-We can start now the salt-master service manually:
-
-```Bash
-salt-master -c venv/etc/salt &
-```
+The `yomi-formula` package already contains an example of such
+configuration. Check section [Enabling auto-sing in
+Yomi](#enabling-auto-sing-in-yomi)
 
 ## Salt API
 
-Yomi includes a monitoring tool, that read from the event bus of
-Salt. To enable the real-time events we need to enable set `events`
-field to `yes` in the configuration section of the pillar. This
-`monitor` tool will connect to the salt-api service to read the status
-and send request to Salt, all done via the REST protocol.
+The `salt-master` service can be accessed via a REST API, provided by
+an external tool that needs to be enabled.
 
-We will use CherryPy to serve the requests of Salt API, and we will
-also install a basic WebSocket Python library. Supposing that the
-virtual environment is activated, we can:
+```bash
+zypper in salt-api
 
-```Bash
-pip install cherrypy ws4py
+systemctl enable --now salt-api.service
 ```
 
-As configuration example, we will setup Salt API to use CherryPy,
-listen on port 8000, disable SSL and use an eauth based of a plain
-text file. Of course this setup is only for testing.
+There are different options to configure the `salt-api` service, but
+is safe to choose `CherryPy` as a back-end to serve the requests of
+Salt API.
 
-```Bash
-mkdir -p venv/etc/salt/master.d
+We need to configure this service to listen to one port, for example
+8000, and to associate an authorization mechanism. Read the Salt
+documentation about this topic for different options.
 
-cat <<EOF > venv/etc/salt/master.d/salt-api.conf
+```bash
+cat <<EOF > /etc/salt/master.d/salt-api.conf
 rest_cherrypy:
   port: 8000
   debug: no
   disable_ssl: yes
 EOF
 
-cat <<EOF > venv/etc/salt/master.d/eauth.conf
+cat <<EOF > /etc/salt/master.d/eauth.conf
 external_auth:
   file:
-    ^filename: $(pwd)/venv/etc/user-list.txt
+    ^filename: /etc/salt/user-list.txt
     salt:
       - .*
       - '@wheel'
@@ -162,22 +186,97 @@ external_auth:
       - '@jobs'
 EOF
 
-echo "salt:linux" > venv/etc/user-list.txt
+echo "salt:linux" > /etc/salt/user-list.txt
 ```
 
-The last line add the user `salt` (with password `linux`) to the user
-list file.
+The `yomi-formula` package already contains an example of such
+configuration. Check section [Salt API in Yomi](#salt-api-in-yomi)
 
-After launching salt-master, we can start the Salt API service:
 
-```Bash
-salt-api -c venv/etc/salt &
+# The Yomi formula
+
+The states and modules required by Salt to drive an installation can
+be installed where the `salt-master` resides:
+
+```bash
+zypper in yomi-formula
 ```
 
-With this configuration in place, the monitoring can be done with this
-configuration:
+This package will install the states in
+`/usr/share/salt-formulas/states`, some pillar examples in
+`/usr/share/yomi/pillar` and configuration files in `/usr/share/yomi`.
 
-```Bash
+
+## Looking for the pillar in Yomi
+
+Yomi expect from the pillar to be a normal YAML document, optionally
+generated by a Jinja template, as is usual in Salt.
+
+The schema of the pillar is described in the section [Pillar reference
+for Yomi](#pillar-reference-for-yomi), but the `yomi-formula` package
+provides a set of examples that can be used to deploy MicroOS
+installations, Kubic, LVM, RAID or simple openSUSE Tumbleweed ones.
+
+In order to `salt-master` can find the pillar, we need to change the
+`pillar_roots` entry in the configuration file, or use the one
+provided by the package:
+
+```bash
+cp -a /usr/share/yomi/pillar.conf /etc/salt/master.d/
+systemctl restart salt-master.service
+```
+
+## Enabling auto-sing in Yomi
+
+The images generated by the Open Build Service that are ready to be
+used together with Yomi contains a list a random UUID, that can be
+used as a auto-sing grain in `salt-master`.
+
+We can enable this feature adding the configuration file provided by
+the package:
+
+```bash
+cp /usr/share/yomi/autosign.conf /etc/salt/master.d/
+systemctl restart salt-master.service
+```
+
+## Salt API in Yomi
+
+As described in the section [Salt API](#salt-api), we need to enable
+the `salt-api` service in order to provide a REST API service to
+`salt-minion`.
+
+This service is used by Yomi to monitor the installation, reading the
+event bus of Salt. To enable the real-time events we need to enable
+set `events` field to `yes` in the configuration section of the
+pillar.
+
+We can enable this service easily (after installing the `salt-api`
+package and the dependencies) using the provided configuration file:
+
+```bash
+cp /usr/share/yomi/salt-api.conf /etc/salt/master.d/
+systemctl restart salt-master.service
+```
+
+Feel free to edit `/etc/salt/master.d/salt-api.conf` and provide the
+required certificates to enable the SSL connection, an use a different
+authorization mechanism. The current one is based on reading the file
+`/usr/share/yomi/user-list.txt`, that is storing the password in plain
+text. So please, *do not* use this in production.
+
+### Real time monitoring in Yomi
+
+Once we check that in our `config` of the pillar contains this:
+
+```yaml
+config:
+  events: yes
+```
+
+We can launch the `monitor` tool.
+
+```bash
 export SALTAPI_URL=http://localhost:8000
 export SALTAPI_EAUTH=file
 export SALTAPI_USER=salt
@@ -194,7 +293,274 @@ option `-r` makes sure that this cache is removed before
 connection. Check the help option of the tool for more information.
 
 
-# Pillars in Yomi
+# Booting a new machine
+
+As described in the previous sections, Yomi is a set of Salt states
+that are used to drive the installation of a new operating system. To
+take full control of the system where the installation will be done,
+you will need to boot from an external system that provides an already
+configured `salt-minion`, and a set of CLI tools required during the
+installation.
+
+We can deploy all the requirements using different mechanisms. One,
+for example, is via PXE boot. We can build a server that will deliver
+the Linux `kernel` and an `initrd` will all the required
+software. Another alternative is to have an already live ISO image
+that you use to boot from the USB port.
+
+There is an already available image that contains all the requirements
+in
+[Factory](https://build.opensuse.org/package/show/openSUSE:Factory/openSUSE-Tumbleweed-Yomi). This
+is an image build from openSUSE Tumbleweed repositories that includes
+a very minimal set of tools, including the openSUSE version of
+`salt-minion`.
+
+To use the last version of the image, together with the last version
+of `salt-minion` that includes all the patches that are under review
+in the SaltStack project, you can always use the version from the
+[devel
+project](https://build.opensuse.org/package/show/systemsmanagement:yomi/openSUSE-Tumbleweed-Yomi)
+
+Note that this image is a `_multibuild` one, and generates two
+different images. One is a LiveCD ISO image, ready to be booted from
+USB or DVD, and the other one is a PXE Boot ready image.
+
+## The ISO image
+
+The ISO image is a LiveCD that can be booted from USB or from DVD, and
+the last version can be always be downloaded from:
+
+```bash
+wget https://download.opensuse.org/repositories/systemsmanagement:/yomi/images/iso/openSUSE-Tumbleweed-Yomi.x86_64-livecd.iso
+```
+
+## PXE Boot
+
+The second image available is a OEM ramdisk that can be booted from
+PXE Boot.
+
+To install the image we first need to download the file
+`openSUSE-Tumbleweed-Yomi.x86_64-${VERSION}-pxeboot-Build${RELEASE}.${BUILD}.install.tar`
+from the Factory, or directly from the development project.
+
+We need to start the `sftpd` service or use `dnsmasq` to behave also
+as a tftp server. There is some documentation in the [openSUSE
+wiki](https://en.opensuse.org/SDB:PXE_boot_installation), and if you
+are using QEMU you can also check the appendix document.
+
+```bash
+mkdir -p /srv/tftpboot/pxelinux.cfg
+cp /usr/share/syslinux/pxelinux.0 /srv/tftpboot
+
+cd /srv/tftpboot
+tar -xvf $IMAGE
+
+cat <<EOF > /srv/tftpboot/pxelinux.cfg/default
+default yomi
+prompt   1
+timeout  30
+
+label yomi
+  kernel pxeboot.kernel
+  append initrd=pxeboot.initrd.xz rd.kiwi.install.pxe rd.kiwi.install.image=tftp://${SERVER}/openSUSE-Tumbleweed-Yomi.xz rd.kiwi.ramdisk ramdisk_size=1048576
+EOF
+```
+
+## Finding the master node
+
+The `salt-minion` configuration in the Yomi image will search the
+`salt-master` system under the `master` name. Is expected that the
+local DNS service will resolve the `master` name to the correct IP
+address.
+
+During boot time of the Yomi image we can change the address where is
+expected to find the master node. To do that we can enter under the
+GRUB menu the entry `master=my_master_address`. For example
+`master=10.0.2.2` will make the minion to search the master in the
+address `10.0.2.2`.
+
+An internal systemd service in the image will detect this address and
+configure the `salt-minion` accordingly.
+
+Under the current Yomi states, this address will be copied under the
+new installed system, together with the key delivered by the
+`salt-master` service. This means that once the system is fully
+installed with the new operating system, the new `salt-minion` will
+find the master directly after the first boot.
+
+## Setting the minion ID
+
+In a similar way, during the boot process we can set the minion ID
+that will be assigned to the `salt-minion`. Using the parameter
+`minion_id`. For example, `minion_id=worker01` will set the minion ID
+for this system as `worker01`.
+
+The rules for the minion ID are a bit more complicated. Salt, by
+default, set the minion ID equal to the FQDN or the IP of the node if
+no ID is specified. This cannot be a good idea if the IP changes, so
+the current rules are:
+
+* The value from `minion_id` boot parameter.
+* The FQDN hostname of the system, if is different from localhost.
+* The MAC address of the first interface of the system.
+
+
+# Basic operations
+
+Once `salt-master` is configured and running, the `yomi-formula`
+states are available and a new system is booted with a up-to-date
+`salt-minion`, we can start to operate with Yomi.
+
+The usual process is simple: describe the pillar information and apply
+the `yomi.install` state to the node or nodes. Is not relevant how the
+pillar was designed (maybe using a smart template that cover all the
+cases or writing a raw YAML that only covers one single installation).
+In this section we will provide some hints about how get information
+and can help in this process.
+
+## Getting hardware information
+
+The provided pillar are only an example of what we can do with
+Yomi. Eventually we need to adapt them based on the hardware that we
+have.
+
+We can discover the hardware configuration with different
+mechanism. One is get the `grains` information directly from the
+minion:
+
+```bash
+salt node grains.items
+```
+
+We can get more detailed information using other Salt modules, like
+`partition.list`, `network.interfaces` or `udev.info`.
+
+With Yomi we provided a simple interface to `hwinfo` that provides in
+a single report some of the information that is required to make
+decisions about the pillar.
+
+```bash
+# Synchronize all the modules to the minion
+salt node saltutil.sync_all
+
+# Get a short report about some devices
+salt node devices.hwinfo
+
+# Get a detailled report about some devices
+salt node devices.hwinfo short=no
+```
+
+## Configuring the pillar
+
+The package `yomi-formula` provides some pillar examples that can be
+used as a reference when you are creating your own profiles.
+
+Salt search the pillar information in the directories listed in the
+`pillar_roots` configuration entry, and using the snippet from the
+section [Pillar in Yomi](#pillar-in-yomi), we can make those examples
+available in our system.
+
+In the case that we want to edit those files, we can copy them in a
+different directory and add it to the `pillar_roots` entry.
+
+```bash
+mkdir -p /srv/pillar-yomi
+cp -a /usr/share/yomi/pillar/* /srv/pillar-yomi
+
+cat <<EOF > /etc/salt/master.d/pillar.conf
+pillar_roots:
+  base:
+    - /srv/pillar-yomi
+    - /srv/pillar
+EOF
+systemctl restart salt-master.service
+```
+
+The pillar tree start with the `top.sls` file (there is another
+`top.sls` file for the states, do not confuse them).
+
+```yaml
+base:
+  '*':
+    - installer
+```
+
+This file is used to map the node with the data that the states will
+use later. For this example the file that contain the data is
+`installer.sls`, but feel free to choose a different name when you are
+creating your own pillar.
+
+This `installer.sls` is used as an entry point for the rest of the
+data. Inside the file there is some Jinja templates that can be edited
+to define different kinds of installations. This feature is leveraged
+by the
+[openQA](https://github.com/os-autoinst/os-autoinst-distri-opensuse/tree/master/tests/yomi)
+tests, to easily make multiple deployments.
+
+You can edit the `{% set VAR=VAL %}` section to adjust it to your
+current profile, or create one from scratch. The files
+`_storage.sls.*` are included for different scenarios, and this is the
+place where the disk layout is described. Feel free to include it
+directly on your pillar, or use a different mechanism to decide the
+layout.
+
+## Cleaning the disks
+
+Yomi try to be careful with the current data stored in the disks. By
+default will not remove any partition, nor will make an implicit
+decision about the device where the installation will run.
+
+If we want to remove the data from the device, we can use the provided
+`devices.wipe` execution module.
+
+```bash
+# List the partitions
+salt node partition.list /dev/sda
+
+# Make sure that the new modules are in the minion
+salt node saltutil.sync_all
+
+# Remove all the partitions and the filesystem information
+salt node devices.wipe /dev/sda
+```
+
+To wipe all the devices defined in the pillar at once, we can apply
+the `yomi.storage.wipe` state.
+
+```bash
+# Make sure that the new modules are in the minion
+salt node saltutil.sync_all
+
+# Remove all the partitions and the filesystem information
+salt node state.apply yomi.storage.wipe
+```
+
+## Applying the yomi.install state
+
+Finally, to install the operating system defined by the pillar into
+the new node, we need to apply the high-state:
+
+```bash
+salt node state.apply yomi.installer
+```
+
+If we have a `top.sls` file similar to this example, living in
+`/srv/salt` or in any other place where `file_roots` option is
+configured:
+
+```yaml
+base:
+  '*':
+    - yomi.installer
+```
+
+We can apply directly the high state:
+
+```bash
+salt node state.highstate
+```
+
+# Pillar reference for Yomi
 
 To install a new node, we need to provide some data to describe the
 installation requirements, like the layout of the partitions, file
@@ -202,11 +568,14 @@ systems used, or what software to install inside the new
 deployment. This data is collected in what is Salt is known as a
 [pillar](https://docs.saltstack.com/en/latest/topics/tutorials/pillar.html).
 
-Pillars can be associated with certain nodes in our network, making of
+To configure the `salt-master` service to find the pillar, check the
+section [Looking for the pillar](#looking-for-the-pillar).
+
+Pillar can be associated with certain nodes in our network, making of
 this technique a basic one to map a description of how and what to
 install into a node. This mapping is done via the `top.sls` file:
 
-```YAML
+```yaml
 base:
   'C7:7E:55:62:83:17':
     - installer
@@ -314,7 +683,7 @@ affect the installer.
 
 Example:
 
-```YAML
+```yaml
 config:
   # Do not send events, useful for debugging
   events: no
@@ -430,7 +799,7 @@ rest of the system.
 
 Example:
 
-```YAML
+```yaml
 partitions:
   config:
     label: gpt
@@ -493,7 +862,7 @@ The rest of the elements of this section will be passed to the
 
 Example:
 
-```YAML
+```yaml
 lvm:
   system:
     devices:
@@ -540,7 +909,7 @@ in the initial array, or `chunk` to speficy the chunk size.
 
 Example:
 
-```YAML
+```yaml
 raid:
   /dev/md0:
     level: 1
@@ -597,7 +966,7 @@ and the file system (and properties) that will be applied to it.
 
 Example:
 
-```YAML
+```yaml
 filesystems:
   /dev/sda1:
     filesystem: vfat
@@ -642,7 +1011,7 @@ filesystems:
 
 Example:
 
-```YAML
+```yaml
 bootloader:
   device: /dev/sda1
 ```
@@ -672,7 +1041,7 @@ installation, and the packages and patterns that will be installed.
 
 Example:
 
-```YAML
+```yaml
 software:
   repositories:
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
@@ -695,7 +1064,7 @@ Install and configure the salt-minion service.
 
 Example:
 
-```YAML
+```yaml
 salt-minion:
   configure: yes
 ```
@@ -715,7 +1084,7 @@ time.
 
 Example:
 
-```YAML
+```yaml
 services:
   enabled:
     - salt-minion
@@ -742,7 +1111,7 @@ we expect to find once the system is booted.
 
 Example:
 
-```YAML
+```yaml
 users:
   - username: root
     password: "$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
