@@ -11,7 +11,7 @@
 #   * snapper = {True, False}
 #   * swap = {True, False}
 #   * mode = {'single', 'lvm', 'raid{0, 1, 4, 5, 6, 10}', 'microos',
-#             'kubic'}
+#             'kubic', 'image'}
 #
 # This meta-pillar can be used as a template for new installers. This
 # template is expected to be adapted for production systems, as was
@@ -48,21 +48,27 @@ software:
     minimal: {{ 'yes' if mode in ('microos', 'kubic') else 'no' }}
   repositories:
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
+{% if mode == 'image' %}
+  image:
+    url: tftp://10.0.3.1/openSUSE-Tumbleweed-Yomi.x86_64-1.0.0.xz
+    md5:
+{% else %}
   packages:
-{% if mode == 'microos' %}
+  {% if mode == 'microos' %}
     - pattern:microos_base
     - pattern:microos_defaults
     - pattern:microos_hardware
     - pattern:microos_apparmor
-{% elif mode == 'kubic' %}
+  {% elif mode == 'kubic' %}
     - pattern:microos_base
     - pattern:microos_defaults
     - pattern:microos_hardware
     - pattern:microos_apparmor
     - pattern:kubic_worker
-{% else %}
+  {% else %}
     - pattern:enhanced_base
     - kernel-default
+  {% endif %}
 {% endif %}
 
 salt-minion:

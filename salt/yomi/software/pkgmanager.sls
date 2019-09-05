@@ -14,7 +14,7 @@ config_zypp_minimal_host:
         - multiversion =
 {% endif %}
 
-{% for name, repo in software.repositories.items() %}
+{% for name, repo in software.get('repositories', {}).items() %}
 {{ macros.log('pkgrepo', 'add_repository_' ~ repo) }}
 add_repository_{{ repo }}:
   pkgrepo.managed:
@@ -27,6 +27,7 @@ add_repository_{{ repo }}:
       - mount: mount_/mnt
 {% endfor %}
 
+{% if 'packages' in software %}
 {{ macros.log('pkg', 'install_packages') }}
 install_packages:
   pkg.installed:
@@ -34,6 +35,7 @@ install_packages:
     - no_recommends: yes
     - includes: [pattern]
     - root: /mnt
+{% endif %}
 
 {% if software_config.get('minimal', False) %}
 {{ macros.log('file', 'config_zypp_minimal') }}

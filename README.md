@@ -1030,14 +1030,58 @@ installation, and the packages and patterns that will be installed.
     Configure zypper to make a minimal installation, excluding
     recommended, documentation and multi-version packages.
 
-* `repositories`. Dictionary.
+* `repositories`. Dictionary. Optional
 
   Each key of the dictionary will be the name under where this
-  repository is registered, and the key is the URI associated with it.
+  repository is registered, and the key is the URL associated with it.
 
-* `packages`. Array.
+* `packages`. Array. Optional
 
   List of packages or patters to be installed.
+
+* `image`. Dictionary. Optional
+
+  We can bootstrap the root file system based on a partition image
+  generate by KIWI (or any other mechanism), that will be copied into
+  the partition that have the root mount point assigned. This can be
+  used to speed the installation process.
+  
+  Those images needs to contain only the file system and the data. If
+  the image contains a boot loader or partition information, the image
+  will fail during the resize operation. To validate if the image is
+  suitable, a simple `file image.raw` will do.
+  
+  * `url`: String.
+
+    URL of the image. As internally we are using curl to fetch the
+    image, we can support multiple protocols like `http://`,
+    `https://` or `tftp://` among others. The image can be compressed,
+    and in that case one of those extensions must to be used to
+    indicate the format: [`gz`, `bz2`, `xz`]
+
+  * `md5`|`sha1`|`sha224`|`sha256`|`sha384`|`sha512`: String. Optional
+
+    Checksum type and value used to validate the image. If this field
+    is present but empty (only the checksum type, but with no value
+    attached), the state will try to fetch the checksum fail from the
+    same URL given in the previous field. If the path contains an
+    extension for a compression format, this will be replaced with the
+    checksum type as a new extension.
+	
+	For example, if the URL is `http://example.com/image.xz`, the
+    checksum type is `md5`, and no value is provided, the checksum
+    will be expected at `http://example.com/image.md5`.
+	
+	But if the URL is something like `http://example.com/image.ext4`,
+    the checksum will be expected in the URL
+    `http://example.com/image.ext4.md5`.
+	
+  If the checksum type is provided, the value for the last image will
+  be stored in the Salt cache, and will be used to decide if the image
+  in the URL is different from the one already copied in the
+  partition. If this is the case, no image will be
+  downloaded. Otherwise a new image will be copied, and the old one
+  will be overwritten in the same partition.
 
 Example:
 
