@@ -80,10 +80,6 @@ def formatted(name, fs_type=u'ext4', force=False, **kwargs):
         'changes': {},
         'comment': [],
     }
-    # Check if fstype is linux-swap
-    # check if partition is type 82
-    # check if is already formated
-    # if forced, format, but maybe check if swapon over the partition
 
     fs_type = 'swap' if fs_type == 'linux-swap' else fs_type
     if fs_type != 'swap':
