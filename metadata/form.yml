@@ -1690,7 +1690,7 @@ filesystems:
         - ext4
         - vfat
       $default: ext4
-    mounpoint:
+    mountpoint:
       $type: text
       $placeholder: /
     fat:
@@ -1724,7 +1724,7 @@ bootloader:
   $type: group
   device:
     $type: text
-    $placeholder: /dev/sda1
+    $placeholder: /dev/sda
     $help: Device where the GRUB2 will be installed
   kernel:
     $type: text

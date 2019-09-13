@@ -1013,7 +1013,7 @@ Example:
 
 ```yaml
 bootloader:
-  device: /dev/sda1
+  device: /dev/sda
 ```
 
 ## `software` section
