@@ -67,6 +67,7 @@ software:
     - pattern:kubic_worker
   {% else %}
     - pattern:enhanced_base
+    - glibc-locale
     - kernel-default
   {% endif %}
 {% endif %}
