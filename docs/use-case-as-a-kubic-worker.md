@@ -163,7 +163,7 @@ can create one easily for this example.
 cat <<EOF > /srv/salt/top.sls
 base:
   '*':
-    - yomi.installer
+    - yomi
 EOF
 ```
 
@@ -181,7 +181,7 @@ hardware](../README.md#getting-hardware-information) available in the
 new worker node, and adjust the pillar accordingly.
 
 Optionally we can [wipe the disks](../README.md#cleaning-the-disks),
-and then apply the `yomi.installer` state.
+and then apply the `yomi` state.
 
 ```bash
 salt worker2 state.apply

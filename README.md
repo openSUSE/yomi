@@ -412,11 +412,11 @@ states are available and a new system is booted with a up-to-date
 `salt-minion`, we can start to operate with Yomi.
 
 The usual process is simple: describe the pillar information and apply
-the `yomi.install` state to the node or nodes. Is not relevant how the
-pillar was designed (maybe using a smart template that cover all the
-cases or writing a raw YAML that only covers one single installation).
-In this section we will provide some hints about how get information
-and can help in this process.
+the `yomi` state to the node or nodes. Is not relevant how the pillar
+was designed (maybe using a smart template that cover all the cases or
+writing a raw YAML that only covers one single installation).  In this
+section we will provide some hints about how get information and can
+help in this process.
 
 ## Getting hardware information
 
@@ -535,13 +535,13 @@ salt node saltutil.sync_all
 salt node state.apply yomi.storage.wipe
 ```
 
-## Applying the yomi.install state
+## Applying the yomi state
 
 Finally, to install the operating system defined by the pillar into
 the new node, we need to apply the high-state:
 
 ```bash
-salt node state.apply yomi.installer
+salt node state.apply yomi
 ```
 
 If we have a `top.sls` file similar to this example, living in
@@ -551,7 +551,7 @@ configured:
 ```yaml
 base:
   '*':
-    - yomi.installer
+    - yomi
 ```
 
 We can apply directly the high state:

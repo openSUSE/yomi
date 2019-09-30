@@ -6,7 +6,7 @@ synchronize_all:
 install_microos:
   salt.state:
     - sls:
-      - yomi.installer
+      - yomi
     - tgt: '*'
 
 wait_for_reboots:

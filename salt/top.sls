@@ -1,3 +1,3 @@
 base:
   '*':
-    - yomi.installer
+    - yomi
