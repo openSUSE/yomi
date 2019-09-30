@@ -1,5 +1,15 @@
-# TODO(aplanas): Think about a better guard
-{% if not salt.file.file_exists('/etc/yomi-installed') %}
+{% set filesystems = pillar['filesystems'] %}
+
+{% set ns = namespace(installed=False) %}
+{% for device, info in filesystems.items() %}
+  {% if info.get('mountpoint') == '/' %}
+    {% if salt.cmd.run('findmnt --list --noheadings --output SOURCE /') == device %}
+      {% set ns.installed = True %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% if not ns.installed %}
 include:
   - .storage
   - .software
