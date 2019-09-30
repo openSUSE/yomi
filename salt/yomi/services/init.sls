@@ -4,7 +4,7 @@
 
 include:
   - .network
-{% if 'salt-minion' in pillar %}
+{% if pillar.get('salt-minion', {}) %}
   - .salt-minion
 {% endif %}
 

@@ -1,7 +1,7 @@
 {% set software = pillar['software'] %}
 
 include:
-{% if 'image' in software %}
+{% if software.get('image', {}) %}
   - .image
   - ..storage.fstab
   - ..storage.mount

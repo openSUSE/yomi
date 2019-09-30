@@ -1,6 +1,6 @@
 {% import 'macros.yml' as macros %}
 
-{% set salt_minion = pillar.get('salt-minion', {}) %}
+{% set salt_minion = pillar['salt-minion'] %}
 
 {% if salt_minion.get('configure', False) %}
 {{ macros.log('module', 'create_salt-minion') }}

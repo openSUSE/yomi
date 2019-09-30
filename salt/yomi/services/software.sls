@@ -1,8 +1,7 @@
-{% set config = pillar['config'] %}
-
-{% if 'salt-minion' in pillar %}
+{% if pillar.get('salt-minion', {}) %}
 include:
-  {% if 'salt-minion' in pillar %}
+  {% if pillar.get('salt-minion', {}) %}
   - .salt-minion.software
   {% endif %}
 {% endif %}
+  

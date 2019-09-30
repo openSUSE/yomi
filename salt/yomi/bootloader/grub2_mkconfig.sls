@@ -43,7 +43,7 @@ config_grub2_resume:
     - name: /mnt/etc/default/grub
     - text:
       - GRUB_TIMEOUT=8
-{% if 'lvm' not in pillar %}
+{% if not pillar.get('lvm', {}) %}
       - GRUB_DEFAULT="saved"
       # - GRUB_SAVEDEFAULT="true"
 {% endif %}
@@ -64,7 +64,7 @@ grub2_mkconfig:
   cmd.run:
     - name: grub2-mkconfig -o /boot/grub2/grub.cfg
     - root: /mnt
-{% if 'lvm' in pillar %}
+{% if pillar.get('lvm', {}) %}
     - binds: [/run]
 {% endif %}
     - watch:

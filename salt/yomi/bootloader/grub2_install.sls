@@ -18,7 +18,7 @@ grub2_install:
     - name: grub2-install --force {{ bootloader.device }}
     - creates: /mnt/boot/grub2/i386-pc/normal.mod
 {% endif %}
-{% if 'lvm' in pillar %}
+{% if pillar.get('lvm', {}) %}
     - binds: [/run]
     - env:
       - LVM_SUPPRESS_FD_WARNINGS: 1

@@ -27,7 +27,7 @@ add_repository_{{ repo }}:
       - mount: mount_/mnt
 {% endfor %}
 
-{% if 'packages' in software %}
+{% if software.get('packages', []) %}
 {{ macros.log('pkg', 'install_packages') }}
 install_packages:
   pkg.installed:

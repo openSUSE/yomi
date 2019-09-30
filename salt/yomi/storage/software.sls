@@ -1,11 +1,11 @@
 {% set config = pillar['config'] %}
 
-{% if 'raid' in pillar or 'lvm' in pillar or config.get('snapper', False) %}
+{% if pillar.get('raid', {}) or pillar.get('lvm', {}) or config.get('snapper', False) %}
 include:
-  {% if 'raid' in pillar %}
+  {% if pillar.get('raid', {}) %}
   - .raid.software
   {% endif %}
-  {% if 'lvm' in pillar %}
+  {% if pillar.get('lvm', {}) %}
   - .lvm.software
   {% endif %}
   {% if config.get('snapper', False) %}

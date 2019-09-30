@@ -6,7 +6,7 @@ include:
   - .volumes
   - .format
   - .subvolumes
-{% if 'image' not in software %}
+{% if software.get('image', {}) %}
   - .fstab
   - .mount
 {% endif %}
