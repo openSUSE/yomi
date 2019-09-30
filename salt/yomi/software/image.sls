@@ -33,7 +33,7 @@ generate_machine_id_{{ device }}:
     - creates: /mnt/etc/machine-id
 
 {{ macros.log('mount', 'umount_image_/mnt') }}
-umount_/mnt:
+umount_image_/mnt:
   mount.unmounted:
     - name: /mnt
     - requires: mount_image_/mnt
