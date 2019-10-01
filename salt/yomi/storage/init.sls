@@ -6,7 +6,8 @@ include:
   - .volumes
   - .format
   - .subvolumes
-{% if software.get('image', {}) %}
+{# TODO: Remove the double check (SumaForm bug) #}
+{% if not software.get('image', {}).get('url', '') %}
   - .fstab
   - .mount
 {% endif %}

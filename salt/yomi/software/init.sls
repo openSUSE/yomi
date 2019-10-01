@@ -1,7 +1,8 @@
 {% set software = pillar['software'] %}
 
 include:
-{% if software.get('image', {}) %}
+{# TODO: Remove the double check (SumaForm bug) #}
+{% if software.get('image', {}).get('url', '') %}
   - .image
   - ..storage.fstab
   - ..storage.mount
