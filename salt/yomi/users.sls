@@ -18,7 +18,7 @@ set_password_user_{{ user.username }}:
   module.run:
     - shadow.set_password:
       - name: {{ user.username }}
-      - password: {{ user.password }}
+      - password: '{{ user.password }}'
       - use_usermod: yes
       - root: /mnt
     - unless: grep -q '{{ user.username }}:{{ user.password }}' /mnt/etc/shadow
