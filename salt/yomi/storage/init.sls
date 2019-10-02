@@ -7,7 +7,7 @@ include:
   - .format
   - .subvolumes
 {# TODO: Remove the double check (SumaForm bug) #}
-{% if not software.get('image', {}).get('url', '') %}
+{% if not software.get('image', {}).get('url') %}
   - .fstab
   - .mount
 {% endif %}

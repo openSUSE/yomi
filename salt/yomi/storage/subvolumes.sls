@@ -2,6 +2,6 @@
 
 include:
   - .btrfs.subvolume
-{% if config.get('snapper', False) %}
+{% if config.get('snapper') %}
   - .snapper.subvolume
 {% endif %}

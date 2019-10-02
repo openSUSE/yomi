@@ -1,7 +1,7 @@
 {% set config = pillar['config'] %}
 
 include:
-{% if config.get('snapper', False) %}
+{% if config.get('snapper') %}
   - .snapper.umount
 {% endif %}
   - .btrfs.umount

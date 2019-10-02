@@ -3,7 +3,7 @@
 {% set software = pillar['software'] %}
 {% set software_config = software.get('config', {}) %}
 
-{% if software_config.get('minimal', False) %}
+{% if software_config.get('minimal') %}
 {{ macros.log('file', 'config_zypp_minimal_host') }}
 config_zypp_minimal_host:
   file.append:
@@ -27,7 +27,7 @@ add_repository_{{ repo }}:
       - mount: mount_/mnt
 {% endfor %}
 
-{% if software.get('packages', []) %}
+{% if software.get('packages') %}
 {{ macros.log('pkg', 'install_packages') }}
 install_packages:
   pkg.installed:
@@ -37,7 +37,7 @@ install_packages:
     - root: /mnt
 {% endif %}
 
-{% if software_config.get('minimal', False) %}
+{% if software_config.get('minimal') %}
 {{ macros.log('file', 'config_zypp_minimal') }}
 config_zypp_minimal:
   file.append:

@@ -1,20 +1,18 @@
 {% import 'macros.yml' as macros %}
 
 {% set config = pillar['config'] %}
-{% set is_uefi = grains['efi'] %}
-{% set is_secure_boot = grains['efi-secure-boot'] %}
 
 {{ macros.log('pkg', 'install_grub2') }}
 install_grub2:
   pkg.installed:
     - pkgs:
       - grub2
-{% if config.get('grub2_theme', False) %}
+{% if config.get('grub2_theme') %}
       - grub2-branding-openSUSE
 {% endif %}
-{% if is_uefi %}
+{% if grains['efi'] %}
       - grub2-x86_64-efi
-  {% if is_secure_boot %}
+  {% if grains['efi-secure-boot'] %}
       - shim
   {% endif %}
 {% endif %}

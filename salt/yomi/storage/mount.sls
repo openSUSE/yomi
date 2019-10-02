@@ -3,6 +3,6 @@
 include:
   - .device.mount
   - .btrfs.mount
-{% if config.get('snapper', False) %}
+{% if config.get('snapper') %}
   - .snapper.mount
 {% endif %}

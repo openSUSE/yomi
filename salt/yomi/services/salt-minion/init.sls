@@ -2,7 +2,7 @@
 
 {% set salt_minion = pillar['salt-minion'] %}
 
-{% if salt_minion.get('configure', False) %}
+{% if salt_minion.get('configure') %}
 {{ macros.log('module', 'create_salt-minion') }}
 create_salt-minion:
   module.run:

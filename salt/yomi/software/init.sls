@@ -2,7 +2,7 @@
 
 include:
 {# TODO: Remove the double check (SumaForm bug) #}
-{% if software.get('image', {}).get('url', '') %}
+{% if software.get('image', {}).get('url') %}
   - .image
   - ..storage.fstab
   - ..storage.mount
