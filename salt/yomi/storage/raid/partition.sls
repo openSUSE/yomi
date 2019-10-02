@@ -1,2 +1,2 @@
 {% set filter=salt.filters.is_raid %}
-{% include "../_partition.sls" %}
+{% include '../_partition.sls' %}
