@@ -1,0 +1,31 @@
+# Uyuni Form for the Yomi pillar data - Services
+#
+# Find mode pillar examples in /usr/share/yomi/pillar
+
+salt-minion:
+  $type: group
+  configure:
+    $type: boolean
+    $default: yes
+    $help: (Provisional) Install and configure a salt-minion service
+
+services:
+  $type: group
+  enabled:
+    $type: edit-group
+    $minItems: 0
+    $itemName: Service ${i}
+    $prototype:
+      $key:
+        $type: text
+        $name: Service
+        $help: Name of the service to enable
+  disabled:
+    $type: edit-group
+    $minItems: 0
+    $itemName: Service ${i}
+    $prototype:
+      $key:
+        $type: text
+        $name: Service
+        $help: Name of the service to disable

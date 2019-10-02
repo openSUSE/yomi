@@ -1,0 +1,19 @@
+# Uyuni Form for the Yomi pillar data - Bootloader
+#
+# Find mode pillar examples in /usr/share/yomi/pillar
+
+bootloader:
+  $type: group
+  device:
+    $type: text
+    $placeholder: /dev/sda
+    $help: Device where the GRUB2 will be installed
+  kernel:
+    $type: text
+    $optional: yes
+    $default: splash=silent quiet
+    $help: Line assigned to the GRUB_CMDLINE_LINUX_DEFAULT parameter
+  disable_os_prober:
+    $type: boolean
+    $default: no
+    $help: Value for GRUB_DISABLE_OS_PROBER parameter

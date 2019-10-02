@@ -1,0 +1,41 @@
+# Uyuni Form for the Yomi pillar data - Software
+#
+# Find mode pillar examples in /usr/share/yomi/pillar
+
+software:
+  $type: group
+  config:
+    $type: group
+    minimal:
+      $type: boolean
+      $default: no
+      $help: Exclude recommended, documentation and multi-version packages
+  repositories:
+    $type: edit-group
+    $minItems: 0
+    $prototype:
+      $key:
+        $type: text
+        $name: Repository Name
+        $placeholder: repo-oss
+      $type: url
+      $name: Repository URL
+      $placeholder: http://download.opensuse.org/tumbleweed/repo/oss
+  packages:
+    $type: edit-group
+    $minItems: 0
+    $itemName: Package ${i}
+    $prototype:
+      $key:
+        $type: text
+        $name: Package
+        $help: "You can install patterns using the 'pattern:' prefix"
+  image:
+    $type: group
+    $optional: yes
+    url:
+      $type: url
+      $name: Image URL
+    md5:
+      $type: text
+      $optional: yes

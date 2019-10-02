@@ -1,0 +1,24 @@
+# Uyuni Form for the Yomi pillar data - Users
+#
+# Find mode pillar examples in /usr/share/yomi/pillar
+
+users:
+  $type: edit-group
+  $minItems: 1
+  $itemName: User ${i}
+  $prototype:
+    username:
+      $type: text
+    password:
+      $type: text
+      $name: Password Hash
+      $help: "You can generate a hash with 'openssl passwd -1 -salt <salt> <password>'"
+    certificates:
+      $type: edit-group
+      $minItems: 0
+      $itemName: Certificate ${i}
+      $prototype:
+        $key:
+          $type: text
+          $name: Certificate
+          $help: "Will be added to .ssh/authorized_keys. Use only the encoded key (remove the 'ssh-rsa' prefix and the 'user@host' suffix)"
