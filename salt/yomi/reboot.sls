@@ -13,7 +13,7 @@ grub_command_line:
 {{ macros.log('cmd', 'prepare_kexec') }}
 prepare_kexec:
   cmd.run:
-    - name: kexec -a -l /mnt/boot/vmlinuz --initrd=/mnt/boot/initrd --command-line="`cat /tmp/command_line`"
+    - name: kexec -a -l /mnt/boot/vmlinuz --initrd=/mnt/boot/initrd --command-line="$(cat /tmp/command_line)"
     - onlyif: "[ -e /tmp/command_line ]"
 
 {{ macros.log('cmd', 'execute_kexec') }}
