@@ -16,26 +16,5 @@ dump_image_into_{{ device }}:
     - checksum: {{ software.image[checksum_type] or '' }}
       {% endif %}
     {% endfor %}
-
-{{ macros.log('mount', 'mount_image_/mnt') }}
-mount_image_/mnt:
-  mount.mounted:
-    - name: /mnt
-    - device: {{ device }}
-    - fstype: {{ info.filesystem }}
-    - persist: no
-
-{{ macros.log('cmd', 'generate_machine_id_' ~ device) }}
-generate_machine_id_{{ device }}:
-  cmd.run:
-    - name: systemd-machine-id-setup
-    - root: /mnt
-    - creates: /mnt/etc/machine-id
-
-{{ macros.log('mount', 'umount_image_/mnt') }}
-umount_image_/mnt:
-  mount.unmounted:
-    - name: /mnt
-    - requires: mount_image_/mnt
   {% endif %}
 {% endfor %}

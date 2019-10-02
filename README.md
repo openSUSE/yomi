@@ -675,7 +675,8 @@ affect the installer.
 
 * `machine_id`: String. Optional.
 
-  Sets the system's machine ID. This controls the machine-id file.
+  Sets the system's machine ID. This controls the machine-id file. If
+  no one is provided, the one from the current system will be re-used.
 
 * `target`: String. Optional. Default: `multi-user.target`
 

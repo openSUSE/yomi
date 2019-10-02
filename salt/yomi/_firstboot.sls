@@ -25,3 +25,13 @@ systemd_firstboot:
         - /mnt/etc/localtime
         - /mnt/etc/machine-id
         - /mnt/etc/vconsole.conf
+
+{% if not config.get('machine_id') %}
+{{ macros.log('module', 'create_machine-id') }}
+create_machine-id:
+  module.run:
+    - file.copy:
+      - src: /etc/machine-id
+      - dst: /mnt/etc/machine-id
+      - remove_existing: yes
+{% endif %}
