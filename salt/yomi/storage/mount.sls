@@ -6,3 +6,4 @@ include:
 {% if config.get('snapper') %}
   - .snapper.mount
 {% endif %}
+  - ..chroot.mount
