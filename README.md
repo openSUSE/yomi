@@ -369,9 +369,8 @@ EOF
 ## Finding the master node
 
 The `salt-minion` configuration in the Yomi image will search the
-`salt-master` system under the `master` name. Is expected that the
-local DNS service will resolve the `master` name to the correct IP
-address.
+`salt-master` system under the `salt` name. Is expected that the local
+DNS service will resolve the `salt` name to the correct IP address.
 
 During boot time of the Yomi image we can change the address where is
 expected to find the master node. To do that we can enter under the
