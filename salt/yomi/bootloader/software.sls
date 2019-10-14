@@ -8,7 +8,7 @@ install_grub2:
     - pkgs:
       - grub2
 {% if config.get('grub2_theme') %}
-      - grub2-branding-openSUSE
+      - grub2-branding
 {% endif %}
 {% if grains['efi'] %}
       - grub2-x86_64-efi
@@ -16,6 +16,7 @@ install_grub2:
       - shim
   {% endif %}
 {% endif %}
+    - resolve_capabilities: yes
     - no_recommends: yes
     - root: /mnt
     - require:
