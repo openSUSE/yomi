@@ -1,0 +1,54 @@
+[1mAVAILABLE EXTENSIONS AND MODULES[0m
+
+    [1mBasesystem Module 15 SP2 x86_64[0m [33m(Activated)[0m
+    Deactivate with: SUSEConnect [31m-d[0m -p sle-module-basesystem/15.2/x86_64
+
+        [1mContainers Module 15 SP2 x86_64[0m
+        Activate with: SUSEConnect -p sle-module-containers/15.2/x86_64
+
+        [1mDesktop Applications Module 15 SP2 x86_64[0m
+        Activate with: SUSEConnect -p sle-module-desktop-applications/15.2/x86_64
+
+            [1mDevelopment Tools Module 15 SP2 x86_64[0m
+            Activate with: SUSEConnect -p sle-module-development-tools/15.2/x86_64
+
+            [1mSUSE Linux Enterprise Workstation Extension 15 SP2 x86_64 (ALPHA)[0m
+            Activate with: SUSEConnect -p sle-we/15.2/x86_64 -r [32m[1mADDITIONAL REGCODE[0m 
+
+        [1mPython 2 Module 15 SP2 x86_64[0m
+        Activate with: SUSEConnect -p sle-module-python2/15.2/x86_64
+
+        [1mSUSE Linux Enterprise Live Patching 15 SP2 x86_64 (ALPHA)[0m
+        Activate with: SUSEConnect -p sle-module-live-patching/15.2/x86_64 -r [32m[1mADDITIONAL REGCODE[0m 
+
+        [1mSUSE Package Hub 15 SP2 x86_64[0m
+        Activate with: SUSEConnect -p PackageHub/15.2/x86_64
+
+        [1mServer Applications Module 15 SP2 x86_64[0m [33m(Activated)[0m
+        Deactivate with: SUSEConnect [31m-d[0m -p sle-module-server-applications/15.2/x86_64
+
+            [1mLegacy Module 15 SP2 x86_64[0m
+            Activate with: SUSEConnect -p sle-module-legacy/15.2/x86_64
+
+            [1mPublic Cloud Module 15 SP2 x86_64[0m
+            Activate with: SUSEConnect -p sle-module-public-cloud/15.2/x86_64
+
+            [1mSUSE Linux Enterprise High Availability Extension 15 SP2 x86_64 (ALPHA)[0m
+            Activate with: SUSEConnect -p sle-ha/15.2/x86_64 -r [32m[1mADDITIONAL REGCODE[0m 
+
+            [1mWeb and Scripting Module 15 SP2 x86_64[0m
+            Activate with: SUSEConnect -p sle-module-web-scripting/15.2/x86_64
+
+        [1mTransactional Server Module 15 SP2 x86_64[0m
+        Activate with: SUSEConnect -p sle-module-transactional-server/15.2/x86_64
+
+
+[1mREMARKS[0m
+
+[31m(Not available)[0m The module/extension is [1mnot[0m enabled on your RMT/SMT
+[33m(Activated)[0m     The module/extension is activated on your system
+
+[1mMORE INFORMATION[0m
+
+You can find more information about available modules here:
+https://www.suse.com/documentation/sles-15/singlehtml/art_modules/art_modules.html
