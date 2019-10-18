@@ -26,7 +26,6 @@ software:
     $minItems: 0
     $itemName: Package ${i}
     $prototype:
-      $key:
         $type: text
         $name: Package
         $help: "You can install patterns using the 'pattern:' prefix"
@@ -39,3 +38,42 @@ software:
     md5:
       $type: text
       $optional: yes
+
+suseconnect:
+  $type: group
+  $name: SUSEConnect
+  config:
+    $type: group
+    regcode:
+      $type: text
+      $name: Registration Code
+    email:
+      $type: text
+      $optional: yes
+      $help: Email address for product registration
+    url:
+      $type: url
+      $optional: yes
+      $placeholder: https://scc.suse.com
+    version:
+      $type: text
+      $optional: yes
+    arch:
+      $type: text
+      $name: Architecture
+      $optional: yes
+  products:
+    $type: edit-group
+    $minItems: 0
+    $itemName: Product ${i}
+    $prototype:
+      $type: text
+      $placeholder: <name>/<version>/<architecture>
+  packages:
+    $type: edit-group
+    $minItems: 0
+    $itemName: Package ${i}
+    $prototype:
+        $type: text
+        $name: Package
+        $help: "You can install patterns using the 'pattern:' prefix"
