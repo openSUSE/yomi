@@ -1094,6 +1094,73 @@ software:
     - kernel-default
 ```
 
+## `suseconnect` section
+
+Very related with the previous section (`software`), we can register
+an SLE product and modules using the `SUSEConnect` command.
+
+In order to `SUSEConnect` to succeed, a product needs to be present
+already in the system. This imply that the register must happen after
+(at least a partial) installation has been done.
+
+As `SUSEConnect` will register new repositories, this also imply that
+not all the packages that can be enumerated in the `software` section
+can be installed.
+
+To resolve both conflicts, Yomi will first install the packages listed
+in the `sofwtare` section, and after the registration, the packages
+listed in this `suseconnect` section.
+
+* `config`. Dictionary.
+
+  Local configuration for the section. It is not optional as there is
+  at least one parameter that is required for any registration.
+
+  * `regcode`. String.
+
+  Subscription registration code for the product to be registered.
+
+  * `email`. String. Optional.
+
+  Email address for product registration.
+
+  * `url`. String. Optional.
+
+  URL of registration server (e.g. https://scc.suse.com)
+
+  * `version`. String. Optional.
+
+  Version part of the product name. If the product name do not have a
+  version, this default value will be used.
+
+  * `arch`. String. Optional.
+
+  Architecture part of the product name. If the product name do not
+  have an architecture, this default value will be used.
+
+* `products`. Array. Optional.
+
+  Product names to register. The expected format is
+  <name>/<version>/<architecture>. If only <name> is used, the values
+  for <version> and <architecture> will be taken from the `config`
+  section.
+
+* `packages`. Array. Optional
+
+  List of packages or patters to be installed from the different
+  modules.
+
+Example:
+
+```yaml
+suseconnect:
+  config:
+    regcode: SECRET-CODE
+  products:
+    - sle-module-basesystem/15.2/x86_64
+    - sle-module-server-applications/15.2/x86_64
+```
+
 ## `salt-minion` section
 
 Install and configure the salt-minion service.

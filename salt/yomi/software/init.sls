@@ -7,7 +7,10 @@ include:
   - ..storage.fstab
   - ..storage.mount
 {% endif %}
-  - .pkgmanager
+  - .software
+{% if pillar.get('suseconnect') %}
+  - .suseconnect
+{% endif %}
   - ..storage.software
   - ..bootloader.software
   - ..services.software
