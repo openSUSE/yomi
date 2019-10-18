@@ -11,7 +11,7 @@
 #   * snapper = {True, False}
 #   * swap = {True, False}
 #   * mode = {'single', 'lvm', 'raid{0, 1, 4, 5, 6, 10}', 'microos',
-#             'kubic', 'image'}
+#             'kubic', 'image', 'sles'}
 #
 # This meta-pillar can be used as a template for new installers. This
 # template is expected to be adapted for production systems, as was
@@ -23,10 +23,10 @@
 {% set partition = 'gpt' %}
 {% set device_type = 'sd' %}
 {% set root_filesystem = 'btrfs' %}
-{% set home_filesystem = False %}
+{% set home_filesystem = 'xfs' %}
 {% set snapper = True %}
-{% set swap = False %}
-{% set mode = 'microos' %}
+{% set swap = True %}
+{% set mode = 'sles' %}
 
 config:
   events: no
@@ -43,11 +43,27 @@ config:
 
 {% include "_storage.sls.%s" % mode %}
 
+{% if mode == 'sles' %}
+suseconnect:
+  config:
+    regcode: REGISTRATION-CODE
+    version: '15.1'
+    arch: x86_64
+  products:
+    - sle-module-basesystem
+    - sle-module-server-applications
+{% endif %}
+
 software:
   config:
     minimal: {{ 'yes' if mode in ('microos', 'kubic') else 'no' }}
   repositories:
-    repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
+{% if mode == 'sles' %}
+    SUSE_SLE-15_GA: "http://download.suse.de/ibs/SUSE:/SLE-15:/GA/standard/"
+    SUSE_SLE-15-SP1_GA: "http://download.suse.de/ibs/SUSE:/SLE-15-SP1:/GA/standard/"
+{% else %}
+    repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss/"
+{% endif %}
 {% if mode == 'image' %}
   image:
     url: tftp://10.0.3.1/openSUSE-Tumbleweed-Yomi.x86_64-1.0.0.xz
@@ -65,6 +81,15 @@ software:
     - pattern:microos_hardware
     - pattern:microos_apparmor
     - pattern:kubic_worker
+  {% elif mode == 'sles' %}
+    - product:SLES
+    - pattern:base
+    - pattern:enhanced_base
+    - pattern:yast2_basis
+    - pattern:x11_yast
+    - pattern:x11
+    - pattern:gnome_basic
+    - kernel-default
   {% else %}
     - pattern:enhanced_base
     - glibc-locale
