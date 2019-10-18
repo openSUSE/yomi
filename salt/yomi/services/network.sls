@@ -18,6 +18,24 @@ create_ifcfg_{{ interface }}:
         - NETWORK=''
         - REMOTE_IPADDR=''
         - STARTMODE='auto'
+    - unless: "[ -e /mnt/usr/lib/udev/rules.d/75-persistent-net-generator.rules ]"
+
+{{ macros.log('file', 'create_ifcfg_eth' ~ loop.index0) }}
+create_ifcfg_eth{{ loop.index0 }}:
+  file.append:
+    - name: /mnt/etc/sysconfig/network/ifcfg-eth{{ loop.index0 }}
+    - text:
+        - BOOTPROTO='dhcp'
+        - BROADCAST=''
+        - ETHTOOL_OPTIONS=''
+        - IPADDR=''
+        - MTU=''
+        - NAME=''
+        - NETMASK=''
+        - NETWORK=''
+        - REMOTE_IPADDR=''
+        - STARTMODE='auto'
+    - onlyif: "[ -e /mnt/usr/lib/udev/rules.d/75-persistent-net-generator.rules ]"
 {% endfor %}
 
 {{ macros.log('file', 'dhcp_hostname') }}
