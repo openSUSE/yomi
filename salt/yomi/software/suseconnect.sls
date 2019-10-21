@@ -18,6 +18,11 @@ register_product:
       - mount: mount_/mnt
 
 {% for product in suseconnect.get('products', []) %}
+  {% set regcode = suseconnect_config['regcode'] %}
+  {% if product in mapping %}
+    {% set regcode = product.get('regcode', regcode) %}
+    {% set product = product['name'] %}
+  {% endif %}
   {% if 'version' in suseconnect_config and 'arch' in suseconnect_config %}
     {% if suseconnect_config['version'] not in product %}
       {% set product = '%s/%s/%s'|format(product, suseconnect_config['version'], suseconnect_config['arch']) %}
@@ -26,7 +31,7 @@ register_product:
 {{ macros.log('suseconnect', 'register_' ~ product) }}
 register_{{ product }}:
   suseconnect.registered:
-    - regcode: {{ suseconnect_config['regcode'] }}
+    - regcode: {{ regcode }}
     - product: {{ product }}
 {% if suseconnect_config.get('email') %}
     - email: {{ suseconnect_config['email'] }}

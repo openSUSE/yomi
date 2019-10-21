@@ -1145,6 +1145,21 @@ listed in this `suseconnect` section.
   for <version> and <architecture> will be taken from the `config`
   section.
 
+  If the product / module have a different registration code than the
+  one declared in the `config` sub-section, we can declare a new one
+  via a dictionary.
+
+  * `name`. String. Optional.
+
+    Product names to register. The expected format is
+    <name>/<version>/<architecture>. If only <name> is used, the
+    values for <version> and <architecture> will be taken from the
+    `config` section.
+
+  * `regcode`. String. Optional.
+
+    Subscription registration code for the product to be registered.
+
 * `packages`. Array. Optional
 
   List of packages or patters to be installed from the different
@@ -1159,6 +1174,8 @@ suseconnect:
   products:
     - sle-module-basesystem/15.2/x86_64
     - sle-module-server-applications/15.2/x86_64
+    - name: sle-module-live-patching/15.2/x86_64
+      regcode: SECRET-CODE
 ```
 
 ## `salt-minion` section
