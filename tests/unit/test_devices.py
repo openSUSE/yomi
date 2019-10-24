@@ -2,7 +2,7 @@
 #
 # Author: Alberto Planas <aplanas@suse.com>
 #
-# Copyright 2019 SUSE LINUX GmbH, Nuernberg, Germany.
+# Copyright 2019 SUSE LLC.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -1052,7 +1052,7 @@ class DevicesTestCase(unittest.TestCase):
               Drive Speed: 4
               Volume ID: "CDROM"
               Application: "0X5228779D"
-              Publisher: "SUSE LINUX GMBH"
+              Publisher: "SUSE LLC"
               Preparer: "KIWI - HTTPS://GITHUB.COM/OSINSIDE/KIWI"
               Creation date: "2019081111443900"
               El Torito info: platform 0, bootable
@@ -1137,7 +1137,7 @@ class DevicesTestCase(unittest.TestCase):
                 'Drive Speed': '4',
                 'Volume ID': 'CDROM',
                 'Application': '0X5228779D',
-                'Publisher': 'SUSE LINUX GMBH',
+                'Publisher': 'SUSE LLC',
                 'Preparer': 'KIWI - HTTPS://GITHUB.COM/OSINSIDE/KIWI',
                 'Creation date': '2019081111443900',
                 'El Torito info': {
