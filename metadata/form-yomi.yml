@@ -13,13 +13,15 @@ config:
   reboot:
     $type: boolean
     $default: yes
-    # This can fail, as the tri-state is boolean and text, but here is
-    # only text.
+    # This can fail, as the multi-state is boolean and text, but here
+    # is only text.
     # $type: select
     # $values:
     #   - "yes"
     #   - "no"
     #   - kexec
+    #   - halt
+    #   - shutdown
     # $default: "yes"
   snapper:
     $type: boolean

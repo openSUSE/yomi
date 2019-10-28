@@ -625,6 +625,11 @@ affect the installer.
   * `kexec`: Instead of rebooting, reload the new kernel installed in
     the node.
 
+  * `halt`: The machine will halt at the end of the installation.
+
+  * `shutdown`: The machine will shut down at the end of the
+    installation.
+
 * `snapper`: Boolean. Optional. Default: `no`
 
   In Btrfs configurations (and in LVM, but still not implemented) we

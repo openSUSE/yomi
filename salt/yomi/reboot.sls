@@ -21,6 +21,18 @@ execute_kexec:
   cmd.run:
     - name: systemctl kexec
 
+{% elif reboot == 'halt' %}
+{{ macros.log('module', 'halt') }}
+halt:
+  module.run:
+    - system.halt:
+
+{% elif reboot == 'shutdown' %}
+{{ macros.log('module', 'shutdown') }}
+shutdown:
+  module.run:
+    - system.shutdown:
+
 {% elif reboot %}
 {{ macros.log('module', 'reboot') }}
 reboot:
