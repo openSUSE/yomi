@@ -8,6 +8,11 @@ bootloader:
     $type: text
     $placeholder: /dev/sda
     $help: Device where the GRUB2 will be installed
+  timeout:
+    $type: number
+    $optional: yes
+    $default: 8
+    $help: Value for the GRUB_TIMEOUT parameter
   kernel:
     $type: text
     $optional: yes

@@ -995,6 +995,10 @@ filesystems:
   activated, to install and configure the bootloader (or the shim
   loader)
 
+* `timeout`: Integer. Optional. Default: `8`
+
+  Value for the `GRUB_TIMEOUT` parameter.
+
 * `kernel`: String. Optional. Default: `splash=silent quiet`
 
   Line assigned to the `GRUB_CMDLINE_LINUX_DEFAULT` parameter.

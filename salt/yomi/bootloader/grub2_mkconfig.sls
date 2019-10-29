@@ -35,7 +35,7 @@ config_grub2_resume:
   file.append:
     - name: /mnt/etc/default/grub
     - text:
-      - GRUB_TIMEOUT=8
+      - GRUB_TIMEOUT={{ bootloader.get('timeout', 8) }}
 {% if not pillar.get('lvm') %}
       - GRUB_DEFAULT="saved"
       # - GRUB_SAVEDEFAULT="true"
