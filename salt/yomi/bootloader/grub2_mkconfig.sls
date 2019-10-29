@@ -24,15 +24,10 @@ config_grub2_theme:
   file.append:
     - name: /mnt/etc/default/grub
     - text:
-      - GRUB_TERMINAL={{ "gfxterm" if not config.get('grub2_console') else "console" }}
+      - GRUB_TERMINAL="{{ bootloader.get('terminal', 'gfxterm') }}"
       - GRUB_GFXMODE="{{ bootloader.get('gfxmode', 'auto') }}"
       - GRUB_BACKGROUND=
       # - GRUB_THEME="/boot/grub2/themes/openSUSE/theme.txt"
-{% endif %}
-
-{% set kernel = bootloader.get('kernel', 'splash=silent quiet') %}
-{% if config.get('grub2_console') %}
-  {% set kernel = kernel ~ ' console=tty0 console=ttyS0,115200' %}
 {% endif %}
 
 {{ macros.log('file', 'config_grub2_resume') }}
@@ -45,8 +40,19 @@ config_grub2_resume:
       - GRUB_DEFAULT="saved"
       # - GRUB_SAVEDEFAULT="true"
 {% endif %}
-      - GRUB_CMDLINE_LINUX_DEFAULT="{{ kernel }}"
+
+{% set serial_command = bootloader.get('serial_command')%}
+{{ macros.log('file', 'config_grub2_config') }}
+config_grub2_config:
+  file.append:
+    - name: /mnt/etc/default/grub
+    - text:
+      - GRUB_CMDLINE_LINUX_DEFAULT="{{ bootloader.get('kernel', 'splash=silent quiet') }}"
       - GRUB_DISABLE_OS_PROBER="{{ true if bootloader.get('disable_os_prober') else false }}"
+{% if serial_command %}
+      - GRUB_TERMINAL="serial"
+      - GRUB_SERIAL_COMMAND="{{ serial_command }}"
+{% endif %}
 
 {{ macros.log('cmd', 'grub2_set_default') }}
 grub2_set_default:

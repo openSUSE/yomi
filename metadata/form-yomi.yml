@@ -27,13 +27,9 @@ config:
     $type: boolean
     $default: no
     $help: For now it only can be used in BtrFS filesystems
-  grub2_console:
-    $type: boolean
-    $default: no
-    $help: "If yes Yomi will append 'console=tty0 console=ttyS0,115200' in the Linux command line"
   locale:
     $type: select
-    # Output from ''
+    # Output from 'localectl list-locales'
     $values:
       - C.utf8
       - aa_DJ

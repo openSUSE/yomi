@@ -637,12 +637,6 @@ affect the installer.
   after updates in the system. One installed, a first snapshot will be
   done and the GRUB entry to boot from snapshots will be added.
 
-* `grub2_console`: Boolean. Optional. Default: `no`
-
-  If `yes` Yomi will append `console=tty0 console=ttyS0,115200` in the
-  Linux command line during the boot. This option is help full when
-  the we want to have serial access to console to the new machine.
-
 * `locale`: String. Optional. Default: `en_US.utf8`
 
   Sets the system locale, more specifically the LANG= and LC\_MESSAGES
@@ -1005,14 +999,30 @@ filesystems:
 
   Line assigned to the `GRUB_CMDLINE_LINUX_DEFAULT` parameter.
 
-* `theme`: Boolean. Optional. Default: `no`
+* `terminal`: String. Optional. Default: `gfxterm`
 
-  If `yes` the `grub2-branding` package will be installed and
-  configured.
+  Value for the `GRUB_TERMINAL` parameter.
+
+  If the value is set to `serial`, we need to add content to the
+  `serial_command` parameter.
+
+  If the value is set to `console`, we can pass the console parameters
+  to the `kernel` parameter. For example, `kernel: splash=silent quiet
+  console=tty0 console=ttyS0,115200`
+
+* `serial_command`: String. Optional
+
+  Value for the `GRUB_SERIAL_COMMAND` parameter. If there is a value,
+  `GRUB_TERMINAL` is expected to be `serial`.
 
 * `gfxmode`: String. Optional. Default: `auto`
 
   Value for the `GRUB_GFXMODE` parameter.
+
+* `theme`: Boolean. Optional. Default: `no`
+
+  If `yes` the `grub2-branding` package will be installed and
+  configured.
 
 * `disable_os_prober`: Boolean. Optional. Default: `False`
 

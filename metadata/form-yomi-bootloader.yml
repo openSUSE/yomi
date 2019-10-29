@@ -13,6 +13,15 @@ bootloader:
     $optional: yes
     $default: splash=silent quiet
     $help: Line assigned to the GRUB_CMDLINE_LINUX_DEFAULT parameter
+  terminal:
+    $type: text
+    $optional: yes
+    $default: gfxterm
+    $help: Value for the GRUB_TERMINAL parameter
+  serial_command:
+    $type: text
+    $optional: yes
+    $help: Value for the GRUB_SERIAL_COMMAND parameter
   gfxmode:
     $type: text
     $optional: yes
@@ -22,7 +31,6 @@ bootloader:
     $type: boolean
     $default: yes
     $help: Install and configure grub2-branding package
-
   disable_os_prober:
     $type: boolean
     $default: no
