@@ -27,10 +27,6 @@ config:
     $type: boolean
     $default: no
     $help: For now it only can be used in BtrFS filesystems
-  grub2_theme:
-    $type: boolean
-    $default: yes
-    $help: (Provisional) Install and configure grub2-branding-openSUSE package
   grub2_console:
     $type: boolean
     $default: no

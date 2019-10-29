@@ -18,7 +18,7 @@ config_grub2_efi:
     - text: GRUB_USE_LINUXEFI="true"
 {% endif %}
 
-{% if config.get('grub2_theme') %}
+{% if bootloader.get('theme') %}
 {{ macros.log('file', 'config_grub2_theme') }}
 config_grub2_theme:
   file.append:

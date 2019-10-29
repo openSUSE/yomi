@@ -18,6 +18,11 @@ bootloader:
     $optional: yes
     $default: auto
     $help: Value for the GRUB_GFXMODE parameter
+  theme:
+    $type: boolean
+    $default: yes
+    $help: Install and configure grub2-branding package
+
   disable_os_prober:
     $type: boolean
     $default: no

@@ -637,11 +637,6 @@ affect the installer.
   after updates in the system. One installed, a first snapshot will be
   done and the GRUB entry to boot from snapshots will be added.
 
-* `grub2_theme`: Boolean. Optional. Default: `no`
-
-  If `yes` the `grub2-branding-openSUSE` package will be installed and
-  configured.
-
 * `grub2_console`: Boolean. Optional. Default: `no`
 
   If `yes` Yomi will append `console=tty0 console=ttyS0,115200` in the
@@ -1009,6 +1004,11 @@ filesystems:
 * `kernel`: String. Optional. Default: `splash=silent quiet`
 
   Line assigned to the `GRUB_CMDLINE_LINUX_DEFAULT` parameter.
+
+* `theme`: Boolean. Optional. Default: `no`
+
+  If `yes` the `grub2-branding` package will be installed and
+  configured.
 
 * `gfxmode`: String. Optional. Default: `auto`
 

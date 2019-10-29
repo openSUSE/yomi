@@ -85,3 +85,4 @@ filesystems:
 
 bootloader:
   device: /dev/{{ device_type }}a
+  theme: yes

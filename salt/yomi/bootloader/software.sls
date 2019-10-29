@@ -1,13 +1,13 @@
 {% import 'macros.yml' as macros %}
 
-{% set config = pillar['config'] %}
+{% set bootloader = pillar['bootloader'] %}
 
 {{ macros.log('pkg', 'install_grub2') }}
 install_grub2:
   pkg.installed:
     - pkgs:
       - grub2
-{% if config.get('grub2_theme') %}
+{% if bootloader.get('theme') %}
       - grub2-branding
 {% endif %}
 {% if grains['efi'] %}

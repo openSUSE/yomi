@@ -111,3 +111,4 @@ filesystems:
 
 bootloader:
   device: /dev/md0
+  theme: yes
