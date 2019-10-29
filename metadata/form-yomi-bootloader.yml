@@ -13,7 +13,12 @@ bootloader:
     $optional: yes
     $default: splash=silent quiet
     $help: Line assigned to the GRUB_CMDLINE_LINUX_DEFAULT parameter
+  gfxmode:
+    $type: text
+    $optional: yes
+    $default: auto
+    $help: Value for the GRUB_GFXMODE parameter
   disable_os_prober:
     $type: boolean
     $default: no
-    $help: Value for GRUB_DISABLE_OS_PROBER parameter
+    $help: Value for the GRUB_DISABLE_OS_PROBER parameter

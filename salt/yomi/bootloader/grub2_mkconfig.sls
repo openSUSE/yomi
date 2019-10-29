@@ -25,7 +25,7 @@ config_grub2_theme:
     - name: /mnt/etc/default/grub
     - text:
       - GRUB_TERMINAL={{ "gfxterm" if not config.get('grub2_console') else "console" }}
-      - GRUB_GFXMODE="auto"
+      - GRUB_GFXMODE="{{ bootloader.get('gfxmode', 'auto') }}"
       - GRUB_BACKGROUND=
       # - GRUB_THEME="/boot/grub2/themes/openSUSE/theme.txt"
 {% endif %}

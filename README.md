@@ -1010,9 +1010,13 @@ filesystems:
 
   Line assigned to the `GRUB_CMDLINE_LINUX_DEFAULT` parameter.
 
+* `gfxmode`: String. Optional. Default: `auto`
+
+  Value for the `GRUB_GFXMODE` parameter.
+
 * `disable_os_prober`: Boolean. Optional. Default: `False`
 
-  Value for `GRUB_DISABLE_OS_PROBER` parameter.
+  Value for the `GRUB_DISABLE_OS_PROBER` parameter.
 
 Example:
 
