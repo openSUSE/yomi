@@ -1,0 +1,675 @@
+#!/usr/bin/python3
+
+# -*- coding: utf-8 -*-
+#
+# Author: Alberto Planas <aplanas@suse.com>
+#
+# Copyright 2019 SUSE LLC.
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+import argparse
+import crypt
+import json
+import logging
+from pathlib import Path
+import xml.etree.ElementTree as ET
+
+
+class PathDict(dict):
+    def path(self, path, default=None):
+        result = self
+        for item in path.split('.'):
+            if item in result:
+                result = result[item]
+            else:
+                return default
+        return result
+
+
+class Convert:
+    def __init__(self, control):
+        """Construct a Convert class from a control XML object"""
+        self.control = control
+        # Store the parsed version of the control file
+        self._control = None
+        self.pillar = {}
+
+    @staticmethod
+    def _find(element, name):
+        """Find a single element in a XML tree"""
+        return element.find('{{http://www.suse.com/1.0/yast2ns}}{}'.format(
+            name))
+
+    @staticmethod
+    def _get_tag(element):
+        """Get element name, without namespace"""
+        return element.tag.replace('{http://www.suse.com/1.0/yast2ns}', '')
+
+    @staticmethod
+    def _get_type(element):
+        """Get element type if any"""
+        return element.attrib.get('{http://www.suse.com/1.0/configns}type')
+
+    @staticmethod
+    def _get_text(element):
+        """Get element text if any"""
+        if element is not None and element.text is not None:
+            return element.text.strip()
+
+    @staticmethod
+    def _get_bool(element):
+        """Get element boolean value if any"""
+        _text = Convert._get_text(element)
+        if _text:
+            return _text.lower() == 'true'
+
+    @staticmethod
+    def _get_int(element):
+        """Get element integer value if any"""
+        _text = Convert._get_text(element)
+        if _text:
+            try:
+                return int(_text)
+            except ValueError:
+                pass
+
+    @staticmethod
+    def _get(element):
+        """Recursively parse the XML tree"""
+        type_ = Convert._get_type(element)
+        if not type_ and not len(element):
+            return Convert._get_text(element)
+        elif type_ == 'symbol':
+            return Convert._get_text(element)
+        elif type_ == 'boolean':
+            return Convert._get_bool(element)
+        elif type_ == 'integer':
+            return Convert._get_int(element)
+        elif type_ == 'list':
+            return [Convert._get(subelement) for subelement in element]
+        elif not type_ and len(element):
+            return {
+                Convert._get_tag(subelement): Convert._get(subelement)
+                for subelement in element
+            }
+        else:
+            logging.error('Element type not recognized: %s', type_)
+
+    @staticmethod
+    def _parse(element):
+        """Parse the XML tree entry point"""
+        return PathDict({Convert._get_tag(element): Convert._get(element)})
+
+    def convert(self):
+        """Transform a XML control file into a Yomi pillar"""
+        self._control = Convert._parse(self.control.getroot())
+        self._convert_config()
+        self._convert_partitions()
+        self._convert_lvm()
+        self._convert_raid()
+        self._convert_filesystems()
+        self._convert_bootloader()
+        self._convert_software()
+        self._convert_suseconnect()
+        self._convert_salt_minion()
+        self._convert_services()
+        self._convert_users()
+        return self.pillar
+
+    def _reboot(self):
+        """Detect if a reboot is required"""
+        reboot = False
+        mode = self._control.path('profile.general.mode', {})
+        if mode.get('final_halt') or mode.get('halt'):
+            reboot = 'shutdown'
+        elif mode.get('final_reboot') or mode.get('forceboot'):
+            reboot = True
+        return reboot
+
+    def _snapper(self):
+        """Detect if snapper is required"""
+        partitioning = self._control.path('profile.partitioning', PathDict())
+        snapper = any(
+            drive.get('enable_snapshots', True)
+            for drive in partitioning
+            if any(partition
+                   for partition in drive.get('partitions', [])
+                   if partition.get('filesystem', 'btrfs') == 'btrfs'))
+
+        snapper |= self._control.path('profile.bootloader.suse_btrfs', False)
+        return snapper
+
+    def _keymap(self):
+        """Translate keymap configuration"""
+        keymap = self._control.path('profile.keyboard.keymap', 'english-us')
+        return {
+            'english-us': 'us',
+            'english-uk': 'gb',
+            'german': 'de-nodeadkeys',
+            'german-deadkey': 'de',
+            'german-ch': 'ch',
+            'french': 'fr',
+            'french-ch': 'ch-fr',
+            'french-ca': 'ca',
+            'cn-latin1': 'ca-multix',
+            'spanish': 'es',
+            'spanish-lat': 'latam',
+            'spanish-lat-cp850': 'es',
+            'spanish-ast': 'es-ast',
+            'italian': 'it',
+            'persian': 'ir',
+            'portugese': 'pt',
+            'portugese-br': 'br',
+            'portugese-br-usa': 'us-intl',
+            'greek': 'gr',
+            'dutch': 'nl',
+            'danish': 'dk',
+            'norwegian': 'no',
+            'swedish': 'se',
+            'finnish': 'fi-kotoistus',
+            'czech': 'cz',
+            'czech-qwerty': 'cz-qwerty',
+            'slovak': 'sk',
+            'slovak-qwerty': 'sk-qwerty',
+            'slovene': 'si',
+            'hungarian': 'hu',
+            'polish': 'pl',
+            'russian': 'ruwin_alt-UTF-8',
+            'serbian': 'sr-cy',
+            'estonian': 'ee',
+            'lithuanian': 'lt',
+            'turkish': 'tr',
+            'croatian': 'hr',
+            'japanese': 'jp',
+            'belgian': 'be',
+            'dvorak': 'us-dvorak',
+            'icelandic': 'is',
+            'ukrainian': 'ua-utf',
+            'khmer': 'khmer',
+            'korean': 'kr',
+            'arabic': 'arabic',
+            'tajik': 'tj_alt-UTF8',
+            'taiwanese': 'us',
+            'chinese': 'us',
+            'romanian': 'ro',
+            'us-int': 'us-intl',
+        }.get(keymap, 'us')
+
+    def _convert_config(self):
+        """Convert the config section of a pillar"""
+        config = self.pillar.setdefault('config', {})
+
+        # Missing fields:
+        #  * locale_message
+        #  * machine_id
+
+        config['events'] = True
+        config['reboot'] = self._reboot()
+        config['snapper'] = self._snapper()
+        config['locale'] = self._control.path('profile.language.language',
+                                              'en_US.utf8')
+        config['keymap'] = self._keymap()
+        config['timezone'] = self._control.path('profile.timezone.timezone',
+                                                'UTC')
+        hostname = self._control.path('profile.networking.dns.hostname')
+        if hostname:
+            config['hostname'] = hostname
+        config['target'] = self._control.path(
+            'profile.services-manager.default_target', 'multi-user.target')
+
+    def _size(self, partition):
+        """Detect the size of a partition"""
+        size = partition.get('size')
+        return 'rest' if size == 'max' or not size else size
+
+    def _type(self, partition):
+        """Detect the type of a partition"""
+        partition_id = partition.get('partition_id')
+        if not partition_id:
+            filesystem = partition.get('filesystem')
+            if filesystem or partition.get('mount'):
+                partition_id = 130 if filesystem == 'swap' else 131
+            elif partition.get('lvm_group'):
+                partition_id = 142
+            elif partition.get('raid_name'):
+                partition_id = 253
+            else:
+                # 'boot' type if is not a file system, LVM, nor RAID
+                return 'boot'
+        return {
+            130: 'swap',
+            131: 'linux',
+            142: 'lvm',
+            253: 'raid',
+            259: 'efi',
+        }[partition_id]
+
+    def _label(self, drive):
+        """Detect the kind of partition table of a device"""
+        disklabel = drive.get('disklabel', 'gpt')
+        if disklabel and disklabel != 'none' and not drive.get('raid_options'):
+            return disklabel
+
+    def _convert_partitions(self):
+        """Convert the partitions section of a pillar"""
+        partitions = self.pillar.setdefault('partitions', {})
+
+        for drive in self._control.path('profile.partitioning', []):
+            # If is part of a logical volume, we skip the drive
+            if drive.get('is_lvm_vg'):
+                continue
+
+            # If the device is missing, we cannot build the pillar
+            device = drive.get('device')
+            if not device:
+                logging.error('Device missing in partitioning')
+                continue
+
+            devices = partitions.setdefault('devices', {})
+            _device = devices.setdefault(device, {})
+
+            label = self._label(drive)
+            if label:
+                _device['label'] = label
+
+            _partitions = _device.setdefault('partitions', [])
+
+            for index, partition in enumerate(drive.get('partitions', [])):
+                _partition = {}
+                _partition['number'] = partition.get('partition_nr', index+1)
+                _partition['size'] = self._size(partition)
+                _partition['type'] = self._type(partition)
+
+                if _partition:
+                    _partitions.append(_partition)
+
+    def _convert_lvm(self):
+        """Convert the lvm section of a pillar"""
+        lvm = {}
+
+        for drive in self._control.path('profile.partitioning', []):
+            # If the device is missing, we cannot build the pillar
+            device = drive.get('device')
+            if not device:
+                logging.error('Device missing in partitioning')
+                continue
+
+            if drive.get('is_lvm_vg'):
+                lvm_group = Path(device).name
+                group = lvm.setdefault(lvm_group, {})
+                volumes = group.setdefault('volumes', [])
+                for partition in drive.get('partitions', []):
+                    volumes.append({
+                        'name': partition['lv_name'],
+                        'size': partition['size'],
+                    })
+                # Group parameters
+                pesize = drive.get('pesize')
+                if pesize:
+                    group['physicalextentsize'] = pesize
+            else:
+                for index, partition in enumerate(drive.get('partitions', [])):
+                    lvm_group = partition.get('lvm_group')
+                    if lvm_group:
+                        partition_nr = partition.get('partition_nr', index+1)
+                        group = lvm.setdefault(lvm_group, {})
+                        devices = group.setdefault('devices', [])
+                        devices.append('{}{}'.format(device, partition_nr))
+
+        if lvm:
+            self.pillar['lvm'] = lvm
+
+    def _convert_raid(self):
+        """Convert the raid section of a pillar"""
+        raid = {}
+
+        for drive in self._control.path('profile.partitioning', []):
+            # If the device is missing, we cannot build the pillar
+            device = drive.get('device')
+            if not device:
+                logging.error('Device missing in partitioning')
+                continue
+
+            raid_options = drive.get('raid_options')
+            if raid_options:
+                _device = raid.setdefault(device, {})
+                chunk_size = raid_options.get('chunk_size')
+                if chunk_size:
+                    _device['chunk'] = chunk_size
+                parity_algorithm = raid_options.get('parity_algorithm')
+                if parity_algorithm:
+                    _device['parity'] = parity_algorithm.replace('_', '-')
+                _device['level'] = raid_options.get('raid_type', 'raid1')
+                device_order = raid_options.get('device_order')
+                if device_order:
+                    _device['devices'] = device_order
+                continue
+
+            for index, partition in enumerate(drive.get('partitions', [])):
+                raid_name = partition.get('raid_name')
+                if raid_name:
+                    partition_nr = partition.get('partition_nr', index+1)
+                    _device = raid.setdefault(raid_name, {})
+                    devices = _device.setdefault('devices', [])
+                    devices.append('{}{}'.format(device, partition_nr))
+
+        if raid:
+            self.pillar['raid'] = raid
+
+    def _convert_filesystems(self):
+        filesystems = self.pillar.setdefault('filesystems', {})
+
+        for drive in self._control.path('profile.partitioning', []):
+            # If the device is missing, we cannot build the pillar
+            device = drive.get('device')
+            if not device:
+                logging.error('Device missing in partitioning')
+                continue
+
+            for index, partition in enumerate(drive.get('partitions', [])):
+                filesystem = {}
+
+                if drive.get('is_lvm_vg'):
+                    lv_name = partition['lv_name']
+                    _partition = str(Path(device, lv_name))
+                elif drive.get('raid_options'):
+                    partition_nr = partition.get('partition_nr', index+1)
+                    _partition = '{}p{}'.format(device, partition_nr)
+                else:
+                    partition_nr = partition.get('partition_nr', index+1)
+                    _partition = '{}{}'.format(device, partition_nr)
+
+                _filesystem = partition.get('filesystem')
+                if _filesystem:
+                    filesystem['filesystem'] = _filesystem
+
+                mount = partition.get('mount')
+                if mount:
+                    filesystem['mountpoint'] = mount
+
+                subvolumes = partition.get('subvolumes')
+                if _filesystem == 'btrfs' and subvolumes:
+                    _subvolumes = filesystem.setdefault('subvolumes', {})
+                    _subvolumes['prefix'] = partition.get('subvolumes_prefix',
+                                                          '@')
+
+                    subvolume = _subvolumes.setdefault('subvolume', [])
+                    for _subvolume in subvolumes:
+                        if isinstance(_subvolume, str):
+                            subvolume.append({'path': _subvolume})
+                        else:
+                            subvolume.append(_subvolume)
+
+                if _partition and filesystem:
+                    filesystems[_partition] = filesystem
+
+    def _kernel(self, bootloader_global):
+        append = bootloader_global.get('append', '')
+        cpu_mitigations = bootloader_global.get('cpu_mitigations', '')
+        if cpu_mitigations:
+            cpu_mitigations = ('noibrs noibpb nopti nospectre_v2 nospectre_v1 '
+                               'l1tf=off nospec_store_bypass_disable '
+                               'no_stf_barrier mds=off mitigations=off')
+        else:
+            cpu_mitigations = ''
+        vgamode = bootloader_global.get('vgamode', '')
+        if vgamode and vgamode not in append:
+            vgamode = 'vga={}'.format(vgamode)
+        else:
+            vgamode = ''
+
+        return ' '.join(param
+                        for param in ('splash=silent quiet', append,
+                                      cpu_mitigations, vgamode) if param)
+
+    def _convert_bootloader(self):
+        """Convert the bootloader section of the pillar"""
+        bootloader = self.pillar.setdefault('bootloader', {})
+
+        _global = self._control.path('profile.bootloader.global', {})
+
+        # TODO: If EFI, we will be sure to create a EFI partition
+
+        # TODO: `boot_custom` is not used to store the device
+        device = _global.get('boot_custom')
+        if device:
+            bootloader['device'] = device
+        else:
+            logging.error('Bootloader device not found in control file')
+
+        timeout = _global.get('timeout')
+        if timeout:
+            bootloader['timeout'] = timeout
+
+        bootloader['kernel'] = self._kernel(_global)
+
+        terminal = _global.get('terminal')
+        if terminal:
+            bootloader['terminal'] = terminal
+
+        serial = _global.get('serial')
+        if serial:
+            bootloader['serial_command'] = serial
+
+        gfxmode = _global.get('gfxmode')
+        if gfxmode:
+            bootloader['gfxmode'] = gfxmode
+
+        bootloader['theme'] = True
+
+        os_prober = _global.get('os_prober')
+        if os_prober is not None:
+            bootloader['disable_os_prober'] = not os_prober
+
+    def _repositories(self, add_on):
+        return {
+            entry['alias']: entry['media_url']
+            for add_on_type in ('add_on_products', 'add_on_others')
+            for entry in add_on.get(add_on_type, [])
+        }
+
+    def _packages(self, software, include_pre, include_post):
+        packages = []
+
+        if include_pre:
+            for product in software.get('products', []):
+                packages.append('product:{}'.format(product))
+
+        if include_pre:
+            for pattern in software.get('patterns', []):
+                packages.append('pattern:{}'.format(pattern))
+
+        if include_post:
+            for pattern in software.get('post-patterns', []):
+                packages.append('pattern:{}'.format(pattern))
+
+        if include_pre:
+            for package in software.get('packages', []):
+                packages.append(package)
+
+        if include_post:
+            for package in software.get('post-packages', []):
+                packages.append(package)
+
+        kernel = software.get('kernel')
+        if include_pre and kernel:
+            packages.append(kernel)
+
+        return packages
+
+    def _convert_software(self):
+        """Convert the software section of the pillar"""
+        software = self.pillar.setdefault('software', {})
+
+        _software = self._control.path('profile.software', {})
+
+        install_recommended = _software.get('install_recommended')
+        if install_recommended is not None:
+            config = software.setdefault('config', {})
+            config['minimal'] = not install_recommended
+
+        add_on = self._control.path('profile.add-on', {})
+        if not add_on:
+            logging.error('No repositories will be registered')
+        software['repositories'] = self._repositories(add_on)
+        software['packages'] = self._packages(
+            _software,
+            include_pre=True,
+            include_post='suse_register' not in self._control['profile'])
+
+    def _products(self, suse_register):
+        products = []
+
+        for addon in suse_register.get('addons', []):
+            products.append('/'.join((addon['name'], addon['version'],
+                                      addon['arch'])))
+
+        return products
+
+    def _convert_suseconnect(self):
+        """Convert the suseconnect section of the pillar"""
+        suseconnect = self.pillar.get('suseconnect', {})
+
+        suse_register = self._control.path('profile.suse_register', {})
+
+        if not suse_register:
+            return
+
+        config = suseconnect.setdefault('config', {})
+
+        reg_code = suse_register.get('reg_code')
+        if reg_code:
+            config['regcode'] = reg_code
+
+        email = suse_register.get('email')
+        if email:
+            config['email'] = email
+
+        reg_server = suse_register.get('reg_server')
+        if reg_server:
+            config['url'] = reg_server
+
+        suseconnect['products'] = self._products(suse_register)
+
+        software = self._control.path('profile.software', {})
+        packages = self._packages(software, include_pre=False,
+                                  include_post=True)
+        if packages:
+            suseconnect['packages'] = packages
+
+        if suseconnect:
+            self.pillar['suseconnect'] = suseconnect
+
+    def _convert_salt_minion(self):
+        """Convert the salt-minion section of the pillar"""
+        self.pillar.setdefault('salt-minion', {'configure': True})
+
+    def _services(self, services):
+        _services = []
+        for service in services:
+            if not service.endswith(('.service', '.socket', '.timer')):
+                service = '{}.service'.format(service)
+            _services.append(service)
+
+        return _services
+
+    def _convert_services(self):
+        """Convert the services section of the pillar"""
+        services = self.pillar.get('services', {})
+
+        enable = self._control.path('profile.services-manager.services.enable',
+                                    [])
+        for service in self._services(enable):
+            services.setdefault('enabled', []).append(service)
+
+        disable = self._control.path(
+            'profile.services-manager.services.disable', [])
+        for service in self._services(disable):
+            services.setdefault('disabled', []).append(service)
+
+        on_demand = self._control.path(
+            'profile.services-manager.services.on_demand', [])
+        for service in self._services(on_demand):
+            services.setdefault('enabled', []).append(
+                service.replace('.service', '.socket'))
+            services.setdefault('disabled', []).append(service)
+
+        if services:
+            self.pillar['services'] = services
+
+    @staticmethod
+    def _password(user, salt=None):
+        password = user.get('user_password')
+        if password and not user.get('encrypted'):
+            salt = salt if salt else crypt.mksalt(crypt.METHOD_MD5)
+            password = crypt.crypt(password, salt)
+        return password
+
+    def _certificates(self, user):
+        certificates = []
+        for certificate in user.get('authorized_keys', []):
+            parts = certificate.split()
+            for index, part in enumerate(parts):
+                if part in ('ssh-rsa', 'ssh-dss', 'ssh-ed25519') \
+                   or part.startswith('ecdsa-sha'):
+                    certificates.append(parts[index + 1])
+                    break
+
+        return certificates
+
+    def _convert_users(self):
+        """Convert the users section of the pillar"""
+        users = self.pillar.get('users', [])
+
+        # TODO parse the fullname, uid, gid, etc. fields
+
+        _users = self._control.path('profile.users', [])
+        for _user in _users:
+            user = {
+                'username': _user['username']
+            }
+
+            password = Convert._password(_user)
+            if password:
+                user['password'] = password
+
+            certificates = self._certificates(_user)
+            if certificates:
+                user['certificates'] = certificates
+
+            users.append(user)
+
+        if users:
+            self.pillar['users'] = users
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Convert AutoYaST control files')
+    parser.add_argument('control', metavar='CONTROL.XML',
+                        help='autoyast control file')
+    parser.add_argument('-o', '--out', default='yomi.json',
+                        help='output file (default: yomi.json)')
+
+    args = parser.parse_args()
+    control = ET.parse(args.control)
+    convert = Convert(control)
+    pillar = convert.convert()
+    with open(args.out, 'w') as f:
+        json.dump(pillar, f, indent=4)

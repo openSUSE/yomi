@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <partitioning config:type="list">
+    <drive>
+      <device>/dev/sda</device>
+      <partitions config:type="list">
+	<partition>
+	  <filesystem config:type="symbol">ext3</filesystem>
+          <mount>/</mount>
+          <size>20G</size>
+	</partition>
+	<partition>
+          <raid_name>/dev/md/0</raid_name>
+          <size>max</size>
+	</partition>
+      </partitions>
+      <use>all</use>
+    </drive>
+    <drive>
+      <device>/dev/sdb</device>
+      <disklabel>none</disklabel>
+      <partitions config:type="list">
+	<partition>
+          <raid_name>/dev/md/0</raid_name>
+	</partition>
+      </partitions>
+      <use>all</use>
+    </drive>
+    <drive>
+      <device>/dev/md/0</device>
+      <partitions config:type="list">
+	<partition>
+	  <filesystem config:type="symbol">ext3</filesystem>
+          <mount>/home</mount>
+          <size>40G</size>
+	</partition>
+	<partition>
+	  <filesystem config:type="symbol">ext3</filesystem>
+          <mount>/srv</mount>
+          <size>10G</size>
+	</partition>
+      </partitions>
+      <raid_options>
+	<chunk_size>4</chunk_size>
+	<parity_algorithm>left_asymmetric</parity_algorithm>
+	<raid_type>raid1</raid_type>
+      </raid_options>
+      <use>all</use>
+    </drive>
+  </partitioning>
+</profile>

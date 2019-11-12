@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+
+  <partitioning config:type="list">
+    <drive>
+      <device>/dev/sda</device>
+      <initialize config:type="boolean">true</initialize>
+      <partitions config:type="list">
+	<partition>
+	  <create config:type="boolean">true</create>
+	  <size>1M</size>
+	  <format config:type="boolean">false</format>
+	  <partition_nr config:type="integer">1</partition_nr>
+	</partition>
+	<partition>
+	  <create config:type="boolean">true</create>
+	  <mount>swap</mount>
+	  <size>2G</size>
+	  <format config:type="boolean">true</format>
+	  <filesystem config:type="symbol">swap</filesystem>
+	  <partition_nr config:type="integer">2</partition_nr>
+	  <partition_id config:type="integer">130</partition_id>
+	</partition>
+	<partition>
+	  <create config:type="boolean">true</create>
+	  <mount>/</mount>
+	  <size>max</size>
+	  <format config:type="boolean">true</format>
+	  <filesystem config:type="symbol">btrfs</filesystem>
+	  <partition_nr config:type="integer">3</partition_nr>
+	  <partition_id config:type="integer">131</partition_id>
+	  <subvolumes config:type="list">
+	    <listentry>tmp</listentry>
+	    <listentry>opt</listentry>
+	    <listentry>srv</listentry>
+	    <listentry>
+	      <path>var/lib/pgsql</path>
+	      <copy_on_write config:type="boolean">false</copy_on_write>
+	    </listentry>
+	  </subvolumes>
+	  <subvolumes_prefix>@</subvolumes_prefix>
+	</partition>
+      </partitions>
+      <use>all</use>
+      <type>CT_DISK</type>
+      <disklabel>gpt</disklabel>
+      <enable_snapshots config:type="boolean">false</enable_snapshots>
+    </drive>
+  </partitioning>
+
+</profile>

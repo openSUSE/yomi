@@ -1,0 +1,464 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <general>
+    <mode>
+      <activate_systemd_default_target config:type="boolean">
+	true
+      </activate_systemd_default_target>
+      <confirm config:type="boolean">true</confirm>
+      <confirm_base_product_license config:type="boolean">
+	false
+      </confirm_base_product_license>
+      <final_halt config:type="boolean">false</final_halt>
+      <final_reboot config:type="boolean">true</final_reboot>
+      <final_restart_services config:type="boolean">
+	true
+      </final_restart_services>
+      <forceboot config:type="boolean">false</forceboot>
+      <halt config:type="boolean">false</halt>
+      <max_systemd_wait config:type="integer">30</max_systemd_wait>
+      <ntp_sync_time_before_installation>
+	0.de.pool.ntp.org
+      </ntp_sync_time_before_installation>
+      <second_stage config:type="boolean">true</second_stage>
+    </mode>
+    <proposals config:type="list">
+      <proposal>partitions_proposal</proposal>
+      <proposal>timezone_proposal</proposal>
+      <proposal>software_proposal</proposal>
+    </proposals>
+    <self_update config:type="boolean">true</self_update>
+    <self_update_url>
+      http://example.com/updates/$arch
+    </self_update_url>
+    <semi-automatic config:type="list">
+      <semi-automatic_entry>networking</semi-automatic_entry>
+      <semi-automatic_entry>scc</semi-automatic_entry>
+      <semi-automatic_entry>partitioning</semi-automatic_entry>
+    </semi-automatic>
+    <signature-handling>
+      <accept_unsigned_file config:type="boolean">
+	false
+      </accept_unsigned_file>
+      <accept_file_without_checksum config:type="boolean">
+	false
+      </accept_file_without_checksum>
+      <accept_verification_failed config:type="boolean">
+	false
+      </accept_verification_failed>
+      <accept_unknown_gpg_key config:type="boolean">
+	false
+      </accept_unknown_gpg_key>
+      <accept_non_trusted_gpg_key config:type="boolean">
+	false
+      </accept_non_trusted_gpg_key>
+      <import_gpg_key config:type="boolean">
+	false
+      </import_gpg_key>
+    </signature-handling>
+    <storage>
+      <start_multipath config:type="boolean">false</start_multipath>
+    </storage>
+    <wait>
+      <pre-modules config:type="list">
+	<module>
+	  <name>networking</name>
+	  <sleep>
+	    <time config:type="integer">10</time>
+	    <feedback config:type="boolean">true</feedback>
+	  </sleep>
+	  <script>
+	    <source>echo foo</source>
+	    <debug config:type="boolean">false</debug>
+	  </script>
+	</module>
+      </pre-modules>
+      <post-modules config:type="list">
+	<module>
+	  <name>networking</name>
+	  <sleep>
+	    <time config:type="integer">10</time>
+	    <feedback config:type="boolean">true</feedback>
+	  </sleep>
+	  <script>
+	    <source>echo foo</source>
+	    <debug config:type="boolean">false</debug>
+	  </script>
+	</module>
+      </post-modules>
+    </wait>
+    <cio_ignore config:type="boolean">false</cio_ignore>
+  </general>
+
+  <report>
+    <errors>
+      <show config:type="boolean">true</show>
+      <timeout config:type="integer">0</timeout>
+      <log config:type="boolean">true</log>
+    </errors>
+    <warnings>
+      <show config:type="boolean">true</show>
+      <timeout config:type="integer">10</timeout>
+      <log config:type="boolean">true</log>
+    </warnings>
+    <messages>
+      <show config:type="boolean">true</show>
+      <timeout config:type="integer">10</timeout>
+      <log config:type="boolean">true</log>
+    </messages>
+    <yesno_messages>
+      <show config:type="boolean">true</show>
+      <timeout config:type="integer">10</timeout>
+      <log config:type="boolean">true</log>
+    </yesno_messages>
+  </report>
+
+  <suse_register>
+    <do_registration config:type="boolean">true</do_registration>
+    <email>tux@example.com</email>
+    <reg_code>MY_SECRET_REGCODE</reg_code>
+    <install_updates config:type="boolean">true</install_updates>
+    <slp_discovery config:type="boolean">false</slp_discovery>
+    <reg_server>
+      https://smt.example.com
+    </reg_server>
+    <reg_server_cert_fingerprint_type>
+      SHA1
+    </reg_server_cert_fingerprint_type>
+    <reg_server_cert_fingerprint>
+      01:AB...:EF
+    </reg_server_cert_fingerprint>
+    <reg_server_cert>
+      http://smt.example.com/smt.crt
+    </reg_server_cert>
+    <addons config:type="list">
+      <addon>
+	<name>sle-module-basesystem</name>
+	<version>15.1</version>
+	<arch>x86_64</arch>
+      </addon>
+    </addons>
+  </suse_register>
+
+  <bootloader>
+    <loader_type>
+      grub2-efi
+    </loader_type>
+    <global>
+      <activate config:type="boolean">true</activate>
+      <append>nomodeset vga=0x317</append>
+      <boot_boot>false</boot_boot>
+      <boot_custom>/dev/sda</boot_custom>
+      <boot_extended>false</boot_extended>
+      <boot_mbr>false</boot_mbr>
+      <boot_root>false</boot_root>
+      <generic_mbr config:type="boolean">false</generic_mbr>
+      <gfxmode>1280x1024x24</gfxmode>
+      <os_prober config:type="boolean">false</os_prober>
+      <cpu_mitigations>auto</cpu_mitigations>
+      <suse_btrfs config:type="boolean">true</suse_btrfs>
+      <serial>
+	serial --speed=115200 --unit=0 --word=8 --parity=no --stop=1
+      </serial>
+      <terminal>serial</terminal>
+      <timeout config:type="integer">10</timeout>
+      <trusted_boot config:type="boolean">true</trusted_boot>
+      <vgamode>0x317</vgamode>
+      <xen_append>nomodeset vga=0x317</xen_append>
+      <xen_kernel_append>dom0_mem=768M</xen_kernel_append>
+    </global>
+    <device_map config:type="list">
+      <device_map_entry>
+	<firmware>hd0</firmware>
+	<linux>/dev/disk/by-id/ata-ST3500418AS_6VM23FX0</linux>
+      </device_map_entry>
+    </device_map>
+  </bootloader>
+
+  <partitioning config:type="list">
+    <drive>
+      <device>/dev/sda</device>
+      <initialize config:type="boolean">true</initialize>
+      <partitions config:type="list">
+	<partition>
+	  <create config:type="boolean">true</create>
+	  <size>1M</size>
+	  <format config:type="boolean">false</format>
+	  <partition_nr config:type="integer">1</partition_nr>
+	</partition>
+	<partition>
+	  <create config:type="boolean">true</create>
+	  <mount>swap</mount>
+	  <size>2G</size>
+	  <format config:type="boolean">true</format>
+	  <filesystem config:type="symbol">swap</filesystem>
+	  <partition_nr config:type="integer">2</partition_nr>
+	  <partition_id config:type="integer">130</partition_id>
+	</partition>
+	<partition>
+	  <create config:type="boolean">true</create>
+	  <mount>/</mount>
+	  <size>max</size>
+	  <format config:type="boolean">true</format>
+	  <filesystem config:type="symbol">ext3</filesystem>
+	  <partition_nr config:type="integer">3</partition_nr>
+	  <partition_id config:type="integer">131</partition_id>
+	</partition>
+      </partitions>
+      <use>all</use>
+      <type>CT_DISK</type>
+      <disklabel>gpt</disklabel>
+      <enable_snapshots config:type="boolean">false</enable_snapshots>
+    </drive>
+  </partitioning>
+
+  <language>
+    <language>en_GB</language>
+    <languages>de_DE,en_US</languages>
+  </language>
+
+  <timezone>
+    <hwclock>UTC</hwclock>
+    <timezone>Europe/Berlin</timezone>
+  </timezone>
+
+  <keyboard>
+    <keymap>german</keymap>
+  </keyboard>
+
+  <software>
+    <products config:type="list">
+      <product>SLED</product>
+    </products>
+    <patterns config:type="list">
+      <pattern>directory_server</pattern>
+    </patterns>
+    <packages config:type="list">
+      <package>apache</package>
+      <package>postfix</package>
+    </packages>
+    <remove-packages config:type="list">
+      <package>postfix</package>
+    </remove-packages>
+    <do_online_update config:type="boolean">true</do_online_update>
+    <kernel>kernel-default</kernel>
+    <install_recommended config:type="boolean">false</install_recommended>
+    <post-packages config:type="list">
+      <package>yast2-cim</package>
+    </post-packages>
+    <post-patterns config:type="list">
+      <pattern>apparmor</pattern>
+    </post-patterns>
+  </software>
+
+  <add-on>
+    <add_on_products config:type="list">
+      <listentry>
+	<media_url>cd:///sdk</media_url>
+	<product>sle-sdk</product>
+	<alias>SLES SDK</alias>
+	<product_dir>/</product_dir>
+	<priority config:type="integer">20</priority>
+	<ask_on_error config:type="boolean">false</ask_on_error>
+	<confirm_license config:type="boolean">false</confirm_license>
+	<name>SUSE Linux Enterprise Software Development Kit</name>
+      </listentry>
+    </add_on_products>
+    <add_on_others config:type="list">
+      <listentry>
+	<media_url>https://download.opensuse.org/repositories/YaST:/Head/openSUSE_Leap_15.1/</media_url>
+	<alias>yast2_head</alias>
+	<priority config:type="integer">30</priority>
+	<name>Latest YaST2 packages from OBS</name>
+      </listentry>
+    </add_on_others>
+  </add-on>
+
+  <services-manager>
+    <default_target>multi-user</default_target>
+    <services>
+      <disable config:type="list">
+	<service>libvirtd</service>
+      </disable>
+      <enable config:type="list">
+	<service>sshd</service>
+      </enable>
+      <on_demand config:type="list">
+	<service>cups</service>
+      </on_demand>
+    </services>
+  </services-manager>
+
+  <networking>
+    <dns>
+      <dhcp_hostname config:type="boolean">true</dhcp_hostname>
+      <domain>site</domain>
+      <hostname>linux-bqua</hostname>
+      <nameservers config:type="list">
+	<nameserver>192.168.1.116</nameserver>
+	<nameserver>192.168.1.117</nameserver>
+	<nameserver>192.168.1.118</nameserver>
+      </nameservers>
+      <resolv_conf_policy>auto</resolv_conf_policy>
+      <searchlist config:type="list">
+	<search>example.com</search>
+	<search>example.net</search>
+      </searchlist>
+      <write_hostname config:type="boolean">false</write_hostname>
+    </dns>
+    <interfaces config:type="list">
+      <interface>
+	<bootproto>dhcp</bootproto>
+	<device>eth0</device>
+	<startmode>auto</startmode>
+      </interface>
+      <interface>
+	<bootproto>static</bootproto>
+	<broadcast>127.255.255.255</broadcast>
+	<device>lo</device>
+	<firewall>no</firewall>
+	<ipaddr>127.0.0.1</ipaddr>
+	<netmask>255.0.0.0</netmask>
+	<network>127.0.0.0</network>
+	<prefixlen>8</prefixlen>
+	<startmode>nfsroot</startmode>
+	<usercontrol>no</usercontrol>
+      </interface>
+    </interfaces>
+    <ipv6 config:type="boolean">true</ipv6>
+    <keep_install_network config:type="boolean">false</keep_install_network>
+    <managed config:type="boolean">false</managed>       ###### NetworkManager?
+    <net-udev config:type="list">
+      <rule>
+	<name>eth0</name>
+	<rule>ATTR{address}</rule>
+	<value>00:30:6E:08:EC:80</value>
+      </rule>
+    </net-udev>
+    <s390-devices config:type="list">
+      <listentry>
+	<chanids>0.0.0800 0.0.0801 0.0.0802</chanids>
+	<type>qeth</type>
+      </listentry>
+    </s390-devices>
+    <routing>
+      <ipv4_forward config:type="boolean">false</ipv4_forward>
+      <ipv6_forward config:type="boolean">false</ipv6_forward>
+      <routes config:type="list">
+	<route>
+          <destination>192.168.2.1</destination>
+          <device>eth0</device>
+          <extrapara>foo</extrapara>
+          <gateway>-</gateway>
+          <netmask>-</netmask>
+	</route>
+	<route>
+          <destination>default</destination>
+          <device>eth0</device>
+          <gateway>192.168.1.1</gateway>
+          <netmask>-</netmask>
+	</route>
+	<route>
+          <destination>default</destination>
+          <device>lo</device>
+          <gateway>192.168.5.1</gateway>
+          <netmask>-</netmask>
+	</route>
+      </routes>
+    </routing>
+  </networking>
+
+  <users config:type="list">
+    <user>
+      <username>root</username>
+      <user_password>password</user_password>
+      <uid>1001</uid>
+      <gid>100</gid>
+      <encrypted config:type="boolean">false</encrypted>
+      <fullname>Root User</fullname>
+      <authorized_keys config:type="list">
+	<listentry>command="/opt/login.sh" ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKLt1vnW2vTJpBp3VK91rFsBvpY97NljsVLdgUrlPbZ/L51FerQQ+djQ/ivDASQjO+567nMGqfYGFA/De1EGMMEoeShza67qjNi14L1HBGgVojaNajMR/NI2d1kDyvsgRy7D7FT5UGGUNT0dlcSD3b85zwgHeYLidgcGIoKeRi7HpVDOOTyhwUv4sq3ubrPCWARgPeOLdVFa9clC8PTZdxSeKp4jpNjIHEyREPin2Un1luCIPWrOYyym7aRJEPopCEqBA9HvfwpbuwBI5F0uIWZgSQLfpwW86599fBo/PvMDa96DpxH1VlzJlAIHQsMkMHbsCazPNC0++Kp5ZVERiH root@example.net</listentry>
+      </authorized_keys>
+    </user>
+    <user>
+      <username>tux</username>
+      <user_password>password</user_password>
+      <uid>1002</uid>
+      <gid>100</gid>
+      <encrypted config:type="boolean">false</encrypted>
+      <fullname>Plain User</fullname>
+      <home>/Users/plain</home>
+      <password_settings>
+	<max>120</max>
+	<inact>5</inact>
+      </password_settings>
+    </user>
+  </users>
+
+  <groups config:type="list">
+    <group>
+      <gid>100</gid>
+      <groupname>users</groupname>
+      <userlist>bob,alice</userlist>
+    </group>
+  </groups>
+
+  <login_settings>
+    <autologin_user>vagrant</autologin_user>
+    <password_less_login config:type="boolean">true</password_less_login>
+  </login_settings>
+
+  <sysconfig config:type="list" >
+    <sysconfig_entry>
+      <sysconfig_key>XNTPD_INITIAL_NTPDATE</sysconfig_key>
+      <sysconfig_path>/etc/sysconfig/xntp</sysconfig_path>
+      <sysconfig_value>ntp.host.com</sysconfig_value>
+    </sysconfig_entry>
+    <sysconfig_entry>
+      <sysconfig_key>HTTP_PROXY</sysconfig_key>
+      <sysconfig_path>/etc/sysconfig/proxy</sysconfig_path>
+      <sysconfig_value>proxy.host.com:3128</sysconfig_value>
+    </sysconfig_entry>
+    <sysconfig_entry>
+      <sysconfig_key>FTP_PROXY</sysconfig_key>
+      <sysconfig_path>/etc/sysconfig/proxy</sysconfig_path>
+      <sysconfig_value>proxy.host.com:3128</sysconfig_value>
+    </sysconfig_entry>
+  </sysconfig>
+
+  <firewall>
+    <enable_firewall>true</enable_firewall>
+    <log_denied_packets>all</log_denied_packets>
+    <default_zone>external</default_zone>
+    <zones config:type="list">
+      <zone>
+	<name>public</name>
+	<interfaces config:type="list">
+          <interface>eth0</interface>
+	</interfaces>
+	<services config:type="list">
+          <service>ssh</service>
+          <service>dhcp</service>
+          <service>dhcpv6</service>
+          <service>samba</service>
+          <service>vnc-server</service>
+	</services>
+	<ports config:type="list">
+          <port>21/udp</port>
+          <port>22/udp</port>
+          <port>80/tcp</port>
+          <port>443/tcp</port>
+          <port>8080/tcp</port>
+	</ports>
+      </zone>
+      <zone>
+	<name>dmz</name>
+	<interfaces config:type="list">
+          <interface>eth1</interface>
+	</interfaces>
+      </zone>
+    </zones>
+  </firewall>
+
+</profile>

@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <partitioning config:type="list">
+    <drive>
+      <device>/dev/sda</device>
+      <partitions config:type="list">
+	<partition>
+	  <!-- <create config:type="boolean">true</create> -->
+          <lvm_group>system</lvm_group>
+          <partition_type>primary</partition_type>
+	  <partition_id config:type="integer">142</partition_id>
+	  <partition_nr config:type="integer">1</partition_nr>
+          <size>max</size>
+	</partition>
+      </partitions>
+      <use>all</use>
+    </drive>
+    <drive>
+      <device>/dev/system</device>
+      <is_lvm_vg config:type="boolean">true</is_lvm_vg>
+      <partitions config:type="list">
+        <partition>
+          <filesystem config:type="symbol">ext3</filesystem>
+          <lv_name>user_lv</lv_name>
+          <mount>/usr</mount>
+          <size>15G</size>
+        </partition>
+        <partition>
+          <filesystem config:type="symbol">ext3</filesystem>
+          <lv_name>opt_lv</lv_name>
+          <mount>/opt</mount>
+          <size>10G</size>
+        </partition>
+        <partition>
+          <filesystem config:type="symbol">ext3</filesystem>
+          <lv_name>var_lv</lv_name>
+          <mount>/var</mount>
+          <size>1G</size>
+        </partition>
+      </partitions>
+      <pesize>4M</pesize>
+      <use>all</use>
+    </drive>
+  </partitioning>
+</profile>

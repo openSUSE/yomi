@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <partitioning config:type="list">
+    <drive>
+      <device>/dev/sda</device>
+      <initialize config:type="boolean">true</initialize>
+      <partitions config:type="list">
+	<partition>
+	  <create config:type="boolean" >false</create>
+	  <crypt_fs config:type="boolean">false</crypt_fs>
+	  <mount>/</mount>
+	  <fstopt>
+	    ro,noatime,user,data=ordered,acl,user_xattr
+	  </fstopt>
+	  <label>mydata</label>
+	  <uuid>UUID</uuid>
+	  <size>10G</size>
+	  <filesystem config:type="symbol">btrfs</filesystem>
+	  <mkfs_options>-I 128</mkfs_options>
+	  <partition_nr config:type="integer">1</partition_nr>
+	  <partition_id config:type="integer">131</partition_id>
+	  <partition_type>primary</partition_type>
+	  <mountby config:type="symbol">label</mountby>
+	  <subvolumes config:type="list">
+	    <path>tmp</path>
+	    <path>opt</path>
+	    <path>srv</path>
+	    <path>var/crash</path>
+	    <path>var/lock</path>
+	    <path>var/run</path>
+	    <path>var/tmp</path>
+	    <path>var/spool</path>
+	  </subvolumes>
+	  <create_subvolumes config:type="boolean" >false</create_subvolumes>
+	  <subvolumes_prefix>@</subvolumes_prefix>
+	  <lv_name>opt_lv</lv_name>
+	  <stripes config:type="integer">2</stripes>
+	  <stripesize config:type="integer">4</stripesize>
+	  <lvm_group>system</lvm_group>
+	  <pool config:type="boolean">false</pool>
+	  <used_pool>my_thin_pool</used_pool>
+	  <raid_name>/dev/md/0</raid_name>
+	  <raid_options>
+	    <chunk_size>4</chunk_size>
+	    <parity_algorithm>left_asymmetric</parity_algorithm>
+	    <raid_type>raid1</raid_type>
+	    <device_order config:type="list">
+              <device>/dev/sdb2</device>
+              <device>/dev/sda1</device>
+            </device_order>
+	  </raid_options>
+	  <bcache_backing_for>/dev/bcache0</bcache_backing_for>
+	  <bcache_caching_for config:type="list">
+	    <listentry>/dev/bcache0</listentry>
+	  </bcache_caching_for>
+	  <resize config:type="boolean">false</resize>
+	</partition>
+      </partitions>
+      <use>all</use>
+      <type config:type="symbol">CT_DISK</type>
+      <disklabel>gpt</disklabel>
+      <enable_snapshots config:type="boolean">true</enable_snapshots>
+    </drive>
+  </partitioning>
+</profile>

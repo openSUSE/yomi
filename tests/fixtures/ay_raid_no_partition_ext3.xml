@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <partitioning config:type="list">
+    <drive>
+      <device>/dev/md/0</device>
+      <disklabel>none</disklabel>
+      <partitions config:type="list">
+	<partition>
+	  <mount>/home</mount>
+	  <size>40G</size>
+	</partition>
+      </partitions>
+      <raid_options>
+	<chunk_size>4</chunk_size>
+	<parity_algorithm>left_asymmetric</parity_algorithm>
+	<raid_type>raid1</raid_type>
+      </raid_options>
+      <use>all</use>
+    </drive>
+  </partitioning>
+</profile>
