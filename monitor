@@ -45,9 +45,9 @@ BLACK = '\033[1;30m'
 RED = '\033[1;31m'
 GREEN = '\033[0;32m'
 YELLOW = '\033[0;33m'
-BLUE  = '\033[1;34m'
+BLUE = '\033[1;34m'
 MAGENTA = '\033[1;35m'
-CYAN  = '\033[1;36m'
+CYAN = '\033[1;36m'
 WHITE = '\033[1;37m'
 RESET = "\033[0;0m"
 
@@ -315,10 +315,10 @@ def print_yomi_event(tag, data):
             print('[{}{}{}] {} -> [{}FAIL{}]     {}'.format(
                 color, id_, RESET, stamp, RED, RESET, tag))
 
+
 # Static-a-like variables to track the rotating color
 print_yomi_event.nodes = {}
 print_yomi_event.colors = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -354,7 +354,8 @@ if __name__ == '__main__':
                         'certificate errors for production.')
     parser.add_argument('-H', '--debug-http', action='store_true',
                         default=False,
-                        help='Output the HTTP request/response headers on stderr.')
+                        help=('Output the HTTP request/response headers on '
+                              'stderr.'))
     parser.add_argument('-m', '--minions', action='store_true',
                         default=False,
                         help='List available minions.')
