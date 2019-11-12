@@ -43,6 +43,10 @@ for module in modules states grains utils; do
     [ "$(ls -A ../salt/_"$module")" ] && ln -sr ../salt/_"$module"/* "$test_env"/"$module"/
 done
 
+for binary in autoyast2yomi monitor; do
+    ln -sr ../"$binary" "$test_env"/"$binary".py
+done
+
 if [ -z $PYTHONPATH ]; then
     export PYTHONPATH="$test_env":"$test_env"/utils:.
 else
