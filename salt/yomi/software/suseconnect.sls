@@ -19,7 +19,7 @@ register_product:
 
 {% for product in suseconnect.get('products', []) %}
   {% set regcode = suseconnect_config['regcode'] %}
-  {% if product in mapping %}
+  {% if product is mapping %}
     {% set regcode = product.get('regcode', regcode) %}
     {% set product = product['name'] %}
   {% endif %}
