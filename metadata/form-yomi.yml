@@ -1422,7 +1422,7 @@ config:
     $type: text
     $optional: yes
     $help: If empty, systemd will generate one
-  targer:
+  target:
     $type: text
     $optional: yes
     $default: multi-user.target
