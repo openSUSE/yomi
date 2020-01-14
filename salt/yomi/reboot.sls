@@ -33,7 +33,7 @@ shutdown:
   module.run:
     - system.shutdown:
 
-{% elif reboot %}
+{% elif reboot == 'yes' or reboot == True %}
 {{ macros.log('module', 'reboot') }}
 reboot:
   module.run:

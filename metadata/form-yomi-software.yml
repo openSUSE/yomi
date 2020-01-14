@@ -4,8 +4,11 @@
 
 software:
   $type: group
+  $help: Software Section for the Yomi Formula
   config:
+    $name: Configuration
     $type: group
+    $help: Local configuration for the software section
     minimal:
       $type: boolean
       $default: no
@@ -13,40 +16,49 @@ software:
   repositories:
     $type: edit-group
     $minItems: 0
+    $help: List of registered repositories
     $prototype:
       $key:
-        $type: text
         $name: Repository Name
+        $type: text
         $placeholder: repo-oss
-      $type: url
+        $help: Short name of the repository
       $name: Repository URL
+      $type: url
       $placeholder: http://download.opensuse.org/tumbleweed/repo/oss
+      $help: URL of the repository
   packages:
     $type: edit-group
     $minItems: 0
     $itemName: Package ${i}
+    $help: List of patterns or packages to install
     $prototype:
-        $type: text
         $name: Package
+        $type: text
         $help: "You can install patterns using the 'pattern:' prefix"
   image:
     $type: group
     $optional: yes
+    $help: Image ISO used to dump in the hard disk
     url:
-      $type: url
       $name: Image URL
+      $type: url
+      $help: URL from where download the image
     md5:
       $type: text
       $optional: yes
+      $help: MD5 of the image, used for validation
 
 suseconnect:
-  $type: group
   $name: SUSEConnect
+  $type: group
   config:
     $type: group
+    $help: Local configuration for the section
     regcode:
-      $type: text
       $name: Registration Code
+      $type: text
+      $help: Subscription registration code for the product
     email:
       $type: text
       $optional: yes
@@ -55,25 +67,31 @@ suseconnect:
       $type: url
       $optional: yes
       $placeholder: https://scc.suse.com
+      $help: URL of registration server
     version:
       $type: text
       $optional: yes
+      $help: Version part of the product name
     arch:
-      $type: text
       $name: Architecture
+      $type: text
       $optional: yes
+      $help: Architecture part of the product name
   products:
     $type: edit-group
     $minItems: 0
     $itemName: Product ${i}
+    $help: List of products to register
     $prototype:
       $type: text
       $placeholder: <name>/<version>/<architecture>
+      $help: The expected format is <name>/<version>/<architecture>
   packages:
     $type: edit-group
     $minItems: 0
     $itemName: Package ${i}
+    $help: List of patterns or packages to install from the products
     $prototype:
-        $type: text
         $name: Package
+        $type: text
         $help: "You can install patterns using the 'pattern:' prefix"

@@ -4,17 +4,21 @@
 
 salt-minion:
   $type: group
-  configure:
+  $help: Salt Minion Section for the Yomi Formula
+  config:
+    $name: Install salt-minion
     $type: boolean
     $default: yes
     $help: (Provisional) Install and configure a salt-minion service
 
 services:
   $type: group
+  $help: Service Section for the Yomi Formula
   enabled:
     $type: edit-group
     $minItems: 0
     $itemName: Service ${i}
+    $help: List of enabled services
     $prototype:
       $key:
         $type: text
@@ -24,6 +28,7 @@ services:
     $type: edit-group
     $minItems: 0
     $itemName: Service ${i}
+    $help: List of disabled services
     $prototype:
       $key:
         $type: text

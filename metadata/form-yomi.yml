@@ -5,28 +5,27 @@
 config:
   $name: General Configuration
   $type: group
+  $help: General Configuration Section for the Yomi Formula
   events:
     $type: boolean
     # Change default once Uyuni can track the events
     $default: no
     $help: If set, the installation can be monitored via Salt events
   reboot:
-    $type: boolean
-    $default: yes
-    # This can fail, as the multi-state is boolean and text, but here
-    # is only text.
-    # $type: select
-    # $values:
-    #   - "yes"
-    #   - "no"
-    #   - kexec
-    #   - halt
-    #   - shutdown
-    # $default: "yes"
+    $type: select
+    $values:
+      - "yes"
+      - "no"
+      - kexec
+      - halt
+      - shutdown
+    $default: "yes"
+    $help: Kind of reboot at the end of the installation
   snapper:
     $type: boolean
     $default: no
-    $help: For now it only can be used in BtrFS filesystems
+    $help: For now it only can be used in Btrfs filesystems
+  # TODO: How to export the values from the locale formula?
   locale:
     $type: select
     # Output from 'localectl list-locales'
@@ -514,6 +513,7 @@ config:
       - zu_ZA
       - zu_ZA.utf8
     $default: en_US.utf8
+    $help: System locale configuration for systemd
   keymap:
     $type: select
     # Output from 'localectl list-keymaps'
@@ -878,7 +878,7 @@ config:
       - nl-std
       - nl-sundeadkeys
       - nl2
-      - no
+      - "no"
       - no-colemak
       - no-dvorak
       - no-latin1
@@ -1060,6 +1060,7 @@ config:
       - wangbe2
       - windowkeys
     $default: us
+    $help: System keyboard configuration for systemd
   timezone:
     $type: select
     # Output from 'timedatectl list-timezones'
@@ -1414,6 +1415,7 @@ config:
       - Pacific/Wallis
       - UTC
     $default: UTC
+    $help: System timezone configuration for systemd
   hostname:
     $type: text
     $optional: yes

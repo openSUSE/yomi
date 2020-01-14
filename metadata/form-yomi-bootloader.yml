@@ -4,6 +4,7 @@
 
 bootloader:
   $type: group
+  $help: Bootloader Section for the Yomi Formula
   device:
     $type: text
     $placeholder: /dev/sda
@@ -34,9 +35,10 @@ bootloader:
     $help: Value for the GRUB_GFXMODE parameter
   theme:
     $type: boolean
-    $default: yes
+    $default: no
     $help: Install and configure grub2-branding package
   disable_os_prober:
+    $name: Disable OS Prober
     $type: boolean
     $default: no
     $help: Value for the GRUB_DISABLE_OS_PROBER parameter

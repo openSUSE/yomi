@@ -618,7 +618,8 @@ affect the installer.
   Control the way that the node will reboot. There are three possible
   values:
 
-  * `yes`: Will produce a full reboot cycle.
+  * `yes`: Will produce a full reboot cycle. This value can be
+    specified as the "yes" string, or the `True` boolean value.
 
   * `no`: Will no reboot after the installation.
 
@@ -1205,7 +1206,7 @@ suseconnect:
 
 Install and configure the salt-minion service.
 
-* `configure`. Boolean. Optional. Default: `no`
+* `config`. Boolean. Optional. Default: `no`
 
   If `yes`, the configuration and cetificates of the new minion will
   be the same that the current minion that is activated. This will
@@ -1217,7 +1218,7 @@ Example:
 
 ```yaml
 salt-minion:
-  configure: yes
+  config: yes
 ```
 
 ## `services` section

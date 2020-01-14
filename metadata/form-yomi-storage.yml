@@ -4,8 +4,10 @@
 
 partitions:
   $type: group
+  $help: Partiton (Storage) Subsection for the Yomi Formula
   config:
     $type: group
+    $help: Configuration options for the partitioner
     label:
       $type: select
       $values:
@@ -20,7 +22,7 @@ partitions:
         # - sun
         # - loop
       $default: gpt
-      $help: Kind of partition table if none is specified in the device
+      $help: Default type of partition table for the device
     initial_gap:
       $type: text
       $optional: yes
@@ -30,13 +32,14 @@ partitions:
     $type: edit-group
     $minItems: 1
     $itemName: Device ${i}
+    $help: List of (physical or logical) devices
     $prototype:
+      $type: group
       $key:
-        $type: text
         $name: Device
+        $type: text
         $placeholder: /dev/sda
         $help: Device name. Names like /dev/disk/by-id/... or /dev/disk/by-label/... can be used
-      $type: group
       label:
         $type: select
         $values:
@@ -51,7 +54,7 @@ partitions:
           # - sun
           # - loop
         $default: gpt
-        $help: Kind of partition table for the device
+        $help: Type of partition table for the device
       initial_gap:
         $type: text
         $optional: yes
@@ -61,27 +64,28 @@ partitions:
         $type: edit-group
         $minItems: 0
         $itemName: Partition ${i}
+        $help: List of partitions for the device
         $prototype:
           number:
+            $name: Partition Number
             $type: number
             $optional: yes
-            $name: Partition Number
             # $default: ${i}
             $help: Will be appended to the device name (E.g. /dev/sda1 for devide /dev/sda and partition number 1)
           id:
+            $name: Partition Name
             $type: text
             $optional: yes
-            $name: Partition Name
             $placeholder: /dev/sda1
             $help: "Full name of the partition. For example, valid ids can be /dev/sda1, /dev/md0p1, etc. Is optional, as the name can be deduced from 'Partition Number'"
           size:
-            $type: text
             $name: Partition Size
+            $type: text
             $placeholder: "Parted units or 'rest': 500MB"
             $help: "Valid units are s, B, kB, MB, GB, TB, compact, cyl, chs, %, kiB, MiB, GiB, TiB. Use 'rest' to indicate the rest of the free space"
           type:
-            $type: select
             $name: Partition Type
+            $type: select
             $values:
               - swap
               - linux
@@ -96,46 +100,50 @@ lvm:
   $type: edit-group
   $minItems: 0
   $itemName: Volume Group ${i}
+  $help: LVM (Storage) Subsection for the Yomi Formula
   $prototype:
-    $key:
-      $type: text
-      $name: Volume Group Name
-      $help: Name of the logical volume
     $type: group
+    $key:
+      $name: Volume Group Name
+      $type: text
+      $help: Name of the logical volume
     devices:
       $type: edit-group
       $minItems: 1
       $itemName: Device or Partition ${i}
+      $help: List of devices or partitions that belong to the volume
       $prototype:
         name:
-          $type: text
           $name: Device or Partition
+          $type: text
           $placeholder: /dev/sda1
           $help: Device or Partition with type LVM
         bootloaderareasize:
+          $name: Boot Loader Area Size
           $type: text
           $optional: yes
-          $name: Boot Loader Area Size
           $help: "Directly passed to 'pvcreate'"
         dataaligment:
+          $name: Data Aligment
           $type: text
           $optional: yes
-          $name: Data Aligment
           $help: "Directly passed to 'pvcreate'"
         dataalignmentoffset:
+          $name: Data Aligment Offset
           $type: text
           $optional: yes
-          $name: Data Aligment Offset
           $help: "Directly passed to 'pvcreate'"
     volumes:
       $type: edit-group
       $minItems: 1
       $itemName: Logical Volume ${i}
+      $help: List of logical volumes
       $prototype:
         name:
-          $type: text
           $name: Logical Volume Name
+          $type: text
           $placeholder: root
+          $help: Name of the logical volume
         extents:
           $type: text
           $optional: yes
@@ -151,9 +159,9 @@ lvm:
           $optional: yes
           $help: "Directly passed to 'lvcreate'"
         stripesize:
+          $name: Stripe Size
           $type: number
           $optional: yes
-          $name: Stripe Size
           $help: "Directly passed to 'lvcreate'"
         # There are more options that we can implement for LVM
     clustered:
@@ -165,31 +173,33 @@ lvm:
       $default: "n"
       $help: "Directly passed to 'vgcreate'"
     maxlogicalvolumes:
+      $name: Max Logical Volumes
       $type: number
       $optional: yes
-      $name: Max Logical Volumes
       $help: "Directly passed to 'vgcreate'"
     maxphysicalvolumes:
+      $name: Max Physical Volumes
       $type: number
       $optional: yes
-      $name: Max Physical Volumes
       $help: "Directly passed to 'vgcreate'"
     physicalextentsize:
+      $name: Physical Extent Size
       $type: text
       $optional: yes
-      $name: Physical Extend Size
       $help: "Directly passed to 'vgcreate'"
 
 raid:
   $type: edit-group
   $minItems: 0
   $itemName: RAID ${i}
+  $help: RAID (Storage) Subsection for the Yomi Formula
   $prototype:
-    $key:
-      $type: text
-      $name: Raid Device Name
-      $placeholder: /dev/md0
     $type: group
+    $key:
+      $name: RAID Device Name
+      $type: text
+      $placeholder: /dev/md0
+      $help: Name of the RAID device
     level:
       $type: select
       $values:
@@ -210,12 +220,13 @@ raid:
       $type: edit-group
       $minItems: 1
       $itemName: Device or Partition ${i}
+      $help: List of devices or partitions that belong to the RAID
       $prototype:
         name:
-          $type: text
           $name: Device or Partition
+          $type: text
           $placeholder: /dev/sda1
-          $help: Device or Partition with type RAID
+          $help: Device or partition with type RAID
     metadata:
       $type: select
       $values:
@@ -228,6 +239,7 @@ raid:
         - ddm
         - imsm
       $default: default
+      $help: RAID metadata version
     raid-devices:
       $type: number
       $optional: yes
@@ -241,12 +253,14 @@ filesystems:
   $type: edit-group
   $minItems: 1
   $itemName: Filesystem ${i}
+  $help: File System (Storage) Subsection for the Yomi Formula
   $prototype:
-    $key:
-      $type: text
-      $name: Partition
-      $placeholder: /dev/sda1
     $type: group
+    $key:
+      $name: Partition
+      $type: text
+      $placeholder: /dev/sda1
+      $help: Partition for the filesystem
     filesystem:
       $type: select
       $values:
@@ -257,32 +271,41 @@ filesystems:
         - ext4
         - vfat
       $default: ext4
+      $help: Filesystem for the device
     mountpoint:
       $type: text
       $placeholder: /
+      $help: Mount point of the partition
     fat:
+      $name: FAT Type
       $type: select
       $values:
         - 12
         - 16
         - 32
       $visibleIf: .filesystem == vfat
+      $help: Type of FAT
     subvolumes:
-      $type: group
       $name: BtrFS Subvolumes
+      $type: group
       $visibleIf: .filesystem == btrfs
+      $help: List of Btrfs subvolumes
       prefix:
         $type: text
         $placeholder: '@'
+        $help: Btrfs subvolume prefix
       subvolume:
         $type: edit-group
         $minItems: 0
         $itemName: Subvolume ${i}
         $visibleIf: .prefix != ""
+        $help: Subvolume description
         $prototype:
           path:
             $type: text
             $placeholder: /root
+            $help: Path for the subvolume
           copy_on_write:
             $type: boolean
             $default: yes
+            $help: CoW flag

@@ -96,7 +96,7 @@ software:
 {% endif %}
 
 salt-minion:
-  configure: yes
+  config: yes
 
 services:
   enabled:

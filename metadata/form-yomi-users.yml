@@ -6,12 +6,13 @@ users:
   $type: edit-group
   $minItems: 1
   $itemName: User ${i}
+  $help: List of users of the system
   $prototype:
     username:
       $type: text
     password:
-      $type: text
       $name: Password Hash
+      $type: text
       $help: "You can generate a hash with 'openssl passwd -1 -salt <salt> <password>'"
     certificates:
       $type: edit-group
@@ -19,6 +20,6 @@ users:
       $itemName: Certificate ${i}
       $prototype:
         $key:
-          $type: text
           $name: Certificate
+          $type: text
           $help: "Will be added to .ssh/authorized_keys. Use only the encoded key (remove the 'ssh-rsa' prefix and the 'user@host' suffix)"
