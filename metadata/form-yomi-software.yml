@@ -52,6 +52,7 @@ software:
 suseconnect:
   $name: SUSEConnect
   $type: group
+  $help: SUSEConnect Section for the Yomi Formula
   config:
     $type: group
     $help: Local configuration for the section

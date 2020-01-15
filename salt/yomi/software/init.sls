@@ -8,7 +8,7 @@ include:
   - ..storage.mount
 {% endif %}
   - .software
-{% if pillar.get('suseconnect') %}
+{% if pillar.get('suseconnect', {}).get('config', {}).get('regcode') %}
   - .suseconnect
 {% endif %}
   - ..storage.software
