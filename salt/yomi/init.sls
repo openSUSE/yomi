@@ -1,15 +1,15 @@
 {% set filesystems = pillar['filesystems'] %}
 
-{% set installed = False %}
+{% set ns = namespace(installed=False) %}
 {% for device, info in filesystems.items() %}
   {% if info.get('mountpoint') == '/' %}
     {% if salt.cmd.run('findmnt --list --noheadings --output SOURCE /') == device %}
-      {% set installed = True %}
+      {% set ns.installed = True %}
     {% endif %}
   {% endif %}
 {% endfor %}
 
-{% if not installed %}
+{% if not ns.installed %}
 include:
   - .storage
   - .software
