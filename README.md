@@ -366,6 +366,11 @@ label yomi
 EOF
 ```
 
+This image is based on Tumbleweed, that leverage by default the
+predictable network interface name.  If your image is based on a
+different one, be sure to add `net.ifnames=1` at the end of the
+`append` section.
+
 ## Finding the master node
 
 The `salt-minion` configuration in the Yomi image will search the

@@ -2,6 +2,9 @@
 
 {% set interfaces = salt.network.interfaces() | select('!=', 'lo') %}
 
+# This assume that the image used for deployment is under a
+# predictable network interface name, like Tumbleweed. For SLE, boot
+# the image with `net.ifnames=1`
 {% for interface in interfaces %}
 {{ macros.log('file', 'create_ifcfg_' ~ interface) }}
 create_ifcfg_{{ interface }}:
