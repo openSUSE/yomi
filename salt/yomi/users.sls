@@ -35,7 +35,7 @@ add_certificate_users_{{ user.username }}_{{ loop.index }}:
       - root: /mnt
       - function: ssh.set_auth_key
       - user: {{ user.username }}
-      - key: '{{ certificate }}'
+      - key: "'{{ certificate }}'"
     - unless: grep -q '{{ certificate }}' /mnt/{{ 'home/' if user.username != 'root' else '' }}{{ user.username }}/.ssh/authorized_keys
   {% endfor %}
 {% endfor %}
