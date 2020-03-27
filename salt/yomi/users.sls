@@ -14,13 +14,16 @@ create_user_{{ user.username }}:
 
   {% if user.get('password') %}
 {{ macros.log('module', 'set_password_user_' ~ user.username) }}
+# We should use here the root parameter, but we move to chroot.call
+# because bsc#1167909
 set_password_user_{{ user.username }}:
   module.run:
-    - shadow.set_password:
-      - name: {{ user.username }}
-      - password: '{{ user.password }}'
-      - use_usermod: yes
+    - chroot.call:
       - root: /mnt
+      - function: shadow.set_password
+      - name: {{ user.username }}
+      - password: "'{{ user.password }}'"
+      - use_usermod: yes
     - unless: grep -q '{{ user.username }}:{{ user.password }}' /mnt/etc/shadow
   {% endif %}
 
