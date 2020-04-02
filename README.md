@@ -1215,7 +1215,9 @@ Install and configure the salt-minion service.
 
   If `yes`, the configuration and cetificates of the new minion will
   be the same that the current minion that is activated. This will
-  copy the minion configuration, certificates and grains.
+  copy the minion configuration, certificates and grains, together
+  with the cached modules and states that are usually synchronized
+  before a highstate.
 
   This option will be replaced in the future with more detailed ones.
 
