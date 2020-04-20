@@ -930,10 +930,10 @@ and the file system (and properties) that will be applied to it.
 * `filesystem`. String.
 
   File system to apply in the device. Valid values are `swap`,
-  `linux-swap`, `bfs`, `btrfs`, `cramfs`, `ext2`, `ext3`, `ext4`,
-  `minix`, `msdos`, `vfat`. Technically Salt will search for a command
-  that match `mkfs.<filesystem>`, so the valid options can be more
-  extensive that the one listed here.
+  `linux-swap`, `bfs`, `btrfs`, `xfs`, `cramfs`, `ext2`, `ext3`,
+  `ext4`, `minix`, `msdos`, `vfat`. Technically Salt will search for a
+  command that match `mkfs.<filesystem>`, so the valid options can be
+  more extensive that the one listed here.
 
 * `mountpoint`. String.
 

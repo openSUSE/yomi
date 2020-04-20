@@ -266,6 +266,7 @@ filesystems:
       $values:
         - swap
         - btrfs
+        - xfs
         - ext2
         - ext3
         - ext4
