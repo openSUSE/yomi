@@ -21,12 +21,14 @@
 # yet synchronized
 {% set efi = True %}
 {% set partition = 'gpt' %}
-{% set device_type = 'sd' %}
+{% set device_type = 'vd' %}
 {% set root_filesystem = 'btrfs' %}
-{% set home_filesystem = 'xfs' %}
+{% set home_filesystem = False %}
 {% set snapper = True %}
 {% set swap = True %}
-{% set mode = 'sles' %}
+{% set mode = 'single' %}
+
+{% set arch = grains['cpuarch'] %}
 
 config:
   events: no
@@ -46,7 +48,7 @@ suseconnect:
   config:
     regcode: REGISTRATION-CODE
     version: '15.1'
-    arch: x86_64
+    arch: {{ arch }}
   products:
     - sle-module-basesystem
     - sle-module-server-applications
@@ -59,12 +61,14 @@ software:
 {% if mode == 'sles' %}
     SUSE_SLE-15_GA: "http://download.suse.de/ibs/SUSE:/SLE-15:/GA/standard/"
     SUSE_SLE-15-SP1_GA: "http://download.suse.de/ibs/SUSE:/SLE-15-SP1:/GA/standard/"
+{% elif arch == 'aarch64' %}
+    repo-oss: "http://download.opensuse.org/ports/aarch64/tumbleweed/repo/oss/"
 {% else %}
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss/"
 {% endif %}
 {% if mode == 'image' %}
   image:
-    url: tftp://10.0.3.1/openSUSE-Tumbleweed-Yomi.x86_64-1.0.0.xz
+    url: tftp://10.0.3.1/openSUSE-Tumbleweed-Yomi{{ arch }}-1.0.0.xz
     md5:
 {% else %}
   packages:

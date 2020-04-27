@@ -1,6 +1,7 @@
 {% import 'macros.yml' as macros %}
 
 {% set bootloader = pillar['bootloader'] %}
+{% set arch = {'aarch64': 'arm64'}.get(grains['cpuarch'], grains['cpuarch'])%}
 
 {{ macros.log('pkg', 'install_grub2') }}
 install_grub2:
@@ -11,7 +12,7 @@ install_grub2:
       - grub2-branding
 {% endif %}
 {% if grains['efi'] %}
-      - grub2-x86_64-efi
+      - grub2-{{ arch }}-efi
   {% if grains['efi-secure-boot'] %}
       - shim
   {% endif %}

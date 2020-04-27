@@ -10,7 +10,7 @@ include:
   {% endif %}
 {% endif %}
 
-{% if grains['efi'] %}
+{% if grains['efi'] and grains['cpuarch'] != 'aarch64' %}
 {{ macros.log('file', 'config_grub2_efi') }}
 config_grub2_efi:
   file.append:

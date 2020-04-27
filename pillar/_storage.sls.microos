@@ -69,8 +69,12 @@ filesystems:
         - path: srv
         - path: boot/writable
         - path: usr/local
+    {% if arch == 'aarch64' %}
+        - path: boot/grub2/arm64-efi
+    {% else %}
         - path: boot/grub2/i386-pc
         - path: boot/grub2/x86_64-efi
+    {% endif %}
 {% set next_partition = next_partition + 1 %}
   /dev/{{ device_type }}a{{ next_partition }}:
     filesystem: {{ root_filesystem }}

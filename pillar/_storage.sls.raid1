@@ -98,8 +98,12 @@ filesystems:
         - path: usr/local
         - path: var
           copy_on_write: no
+    {% if arch == 'aarch64' %}
+        - path: boot/grub2/arm64-efi
+    {% else %}
         - path: boot/grub2/i386-pc
         - path: boot/grub2/x86_64-efi
+    {% endif %}
 {% endif %}
 {% set next_partition = next_partition + 1 %}
 {% if home_filesystem %}

@@ -1,6 +1,7 @@
 {% import 'macros.yml' as macros %}
 
 {% set bootloader = pillar['bootloader'] %}
+{% set arch = {'aarch64': 'arm64'}.get(grains['cpuarch'], grains['cpuarch'])%}
 
 {{ macros.log('cmd', 'grub2_install') }}
 grub2_install:
@@ -9,7 +10,7 @@ grub2_install:
   {% if grains['efi-secure-boot'] %}
     - name: shim-install --config-file=/boot/grub2/grub.cfg
   {% else %}
-    - name: grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+    - name: grub2-install --target={{ arch }}-efi --efi-directory=/boot/efi --bootloader-id=GRUB
   {% endif %}
     - creates: /mnt/boot/efi/EFI/GRUB
 {% else %}

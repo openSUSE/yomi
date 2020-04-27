@@ -18,7 +18,7 @@ integration in any workflow were SaltStack is used.
 
 To execute Yomi we need a modern version of Salt, as we need special
 features are only on the
-[develop](https://github.com/saltstack/salt/tree/develop) branch of
+[master](https://github.com/saltstack/salt/tree/master) branch of
 Salt. Technically we can use the last released version of Salt for
 salt-master, but for the minions we need the most up-to-date
 version. The good news is that most of the patches are currently
@@ -46,6 +46,9 @@ The installation process of Yomi will require:
 * Prepare the [pillar](#pillar-in-yomi) for the new installations.
 * Boot the new systems with the [ISO image](#the-iso-image) or via
   [PXE boot](#pxe-boot)
+
+Currently Yomi support the installation under x86_64 and ARM64
+(aarch64) with EFI.
 
 
 # Installing and configuring salt-master
