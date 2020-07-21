@@ -16,8 +16,8 @@ create_systemd_network_directory:
 # predictable network interface name, like Tumbleweed. For SLE, boot
 # the image with `net.ifnames=1`
 {% for interface in interfaces_except_lo %}
-{{ macros.log('file', 'create_ifcfg_' ~ interface) }}
-create_ifcfg_{{ interface }}:
+{{ macros.log('file', 'create_ifcfg_ifnames_' ~ interface) }}
+create_ifcfg_ifnames_{{ interface }}:
   file.append:
     - name: /mnt/etc/sysconfig/network/ifcfg-{{ interface }}
     - text: |
