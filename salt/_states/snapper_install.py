@@ -94,7 +94,7 @@ def __mount_device(action):
     '''
     @functools.wraps(action)
     def wrapper(*args, **kwargs):
-        device = kwargs['device']
+        device = kwargs.get('device', args[1] if len(args) > 1 else None)
 
         ret = {
             'name': device,
