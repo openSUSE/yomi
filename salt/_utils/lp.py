@@ -21,12 +21,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-EQ = '='
-LTE = '<='
-GTE = '>='
+EQ = "="
+LTE = "<="
+GTE = ">="
 
-MINIMIZE = '-'
-MAXIMIZE = '+'
+MINIMIZE = "-"
+MAXIMIZE = "+"
 
 
 def _vec_scalar(vector, scalar):
@@ -75,9 +75,10 @@ class Model:
         #   * operator = '<='
         #   * free_term = b
         #
-        assert len(coefficients) == len(self.variables), 'Coefficients  ' \
-            'length must match the number of variables'
-        assert operator in (EQ, LTE, GTE), 'Operator not valid'
+        assert len(coefficients) == len(self.variables), (
+            "Coefficients length must match the number of variables"
+        )
+        assert operator in (EQ, LTE, GTE), "Operator not valid"
         self._constraints.append((coefficients, operator, free_term))
 
     def add_cost_function(self, action, coefficients, free_term):
@@ -91,9 +92,10 @@ class Model:
         #   * coefficients = [c_1, c_2, ..., c_n]
         #   * free_term = z_0
         #
-        assert action in (MINIMIZE, MAXIMIZE), 'Action not valid'
-        assert len(coefficients) == len(self.variables), 'Coefficients  ' \
-            'length must match the number of variables'
+        assert action in (MINIMIZE, MAXIMIZE), "Action not valid"
+        assert len(coefficients) == len(self.variables), (
+            "Coefficients length must match the number of variables"
+        )
         self._cost_function = (action, coefficients, free_term)
 
     def _coeff(self, coefficients):
@@ -141,11 +143,9 @@ class Model:
             slack_coeff = [0] * slack_vars
             if operator in (LTE, GTE):
                 slack_coeff[slack_var_idx] = 1 if operator == LTE else -1
-                self._slack_variables.append(
-                    base_slack_var_idx + slack_var_idx)
+                self._slack_variables.append(base_slack_var_idx + slack_var_idx)
                 slack_var_idx += 1
-            self._standard_constraints.append(
-                (coefficients + slack_coeff, free_term))
+            self._standard_constraints.append((coefficients + slack_coeff, free_term))
 
         # Adjust the cost function
         action, coefficients, free_term = self._cost_function
@@ -173,19 +173,21 @@ class Model:
             artificial_coeff[artificial_var_idx] = 1
             artificial_var_idx += 1
             self._canonical_constraints.append(
-                (coefficients + artificial_coeff, free_term))
+                (coefficients + artificial_coeff, free_term)
+            )
 
             coeff_acc = _vec_plus_vec(coeff_acc, coefficients)
             free_term_acc += free_term
 
         coefficients, free_term = self._standard_cost_function
         artificial_coeff = [0] * artificial_vars
-        self._canonical_cost_function = (coefficients + artificial_coeff,
-                                         free_term)
+        self._canonical_cost_function = (coefficients + artificial_coeff, free_term)
 
         coeff_acc = _vec_scalar(coeff_acc, -1)
-        self._canonical_artificial_function = (coeff_acc + artificial_coeff,
-                                               -free_term_acc)
+        self._canonical_artificial_function = (
+            coeff_acc + artificial_coeff,
+            -free_term_acc,
+        )
 
     def _build_tableau_canonical_form(self):
         """Build the tableau related with the canonical form."""
@@ -210,35 +212,41 @@ class Model:
         result = []
         for coefficient, variable in zip(coefficients, self.variables):
             if result:
-                result.append('+' if coefficient >= 0 else '-')
+                result.append("+" if coefficient >= 0 else "-")
                 coefficient = abs(coefficient)
-            result.append('{} {}'.format(coefficient, variable))
-        return ' '.join(result)
+            result.append("{} {}".format(coefficient, variable))
+        return " ".join(result)
 
     def __str__(self):
         result = []
         """String representation of a model."""
         if self._cost_function:
-            result.append({
-                MINIMIZE: 'Minimize:',
-                MAXIMIZE: 'Maximize:'}[self._cost_function[0]])
+            result.append(
+                {MINIMIZE: "Minimize:", MAXIMIZE: "Maximize:"}[self._cost_function[0]]
+            )
             free_term = self._cost_function[2]
-            free_term_sign = '+' if free_term >= 0 else '-'
-            z = ' '.join((self._str_coeff(self._cost_function[1]),
-                          free_term_sign, str(abs(free_term))))
-            result.append('  ' + z)
-            result.append('')
+            free_term_sign = "+" if free_term >= 0 else "-"
+            z = " ".join(
+                (
+                    self._str_coeff(self._cost_function[1]),
+                    free_term_sign,
+                    str(abs(free_term)),
+                )
+            )
+            result.append("  " + z)
+            result.append("")
 
-        result.append('Subject to:')
+        result.append("Subject to:")
         for constraint in self._constraints:
-            c = ' '.join((self._str_coeff(constraint[0]),
-                          constraint[1], str(constraint[2])))
-            result.append('  ' + c)
+            c = " ".join(
+                (self._str_coeff(constraint[0]), constraint[1], str(constraint[2]))
+            )
+            result.append("  " + c)
 
-        c = ', '.join(self.variables) + ' >= 0'
-        result.append('  ' + c)
+        c = ", ".join(self.variables) + " >= 0"
+        result.append("  " + c)
 
-        return '\n'.join(result)
+        return "\n".join(result)
 
 
 class Tableau:
@@ -284,31 +292,37 @@ class Tableau:
 
     def add_constraint(self, constraint, basic_variable):
         """Add a contraint into the tableau."""
-        assert len(constraint) == self.n + 1, 'Wrong size for the constraint'
-        assert basic_variable not in self._basic_variables, \
-            'Basic variable is already registered'
-        assert len(self._basic_variables) == len(self._tableau) \
-            and len(self._tableau) < self.m, 'Too many constraints registered'
+        assert len(constraint) == self.n + 1, "Wrong size for the constraint"
+        assert (
+            basic_variable not in self._basic_variables
+        ), "Basic variable is already registered"
+        assert (
+            len(self._basic_variables) == len(self._tableau)
+            and len(self._tableau) < self.m
+        ), "Too many constraints registered"
 
         self._basic_variables.append(basic_variable)
         self._tableau.append(constraint)
 
     def add_cost_function(self, cost_function):
         """Add the const function in the tableau."""
-        assert len(cost_function) == self.n + 1, \
-            'Wrong size for the cost function'
-        assert len(self._basic_variables) == len(self._tableau) \
-            and len(self._tableau) == self.m, 'Too few constraints registered'
+        assert len(cost_function) == self.n + 1, "Wrong size for the cost function"
+        assert (
+            len(self._basic_variables) == len(self._tableau)
+            and len(self._tableau) == self.m
+        ), "Too few constraints registered"
 
         self._tableau.append(cost_function)
 
     def add_artificial_function(self, artificial_function):
         """Add the artificial function in the tableau."""
-        assert len(artificial_function) == self.n + 1, \
-            'Wrong size for the cost function'
-        assert len(self._basic_variables) == len(self._tableau) - 1 \
-            and len(self._tableau) == self.m + 1, 'Too few constraints or ' \
-            'not cost function registered'
+        assert (
+            len(artificial_function) == self.n + 1
+        ), "Wrong size for the cost function"
+        assert (
+            len(self._basic_variables) == len(self._tableau) - 1
+            and len(self._tableau) == self.m + 1
+        ), ("Too few constraints or not cost function registered")
 
         self._artificial = True
         self._tableau.append(artificial_function)
@@ -326,14 +340,14 @@ class Tableau:
 
     def drop_artificial(self):
         """Transform the tableau in one without artificial variables."""
-        assert self._artificial, 'Tableau already without artificial variables'
-        assert self.is_minimum(), 'Tableau is not in minimum state'
+        assert self._artificial, "Tableau already without artificial variables"
+        assert self.is_minimum(), "Tableau is not in minimum state"
 
         # Check that the basic variables are not artificial variables
         artificial_variables = range(self.n - self.m, self.n)
-        assert not any(i in self._basic_variables
-                       for i in artificial_variables), \
-            'At least one artificial variable is a basic variable'
+        assert not any(
+            i in self._basic_variables for i in artificial_variables
+        ), "At least one artificial variable is a basic variable"
 
         # Remove the artificial cost function
         self._tableau.pop()
@@ -341,7 +355,7 @@ class Tableau:
         # Drop all artificial variable coefficients
         tableau = []
         for line in self._tableau:
-            tableau.append(line[:-self.m - 1] + [line[-1]])
+            tableau.append(line[: -self.m - 1] + [line[-1]])
         self._tableau = tableau
 
         self._artificial = False
@@ -359,11 +373,10 @@ class Tableau:
         result = True
 
         # The system of constraints is in canonical form
-        for idx, constraint in zip(self._basic_variables,
-                                   self.constraints()):
+        for idx, constraint in zip(self._basic_variables, self.constraints()):
             result = result and all(
-                constraint[i] == (1 if idx == i else 0)
-                for i in self._basic_variables)
+                constraint[i] == (1 if idx == i else 0) for i in self._basic_variables
+            )
 
         # We need to check that the associated basic solution is
         # feasible. But we separate this check in a different method.
@@ -372,8 +385,7 @@ class Tableau:
         # The objective function is expressed in therms of only the
         # nonbasic variables
         cost_function = self.cost_function()
-        result = result and all(cost_function[i] == 0
-                                for i in self._basic_variables)
+        result = result and all(cost_function[i] == 0 for i in self._basic_variables)
         return result
 
     def is_minimum(self):
@@ -382,45 +394,45 @@ class Tableau:
 
     def is_basic_feasible_solution(self):
         """Check if there is a basic feasible solution."""
-        assert self.is_canonical(), 'Tableau is not in canonical form'
+        assert self.is_canonical(), "Tableau is not in canonical form"
 
         if self._artificial:
-            assert self.is_minimum(), 'If there are artificial variables, ' \
-                'we need to be minimized.'
+            assert self.is_minimum(), (
+                "If there are artificial variables, we need to be minimized."
+            )
             return self.cost_functions()[-1] == 0
         else:
             return all(c[-1] >= 0 for c in self.constraints())
 
     def is_bound(self):
         """Check if the cost function is bounded."""
-        candidates_idx = [i for i, c in enumerate(self.cost_function()[:-1])
-                          if c < 0]
-        return all(all(row[i] >= 0 for row in self.constraints())
-                   for i in candidates_idx)
+        candidates_idx = [i for i, c in enumerate(self.cost_function()[:-1]) if c < 0]
+        return all(
+            all(row[i] >= 0 for row in self.constraints()) for i in candidates_idx
+        )
 
     def _get_pivoting_column(self):
         """Returm the column number where we can pivot."""
-        candidates = [(i, c) for i, c in enumerate(self.cost_function()[:-1])
-                      if c < 0]
-        assert candidates, 'Cost function already minimal.'
+        candidates = [(i, c) for i, c in enumerate(self.cost_function()[:-1]) if c < 0]
+        assert candidates, "Cost function already minimal."
         return min(candidates, key=lambda x: x[1])[0]
 
     def _get_pivoting_row(self, column):
         """Return the row number where we can pivot."""
-        candidates = [(i, row[-1] / row[column])
-                      for i, row in enumerate(self.constraints())
-                      if row[column] > 0]
+        candidates = [
+            (i, row[-1] / row[column])
+            for i, row in enumerate(self.constraints())
+            if row[column] > 0
+        ]
         # NOTE(aplanas): Not sure that this is the case
-        assert candidates, 'Not basic feasible solution found.'
+        assert candidates, "Not basic feasible solution found."
         return min(candidates, key=lambda x: x[1])[0]
 
     def _pivote(self, row, column):
         """Pivote the tableau in (row, column)."""
         # Normalize the row
-        vec = _vec_scalar(
-            self._tableau[row], 1 / self._tableau[row][column])
+        vec = _vec_scalar(self._tableau[row], 1 / self._tableau[row][column])
         self._tableau[row] = vec
         for row_b, vec_b in enumerate(self._tableau):
             if row_b != row:
-                self._tableau[row_b] = _vec_vec_scalar(
-                    vec, vec_b, -vec_b[column])
+                self._tableau[row_b] = _vec_vec_scalar(vec, vec_b, -vec_b[column])

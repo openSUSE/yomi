@@ -21,22 +21,22 @@
 # specific language governing permissions and limitations
 # under the License.
 
-'''
+"""
 :maintainer:    Alberto Planas <aplanas@suse.com>
 :maturity:      new
 :depends:       None
 :platform:      Linux
-'''
+"""
 from __future__ import absolute_import, print_function, unicode_literals
 import logging
 
 
 LOG = logging.getLogger(__name__)
 
-__virtualname__ = 'devices'
+__virtualname__ = "devices"
 
 __func_alias__ = {
-    'filter_': 'filter',
+    "filter_": "filter",
 }
 
 # Define not exported variables from Salt, so this can be imported as
@@ -50,49 +50,53 @@ except NameError:
 
 
 def _udev(udev_info, key):
-    '''
+    """
     Return the value for a udev key.
 
     The `key` parameter is a lower case text joined by dots. For
     example, 'e.id_bus' will represent the key for
     `udev_info['E']['ID_BUS']`.
 
-    '''
-    k, _, r = key.partition('.')
+    """
+    k, _, r = key.partition(".")
     if not k:
         return udev_info
     if not isinstance(udev_info, dict):
-        return 'n/a'
+        return "n/a"
     if not r:
-        return udev_info.get(k.upper(), 'n/a')
+        return udev_info.get(k.upper(), "n/a")
     return _udev(udev_info.get(k.upper(), {}), r)
 
 
 def _match(udev_info, match_info):
-    '''
+    """
     Check if `udev_info` match the information from `match_info`.
-    '''
+    """
     res = True
     for key, value in match_info.items():
         udev_value = _udev(udev_info, key)
         if isinstance(udev_value, dict):
             # If is a dict we probably make a mistake in key from
             # match_info, as is not accessing a final value
-            LOG.warning('The key %s for the udev information '
-                        'dictionary is not a leaf element', key)
+            LOG.warning(
+                "The key %s for the udev information "
+                "dictionary is not a leaf element",
+                key,
+            )
             continue
 
         # Converting both values to sets make easy to see if there is
         # a coincidence between both values
         value = set(value) if isinstance(value, list) else set([value])
-        udev_value = set(udev_value) if isinstance(udev_value, list) \
-            else set([udev_value])
+        udev_value = (
+            set(udev_value) if isinstance(udev_value, list) else set([udev_value])
+        )
         res = res and (value & udev_value)
     return res
 
 
 def filter_(udev_in=None, udev_ex=None):
-    '''
+    """
     Returns a list of devices, filtered under udev keys.
 
     udev_in
@@ -119,28 +123,26 @@ def filter_(udev_in=None, udev_ex=None):
 
        salt '*' devices.filter udev_in='{"e.id_bus": "ata"}'
 
-    '''
+    """
 
     udev_in = udev_in if udev_in else {}
     udev_ex = udev_ex if udev_ex else {}
 
-    all_devices = __grains__['disks']
+    all_devices = __grains__["disks"]
 
     # Get the udev information only one time
-    udev_info = {d: __salt__['udev.info'](d) for d in all_devices}
+    udev_info = {d: __salt__["udev.info"](d) for d in all_devices}
 
-    devices_udev_key_in = {
-        d for d in all_devices if _match(udev_info[d], udev_in)
-    }
+    devices_udev_key_in = {d for d in all_devices if _match(udev_info[d], udev_in)}
     devices_udev_key_ex = {
         d for d in all_devices if _match(udev_info[d], udev_ex) if udev_ex
     }
 
-    return sorted(devices_udev_key_in-devices_udev_key_ex)
+    return sorted(devices_udev_key_in - devices_udev_key_ex)
 
 
 def wipe(device):
-    '''
+    """
     Remove all the partitions in the device.
 
     device
@@ -154,53 +156,53 @@ def wipe(device):
 
        salt '*' devices.wipeout /dev/sda
 
-    '''
+    """
 
-    partitions = __salt__['partition.list'](device).get('partitions', [])
+    partitions = __salt__["partition.list"](device).get("partitions", [])
     for partition in partitions:
         # Remove filesystem information the the partition
-        __salt__['disk.wipe']('{}{}'.format(device, partition))
-        __salt__['partition.rm'](device, partition)
+        __salt__["disk.wipe"]("{}{}".format(device, partition))
+        __salt__["partition.rm"](device, partition)
 
     # Remove the MBR information
-    __salt__['disk.wipe']('{}'.format(device))
-    __salt__['cmd.run']('dd bs=512 count=1 if=/dev/zero of={}'.format(device))
+    __salt__["disk.wipe"]("{}".format(device))
+    __salt__["cmd.run"]("dd bs=512 count=1 if=/dev/zero of={}".format(device))
 
     return True
 
 
 def _hwinfo_parse_short(report):
-    '''Parse the output of hwinfo and return a dictionary'''
+    """Parse the output of hwinfo and return a dictionary"""
     result = {}
     current_result = {}
     key_counter = 0
     for line in report.strip().splitlines():
-        if line.startswith('    '):
+        if line.startswith("    "):
             key = key_counter
             key_counter += 1
             current_result[key] = line.strip()
-        elif line.startswith('  '):
-            key, value = line.strip().split(' ', 1)
+        elif line.startswith("  "):
+            key, value = line.strip().split(" ", 1)
             current_result[key] = value.strip()
-        elif line.endswith(':'):
+        elif line.endswith(":"):
             key = line[:-1]
             value = {}
             result[key] = value
             current_result = value
             key_counter = 0
         else:
-            LOG.error('Error parsing hwinfo short output: {}'.format(line))
+            LOG.error("Error parsing hwinfo short output: {}".format(line))
 
     return result
 
 
 def _hwinfo_parse_full(report):
-    '''Parse the output of hwinfo and return a dictionary'''
+    """Parse the output of hwinfo and return a dictionary"""
     result = {}
     result_stack = []
     level = 0
     for line in report.strip().splitlines():
-        current_level = line.count('  ')
+        current_level = line.count("  ")
         if level != current_level or len(result_stack) != result_stack:
             result_stack = result_stack[:current_level]
             level = current_level
@@ -212,42 +214,40 @@ def _hwinfo_parse_full(report):
 
         # Initial line of a segment
         if level == 0:
-            key, value = line.split(':', 1)
+            key, value = line.split(":", 1)
             sub_result = {}
             result[key] = sub_result
             # The first line contains also a sub-element
-            key, value = value.strip().split(': ', 1)
+            key, value = value.strip().split(": ", 1)
             sub_result[key] = value
             result_stack.append(sub_result)
             level += 1
             continue
 
         # Line is a note
-        if line.startswith('[') or ':' not in line:
+        if line.startswith("[") or ":" not in line:
             sub_result = result_stack[-1]
-            sub_result['Note'] = (line if not line.startswith('[')
-                                  else line[1:-1])
+            sub_result["Note"] = line if not line.startswith("[") else line[1:-1]
             continue
 
-        key, value = line.split(':', 1)
+        key, value = line.split(":", 1)
         key, value = key.strip(), value.strip()
         sub_result = result_stack[-1]
         # If there is a value and it not starts with hash, this is a
         # (key, value) entry. But there are exception on the rule,
         # like when is about 'El Torito info', that is the begining of
         # a new dictorionart.
-        if value and not value.startswith('#') and key != 'El Torito info':
-            if key == 'I/O Port':
-                key = 'I/O Ports'
-            elif key == 'Config Status':
-                value = dict(item.split('=')
-                             for item in value.split(', '))
-            elif key in ('Driver', 'Driver Modules'):
-                value = value.replace('"', '').split(', ')
-            elif key in ('Tags', 'Device Files', 'Features'):
+        if value and not value.startswith("#") and key != "El Torito info":
+            if key == "I/O Port":
+                key = "I/O Ports"
+            elif key == "Config Status":
+                value = dict(item.split("=") for item in value.split(", "))
+            elif key in ("Driver", "Driver Modules"):
+                value = value.replace('"', "").split(", ")
+            elif key in ("Tags", "Device Files", "Features"):
                 # We cannot split by ', ', as using spaces in
                 # inconsisten in some fields
-                value = [v.strip() for v in value.split(',')]
+                value = [v.strip() for v in value.split(",")]
             else:
                 if value.startswith('"'):
                     value = value[1:-1]
@@ -265,13 +265,13 @@ def _hwinfo_parse_full(report):
                     value = current_value
             sub_result[key] = value
         else:
-            if value.startswith('#'):
-                value = {'Handle': value}
-            elif key == 'El Torito info':
-                value = value.split(', ')
+            if value.startswith("#"):
+                value = {"Handle": value}
+            elif key == "El Torito info":
+                value = value.split(", ")
                 value = {
-                    'platform': value[0].split()[-1],
-                    'bootable': 'no' if 'not' in value[1] else 'yes',
+                    "platform": value[0].split()[-1],
+                    "bootable": "no" if "not" in value[1] else "yes",
                 }
             else:
                 value = {}
@@ -284,7 +284,7 @@ def _hwinfo_parse_full(report):
 
 
 def _hwinfo_parse(report, short):
-    '''Parse the output of hwinfo and return a dictionary'''
+    """Parse the output of hwinfo and return a dictionary"""
     if short:
         return _hwinfo_parse_short(report)
     else:
@@ -292,35 +292,35 @@ def _hwinfo_parse(report, short):
 
 
 def _hwinfo_efi():
-    '''Return information about EFI'''
+    """Return information about EFI"""
     return {
-        'efi': __grains__['efi'],
-        'efi-secure-boot': __grains__['efi-secure-boot'],
+        "efi": __grains__["efi"],
+        "efi-secure-boot": __grains__["efi-secure-boot"],
     }
 
 
 def _hwinfo_memory():
-    '''Return information about the memory'''
+    """Return information about the memory"""
     return {
-        'mem_total': __grains__['mem_total'],
+        "mem_total": __grains__["mem_total"],
     }
 
 
 def _hwinfo_network(short):
-    '''Return network information'''
+    """Return network information"""
     info = {
-        'fqdn': __grains__['fqdn'],
-        'ip_interfaces':  __grains__['ip_interfaces'],
+        "fqdn": __grains__["fqdn"],
+        "ip_interfaces": __grains__["ip_interfaces"],
     }
 
     if not short:
-        info['dns'] = __grains__['dns']
+        info["dns"] = __grains__["dns"]
 
     return info
 
 
 def hwinfo(items=None, short=True, listmd=False, devices=None):
-    '''
+    """
     Probe for hardware
 
     items
@@ -345,11 +345,11 @@ def hwinfo(items=None, short=True, listmd=False, devices=None):
        salt '*' devices.hwinfo items='["disk"]' short=no devices='["/dev/sda"]'
        salt '*' devices.hwinfo devices=/dev/sda
 
-    '''
+    """
     result = {}
 
     if not items:
-        items = ['bios', 'cpu', 'disk', 'memory', 'network', 'partition']
+        items = ["bios", "cpu", "disk", "memory", "network", "partition"]
     if not isinstance(items, (list, tuple)):
         items = [items]
 
@@ -358,29 +358,29 @@ def hwinfo(items=None, short=True, listmd=False, devices=None):
     if devices and not isinstance(devices, (list, tuple)):
         devices = [devices]
 
-    cmd = ['hwinfo']
+    cmd = ["hwinfo"]
     for item in items:
-        cmd.append('--{}'.format(item))
+        cmd.append("--{}".format(item))
 
     if short:
-        cmd.append('--short')
+        cmd.append("--short")
 
     if listmd:
-        cmd.append('--listmd')
+        cmd.append("--listmd")
 
     for device in devices:
-        cmd.append('--only {}'.format(device))
+        cmd.append("--only {}".format(device))
 
-    out = __salt__['cmd.run_stdout'](cmd)
-    result['hwinfo'] = _hwinfo_parse(out, short)
+    out = __salt__["cmd.run_stdout"](cmd)
+    result["hwinfo"] = _hwinfo_parse(out, short)
 
-    if 'bios' in items:
-        result['bios grains'] = _hwinfo_efi()
+    if "bios" in items:
+        result["bios grains"] = _hwinfo_efi()
 
-    if 'memory' in items:
-        result['memory grains'] = _hwinfo_memory()
+    if "memory" in items:
+        result["memory grains"] = _hwinfo_memory()
 
-    if 'network' in items:
-        result['network grains'] = _hwinfo_network(short)
+    if "network" in items:
+        result["network grains"] = _hwinfo_network(short)
 
     return result

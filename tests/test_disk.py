@@ -28,9 +28,9 @@ from utils import disk
 
 class DiskTestCase(unittest.TestCase):
     def test_units(self):
-        self.assertEqual(disk.units(1), (1, 'MB'))
-        self.assertEqual(disk.units('1'), (1, 'MB'))
-        self.assertEqual(disk.units('1.0'), (1, 'MB'))
-        self.assertEqual(disk.units('1s'), (1, 's'))
-        self.assertEqual(disk.units('1.1s'), (1.1, 's'))
-        self.assertRaises(disk.ParseException, disk.units, 's1')
+        self.assertEqual(disk.units(1), (1, "MB"))
+        self.assertEqual(disk.units("1"), (1, "MB"))
+        self.assertEqual(disk.units("1.0"), (1, "MB"))
+        self.assertEqual(disk.units("1s"), (1, "s"))
+        self.assertEqual(disk.units("1.1s"), (1.1, "s"))
+        self.assertRaises(disk.ParseException, disk.units, "s1")

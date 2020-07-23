@@ -38,23 +38,31 @@ import urllib.parse
 import urllib.request
 
 LOG = logging.getLogger(__name__)
-TOKEN_FILE = '~/.salt-api-token'
+TOKEN_FILE = "~/.salt-api-token"
 
 # ANSI color codes
-BLACK = '\033[1;30m'
-RED = '\033[1;31m'
-GREEN = '\033[0;32m'
-YELLOW = '\033[0;33m'
-BLUE = '\033[1;34m'
-MAGENTA = '\033[1;35m'
-CYAN = '\033[1;36m'
-WHITE = '\033[1;37m'
+BLACK = "\033[1;30m"
+RED = "\033[1;31m"
+GREEN = "\033[0;32m"
+YELLOW = "\033[0;33m"
+BLUE = "\033[1;34m"
+MAGENTA = "\033[1;35m"
+CYAN = "\033[1;36m"
+WHITE = "\033[1;37m"
 RESET = "\033[0;0m"
 
 
-class SaltAPI():
-    def __init__(self, url, username, password, eauth, insecure,
-                 token_file=TOKEN_FILE, debug=False):
+class SaltAPI:
+    def __init__(
+        self,
+        url,
+        username,
+        password,
+        eauth,
+        insecure,
+        token_file=TOKEN_FILE,
+        debug=False,
+    ):
         self.url = url
         self.username = username
         self.password = password
@@ -63,12 +71,13 @@ class SaltAPI():
         self.token_file = token_file
         self.debug = debug
 
-        is_https = urllib.parse.urlparse(url).scheme == 'https'
+        is_https = urllib.parse.urlparse(url).scheme == "https"
         if debug or (is_https and insecure):
             if insecure:
                 context = ssl._create_unverified_context()
-                handler = urllib.request.HTTPSHandler(context=context,
-                                                      debuglevel=int(debug))
+                handler = urllib.request.HTTPSHandler(
+                    context=context, debuglevel=int(debug)
+                )
             else:
                 handler = urllib.request.HTTPHandler(debuglevel=int(debug))
             opener = urllib.request.build_opener(handler)
@@ -89,142 +98,142 @@ class SaltAPI():
     def logout(self):
         """Logout from the Salt API service."""
         self._drop_token()
-        self._post('/logout')
+        self._post("/logout")
 
     def events(self):
         """SSE event stream from Salt API service."""
-        for line in api._req_sse('/events', None, 'GET'):
-            line = line.decode('utf-8').strip()
-            if not line or line.startswith((':', 'retry:')):
+        for line in api._req_sse("/events", None, "GET"):
+            line = line.decode("utf-8").strip()
+            if not line or line.startswith((":", "retry:")):
                 continue
-            key, value = line.split(':', 1)
-            if key == 'tag':
+            key, value = line.split(":", 1)
+            if key == "tag":
                 tag = value.strip()
                 continue
-            if key == 'data':
+            if key == "data":
                 data = json.loads(value)
                 yield (tag, data)
 
     def minions(self, mid=None):
         """Return the list of minions."""
         if mid:
-            action = '/minions/{}'.format(mid)
+            action = "/minions/{}".format(mid)
         else:
-            action = '/minions'
-        return self._get(action)['return'][0]
+            action = "/minions"
+        return self._get(action)["return"][0]
 
     def run_job(self, tgt, fun, **kwargs):
         """Start an execution command and return jid."""
         data = {
-            'tgt': tgt,
-            'fun': fun,
+            "tgt": tgt,
+            "fun": fun,
         }
         data.update(kwargs)
-        return self._post('/minions', data)['return'][0]
+        return self._post("/minions", data)["return"][0]
 
     def jobs(self, jid=None):
         """Return the list of jobs."""
         if jid:
-            action = '/jobs/{}'.format(jid)
+            action = "/jobs/{}".format(jid)
         else:
-            action = '/jobs'
-        return self._get(action)['return'][0]
+            action = "/jobs"
+        return self._get(action)["return"][0]
 
     def stats(self):
         """Return a dump of statistics."""
-        return self._get('/stats')['return'][0]
+        return self._get("/stats")["return"][0]
 
     def _login(self):
         """Login into the Salt API service."""
         data = {
-            'username': self.username,
-            'password': self.password,
-            'eauth': self.eauth,
+            "username": self.username,
+            "password": self.password,
+            "eauth": self.eauth,
         }
-        result = self._post('/login', data)
-        return result['return'][0]['token'], result['return'][0]['expire']
+        result = self._post("/login", data)
+        return result["return"][0]["token"], result["return"][0]["expire"]
 
     def _get(self, action, data=None):
-        return self._req(action, data, 'GET')
+        return self._req(action, data, "GET")
 
     def _post(self, action, data=None):
-        return self._req(action, data, 'POST')
+        return self._req(action, data, "POST")
 
     def _req(self, action, data, method):
         """HTTP GET / POST to Salt API."""
         headers = {
-            'User-Agent': 'salt-autoinstaller monitor',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
+            "User-Agent": "salt-autoinstaller monitor",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
         }
         if self.token:
-            headers['X-Auth-Token'] = self.token
+            headers["X-Auth-Token"] = self.token
 
         url = urllib.parse.urljoin(self.url, action)
-        if method == 'GET':
+        if method == "GET":
             data = urllib.parse.urlencode(data).encode() if data else None
             if data:
-                url = '{}?{}'.format(url, data)
+                url = "{}?{}".format(url, data)
             data = None
-        elif method == 'POST':
+        elif method == "POST":
             data = json.dumps(data).encode() if data else {}
         else:
-            raise ValueError('Method {} not valid'.format(method))
+            raise ValueError("Method {} not valid".format(method))
 
         result = {}
         try:
             request = urllib.request.Request(url, data, headers)
             with urllib.request.urlopen(request) as response:
-                result = json.loads(response.read().decode('utf-8'))
+                result = json.loads(response.read().decode("utf-8"))
         except (urllib.error.HTTPError, urllib.error.URLError) as exc:
-            LOG.debug('Error with request', exc_info=True)
-            status = getattr(exc, 'code', None)
+            LOG.debug("Error with request", exc_info=True)
+            status = getattr(exc, "code", None)
 
             if status == 401:
-                print('Authentication denied')
+                print("Authentication denied")
 
             if status == 500:
-                print('Server error.')
+                print("Server error.")
             exit(-1)
         return result
 
     def _req_sse(self, action, data, method):
         """HTTP SSE GET / POST to Salt API."""
         headers = {
-            'User-Agent': 'salt-autoinstaller monitor',
-            'Accept': 'text/event-stream',
-            'Content-Type': 'application/json',
-            'Connection': 'Keep-Alive',
-            'X-Requested-With': 'XMLHttpRequest',
+            "User-Agent": "salt-autoinstaller monitor",
+            "Accept": "text/event-stream",
+            "Content-Type": "application/json",
+            "Connection": "Keep-Alive",
+            "X-Requested-With": "XMLHttpRequest",
         }
         if self.token:
-            headers['X-Auth-Token'] = self.token
+            headers["X-Auth-Token"] = self.token
 
         url = urllib.parse.urljoin(self.url, action)
-        if method == 'GET':
+        if method == "GET":
             data = urllib.parse.urlencode(data).encode() if data else None
             if data:
-                url = '{}?{}'.format(url, data)
+                url = "{}?{}".format(url, data)
             data = None
-        elif method == 'POST':
+        elif method == "POST":
             data = json.dumps(data).encode() if data else {}
         else:
-            raise ValueError('Method {} not valid'.format(method))
+            raise ValueError("Method {} not valid".format(method))
 
         try:
             request = urllib.request.Request(url, data, headers)
             with urllib.request.urlopen(request) as response:
                 yield from response
         except (urllib.error.HTTPError, urllib.error.URLError) as e:
-            LOG.debug('Error with request', exc_info=True)
-            status = getattr(e, 'code', None)
+            LOG.debug("Error with request", exc_info=True)
+            status = getattr(e, "code", None)
 
             if status == 401:
-                print('Authentication denied')
+                print("Authentication denied")
 
             if status == 500:
-                print('Server error.')
+                print("Server error.")
             exit(-1)
 
     def _read_token(self):
@@ -248,7 +257,7 @@ class SaltAPI():
         if self.token_file:
             token_path = Path(self.token_file).expanduser()
             token_path.touch(mode=0o600)
-            token_path.write_text('{} {}'.format(self.token, self.expire))
+            token_path.write_text("{} {}".format(self.token, self.expire))
 
     def _drop_token(self):
         """Remove the token file if present."""
@@ -260,9 +269,9 @@ class SaltAPI():
 
 def print_minions(minions):
     """Print a list of minions."""
-    print('Registered minions:')
+    print("Registered minions:")
     for minion in minions:
-        print('- {}'.format(minion))
+        print("- {}".format(minion))
 
 
 def print_minion(minion):
@@ -272,9 +281,9 @@ def print_minion(minion):
 
 def print_jobs(jobs):
     """Print a list of jobs."""
-    print('Registered jobs:')
+    print("Registered jobs:")
     for job, info in jobs.items():
-        print('- {}'.format(job))
+        print("- {}".format(job))
         pprint.pprint(info)
 
 
@@ -285,15 +294,15 @@ def print_job(job):
 
 def print_raw_event(tag, data):
     """Print raw event without format."""
-    print('- {}'.format(tag))
+    print("- {}".format(tag))
     pprint.pprint(data)
 
 
 def print_yomi_event(tag, data):
     """Print a Yomi event with format."""
-    if tag.startswith('yomi/'):
-        id_ = data['data']['id']
-        stamp = data['data']['_stamp']
+    if tag.startswith("yomi/"):
+        id_ = data["data"]["id"]
+        stamp = data["data"]["_stamp"]
 
         # Decide the color to represent the node
         if id_ in print_yomi_event.nodes:
@@ -303,103 +312,160 @@ def print_yomi_event(tag, data):
             print_yomi_event.colors.insert(0, color)
             print_yomi_event.nodes[id_] = color
 
-        tag = tag.split('/', 1)[1]
-        tag, section = tag.rsplit('/', 1)
-        if section == 'enter':
-            print('[{}{}{}] {} -> [{}STARTING{}] {}'.format(
-                color, id_, RESET, stamp, BLUE, RESET, tag))
-        elif section == 'success':
-            print('[{}{}{}] {} -> [{}SUCCESS{}]  {}'.format(
-                color, id_, RESET, stamp, GREEN, RESET, tag))
-        elif section == 'fail':
-            print('[{}{}{}] {} -> [{}FAIL{}]     {}'.format(
-                color, id_, RESET, stamp, RED, RESET, tag))
+        tag = tag.split("/", 1)[1]
+        tag, section = tag.rsplit("/", 1)
+        if section == "enter":
+            print(
+                "[{}{}{}] {} -> [{}STARTING{}] {}".format(
+                    color, id_, RESET, stamp, BLUE, RESET, tag
+                )
+            )
+        elif section == "success":
+            print(
+                "[{}{}{}] {} -> [{}SUCCESS{}]  {}".format(
+                    color, id_, RESET, stamp, GREEN, RESET, tag
+                )
+            )
+        elif section == "fail":
+            print(
+                "[{}{}{}] {} -> [{}FAIL{}]     {}".format(
+                    color, id_, RESET, stamp, RED, RESET, tag
+                )
+            )
 
 
 # Static-a-like variables to track the rotating color
 print_yomi_event.nodes = {}
 print_yomi_event.colors = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='salt-autoinstaller monitor tool via salt-api.')
-    parser.add_argument('-u', '--saltapi-url',
-                        default=os.environ.get('SALTAPI_URL',
-                                               'https://localhost:8000'),
-                        help='Specify the host url. Overwrite SALTAPI_URL.')
-    parser.add_argument('-a', '--auth', '--eauth', '--extended-auth',
-                        default=os.environ.get('SALTAPI_EAUTH', 'pam'),
-                        help='Specify the external_auth backend to '
-                        'authenticate against and interactively prompt '
-                        'for credentials. Overwrite SALTAPI_EAUTH.')
-    parser.add_argument('-n', '--username',
-                        default=os.environ.get('SALTAPI_USER'),
-                        help='Optional, defaults to user name. will '
-                        'be prompt if empty unless --non-interactive. '
-                        'Overwrite SALTAPI_USER.')
-    parser.add_argument('-p', '--password',
-                        default=os.environ.get('SALTAPI_PASS'),
-                        help='Optional, but will be prompted unless '
-                        '--non-interactive. Overwrite SALTAPI_PASS.')
-    parser.add_argument('--non-interactive', action='store_true',
-                        default=False,
-                        help='Optional, fail rather than waiting for input.')
-    parser.add_argument('-r', '--remove', action='store_true',
-                        default=False,
-                        help='Remove the token cached in the system.')
-    parser.add_argument('-i', '--insecure', action='store_true',
-                        default=False,
-                        help='Ignore any SSL certificate that may be '
-                        'encountered. Note that it is recommended to resolve '
-                        'certificate errors for production.')
-    parser.add_argument('-H', '--debug-http', action='store_true',
-                        default=False,
-                        help=('Output the HTTP request/response headers on '
-                              'stderr.'))
-    parser.add_argument('-m', '--minions', action='store_true',
-                        default=False,
-                        help='List available minions.')
-    parser.add_argument('--show-minion', metavar='MID', default=None,
-                        help='Show the details of a minion.')
-    parser.add_argument('-j', '--jobs', action='store_true',
-                        default=False,
-                        help='List available jobs.')
-    parser.add_argument('--show-job', metavar='JID', default=None,
-                        help='Show the details of a job.')
-    parser.add_argument('-e', '--events',  action='store_true',
-                        default=False,
-                        help='Show events from salt-master.')
-    parser.add_argument('-y', '--yomi-events',  action='store_true',
-                        default=False,
-                        help='Show only Yomi events from salt-master.')
-    parser.add_argument('target', nargs='?',
-                        help='Minion ID where to launch the installer.')
+        description="salt-autoinstaller monitor tool via salt-api."
+    )
+    parser.add_argument(
+        "-u",
+        "--saltapi-url",
+        default=os.environ.get("SALTAPI_URL", "https://localhost:8000"),
+        help="Specify the host url. Overwrite SALTAPI_URL.",
+    )
+    parser.add_argument(
+        "-a",
+        "--auth",
+        "--eauth",
+        "--extended-auth",
+        default=os.environ.get("SALTAPI_EAUTH", "pam"),
+        help="Specify the external_auth backend to "
+        "authenticate against and interactively prompt "
+        "for credentials. Overwrite SALTAPI_EAUTH.",
+    )
+    parser.add_argument(
+        "-n",
+        "--username",
+        default=os.environ.get("SALTAPI_USER"),
+        help="Optional, defaults to user name. will "
+        "be prompt if empty unless --non-interactive. "
+        "Overwrite SALTAPI_USER.",
+    )
+    parser.add_argument(
+        "-p",
+        "--password",
+        default=os.environ.get("SALTAPI_PASS"),
+        help="Optional, but will be prompted unless "
+        "--non-interactive. Overwrite SALTAPI_PASS.",
+    )
+    parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        default=False,
+        help="Optional, fail rather than waiting for input.",
+    )
+    parser.add_argument(
+        "-r",
+        "--remove",
+        action="store_true",
+        default=False,
+        help="Remove the token cached in the system.",
+    )
+    parser.add_argument(
+        "-i",
+        "--insecure",
+        action="store_true",
+        default=False,
+        help="Ignore any SSL certificate that may be "
+        "encountered. Note that it is recommended to resolve "
+        "certificate errors for production.",
+    )
+    parser.add_argument(
+        "-H",
+        "--debug-http",
+        action="store_true",
+        default=False,
+        help=("Output the HTTP request/response headers on " "stderr."),
+    )
+    parser.add_argument(
+        "-m",
+        "--minions",
+        action="store_true",
+        default=False,
+        help="List available minions.",
+    )
+    parser.add_argument(
+        "--show-minion",
+        metavar="MID",
+        default=None,
+        help="Show the details of a minion.",
+    )
+    parser.add_argument(
+        "-j", "--jobs", action="store_true", default=False, help="List available jobs."
+    )
+    parser.add_argument(
+        "--show-job", metavar="JID", default=None, help="Show the details of a job."
+    )
+    parser.add_argument(
+        "-e",
+        "--events",
+        action="store_true",
+        default=False,
+        help="Show events from salt-master.",
+    )
+    parser.add_argument(
+        "-y",
+        "--yomi-events",
+        action="store_true",
+        default=False,
+        help="Show only Yomi events from salt-master.",
+    )
+    parser.add_argument(
+        "target", nargs="?", help="Minion ID where to launch the installer."
+    )
     args = parser.parse_args()
 
     if not args.saltapi_url:
-        print('Please, provide a valid Salt API URL', file=sys.stderr)
+        print("Please, provide a valid Salt API URL", file=sys.stderr)
         exit(-1)
 
     if args.non_interactive:
         if args.username is None:
-            print('Please, provide a valid user name', file=sys.stderr)
+            print("Please, provide a valid user name", file=sys.stderr)
             exit(-1)
 
         if args.password is None:
-            print('Please, provide a valid password', file=sys.stderr)
+            print("Please, provide a valid password", file=sys.stderr)
             exit(-1)
     else:
         if args.username is None:
-            args.username = input('Username: ')
+            args.username = input("Username: ")
         if args.password is None:
-            args.password = getpass.getpass(prompt='Password: ')
+            args.password = getpass.getpass(prompt="Password: ")
 
-    api = SaltAPI(url=args.saltapi_url,
-                  username=args.username,
-                  password=args.password,
-                  eauth=args.auth,
-                  insecure=args.insecure,
-                  debug=args.debug_http)
+    api = SaltAPI(
+        url=args.saltapi_url,
+        username=args.username,
+        password=args.password,
+        eauth=args.auth,
+        insecure=args.insecure,
+        debug=args.debug_http,
+    )
 
     api.login(args.remove)
 
@@ -416,7 +482,7 @@ if __name__ == '__main__':
         print_job(api.jobs(args.show_job))
 
     if args.target:
-        print_job(api.run_job(args.target, 'state.highstate'))
+        print_job(api.run_job(args.target, "state.highstate"))
 
     if args.events or args.yomi_events:
         for tag, data in api.events():

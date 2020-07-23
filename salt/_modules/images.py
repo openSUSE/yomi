@@ -21,12 +21,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-'''
+"""
 :maintainer:    Alberto Planas <aplanas@suse.com>
 :maturity:      new
 :depends:       None
 :platform:      Linux
-'''
+"""
 from __future__ import absolute_import, print_function, unicode_literals
 import logging
 import pathlib
@@ -37,7 +37,7 @@ import salt.utils.args
 
 LOG = logging.getLogger(__name__)
 
-__virtualname__ = 'images'
+__virtualname__ = "images"
 
 # Define not exported variables from Salt, so this can be imported as
 # a normal module
@@ -47,20 +47,41 @@ except NameError:
     __salt__ = {}
 
 
-VALID_SCHEME = ('dict', 'file', 'ftp', 'ftps', 'gopher', 'http',
-                'https', 'imap', 'imaps', 'ldap', 'ldaps', 'pop3',
-                'pop3s', 'rtmp', 'rtsp', 'scp', 'sftp', 'smb', 'smbs',
-                'smtp', 'smtps', 'telnet', 'tftp')
-VALID_COMPRESSIONS = ('gz', 'bz2', 'xz')
-VALID_CHECKSUMS = ('md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512')
+VALID_SCHEME = (
+    "dict",
+    "file",
+    "ftp",
+    "ftps",
+    "gopher",
+    "http",
+    "https",
+    "imap",
+    "imaps",
+    "ldap",
+    "ldaps",
+    "pop3",
+    "pop3s",
+    "rtmp",
+    "rtsp",
+    "scp",
+    "sftp",
+    "smb",
+    "smbs",
+    "smtp",
+    "smtps",
+    "telnet",
+    "tftp",
+)
+VALID_COMPRESSIONS = ("gz", "bz2", "xz")
+VALID_CHECKSUMS = ("md5", "sha1", "sha224", "sha256", "sha384", "sha512")
 
 
 def _checksum_url(url, checksum_type):
-    '''Generate the URL for the checksum'''
+    """Generate the URL for the checksum"""
     url_elements = urllib.parse.urlparse(url)
     path = url_elements.path
     suffix = pathlib.Path(path).suffix
-    new_suffix = '.{}'.format(checksum_type)
+    new_suffix = ".{}".format(checksum_type)
     if suffix[1:] in VALID_COMPRESSIONS:
         path = pathlib.Path(path).with_suffix(new_suffix)
     else:
@@ -69,13 +90,13 @@ def _checksum_url(url, checksum_type):
 
 
 def _curl_cmd(url, **kwargs):
-    '''Return curl commmand line'''
-    cmd = ['curl']
+    """Return curl commmand line"""
+    cmd = ["curl"]
     for key, value in salt.utils.args.clean_kwargs(**kwargs).items():
         if len(key) == 1:
-            cmd.append('-{}'.format(key))
+            cmd.append("-{}".format(key))
         else:
-            cmd.append('--{}'.format(key))
+            cmd.append("--{}".format(key))
         if value is not None:
             cmd.append(value)
     cmd.append(url)
@@ -83,23 +104,23 @@ def _curl_cmd(url, **kwargs):
 
 
 def _fetch_file(url, **kwargs):
-    '''Get a file and return the content'''
+    """Get a file and return the content"""
     params = {
-        'silent': None,
-        'location': None,
+        "silent": None,
+        "location": None,
     }
     params.update(kwargs)
-    return __salt__['cmd.run_stdout'](_curl_cmd(url, **params))
+    return __salt__["cmd.run_stdout"](_curl_cmd(url, **params))
 
 
 def _find_filesystem(device):
-    '''Use lsblk to find the filesystem of a partition.'''
-    cmd = ['lsblk', '--noheadings', '--output', 'FSTYPE', device]
-    return __salt__['cmd.run_stdout'](cmd)
+    """Use lsblk to find the filesystem of a partition."""
+    cmd = ["lsblk", "--noheadings", "--output", "FSTYPE", device]
+    return __salt__["cmd.run_stdout"](cmd)
 
 
 def fetch_checksum(url, checksum_type, **kwargs):
-    '''
+    """
     Fecht the checksum from an image URL
 
     url
@@ -122,20 +143,21 @@ def fetch_checksum(url, checksum_type, **kwargs):
 
         salt '*' images.fetch_checksum https://my.url/JeOS.xz checksum_type=md5
 
-    '''
+    """
 
     checksum_url = _checksum_url(url, checksum_type)
     checksum = _fetch_file(checksum_url, **kwargs)
     if not checksum:
         raise CommandExecutionError(
-            'Checksum file not found in {}'.format(checksum_url))
+            "Checksum file not found in {}".format(checksum_url)
+        )
     checksum = checksum.split()[0]
-    LOG.info('Checksum for the image {}'.format(checksum))
+    LOG.info("Checksum for the image {}".format(checksum))
     return checksum
 
 
 def dump(url, device, checksum_type=None, checksum=None, **kwargs):
-    '''Download an image and copy it into a device
+    """Download an image and copy it into a device
 
     url
         URL of the image. The protocol scheme needs to be available in
@@ -169,79 +191,80 @@ def dump(url, device, checksum_type=None, checksum=None, **kwargs):
         salt '*' images.dump https://my.url/JeOS-btrfs.xz /dev/sda1
         salt '*' images.dump tftp://my.url/JeOS.xz /dev/sda1 checksum_type=md5
 
-    '''
+    """
 
     scheme, _, path, *_ = urllib.parse.urlparse(url)
     if scheme not in VALID_SCHEME:
-        raise SaltInvocationError('Protocol not valid for URL')
+        raise SaltInvocationError("Protocol not valid for URL")
 
     # We cannot validate the compression extension, as we can have
     # non-restricted file names, like '/my-image.ext3' or
     # 'other-image.raw'.
 
     if checksum_type and checksum_type not in VALID_CHECKSUMS:
-        raise SaltInvocationError('Checksum type not valid')
+        raise SaltInvocationError("Checksum type not valid")
 
     if not checksum_type and checksum:
-        raise SaltInvocationError('Checksum type not provided')
+        raise SaltInvocationError("Checksum type not provided")
 
     if checksum_type and not checksum:
         checksum = fetch_checksum(url, checksum_type, **kwargs)
 
     params = {
-        'fail': None,
-        'location': None,
-        'silent': None,
+        "fail": None,
+        "location": None,
+        "silent": None,
     }
     params.update(kwargs)
 
     # If any element in the pipe fail, exit early
-    cmd = ['set -eo pipefail', ';']
+    cmd = ["set -eo pipefail", ";"]
     cmd.extend(_curl_cmd(url, **params))
 
     suffix = pathlib.Path(path).suffix[1:]
     if suffix in VALID_COMPRESSIONS:
-        cmd.append('|')
-        cmd.extend({
-            'gz': ['gunzip'],
-            'bz2': ['bzip2', '-d'],
-            'xz': ['xz', '-d'],
-        }[suffix])
+        cmd.append("|")
+        cmd.extend(
+            {"gz": ["gunzip"], "bz2": ["bzip2", "-d"], "xz": ["xz", "-d"]}[suffix]
+        )
 
-    checksum_prg = '{}sum'.format(checksum_type) if checksum_type else 'md5sum'
-    cmd.extend(['|', 'tee', device, '|', checksum_prg])
-    ret = __salt__['cmd.run_all'](' '.join(cmd), python_shell=True)
-    if ret['retcode']:
+    checksum_prg = "{}sum".format(checksum_type) if checksum_type else "md5sum"
+    cmd.extend(["|", "tee", device, "|", checksum_prg])
+    ret = __salt__["cmd.run_all"](" ".join(cmd), python_shell=True)
+    if ret["retcode"]:
         raise CommandExecutionError(
-            'Error while fetching image {}: {}'.format(url, ret['stderr']))
+            "Error while fetching image {}: {}".format(url, ret["stderr"])
+        )
 
-    new_checksum = ret['stdout'].split()[0]
+    new_checksum = ret["stdout"].split()[0]
 
     if checksum_type and checksum != new_checksum:
         raise CommandExecutionError(
-            'Checksum mismatch. '
-            'Expected {}, calculated {}'.format(checksum, new_checksum))
+            "Checksum mismatch. "
+            "Expected {}, calculated {}".format(checksum, new_checksum)
+        )
 
     filesystem = _find_filesystem(device)
 
     resize_cmd = {
-        'ext2': 'e2fsck -f -y {0}; resize2fs {0}'.format(device),
-        'ext3': 'e2fsck -f -y {0}; resize2fs {0}'.format(device),
-        'ext4': 'e2fsck -f -y {0}; resize2fs {0}'.format(device),
-        'btrfs': 'mount {} /mnt; btrfs filesystem resize max /mnt;'
-                 ' umount /mnt'.format(device),
-        'xfs': 'mount {} /mnt; xfs_growfs /mnt; umount /mnt'.format(device),
+        "ext2": "e2fsck -f -y {0}; resize2fs {0}".format(device),
+        "ext3": "e2fsck -f -y {0}; resize2fs {0}".format(device),
+        "ext4": "e2fsck -f -y {0}; resize2fs {0}".format(device),
+        "btrfs": "mount {} /mnt; btrfs filesystem resize max /mnt;"
+        " umount /mnt".format(device),
+        "xfs": "mount {} /mnt; xfs_growfs /mnt; umount /mnt".format(device),
     }
     if filesystem not in resize_cmd:
         raise CommandExecutionError(
-            'Filesystem {} cannot be resized.'.format(filesystem))
+            "Filesystem {} cannot be resized.".format(filesystem)
+        )
 
-    ret = __salt__['cmd.run_all'](resize_cmd[filesystem], python_shell=True)
-    if ret['retcode']:
+    ret = __salt__["cmd.run_all"](resize_cmd[filesystem], python_shell=True)
+    if ret["retcode"]:
         raise CommandExecutionError(
-            'Error while resizing the partition {}: {}'.format(device,
-                                                               ret['stderr']))
+            "Error while resizing the partition {}: {}".format(device, ret["stderr"])
+        )
 
-    __salt__['cmd.run']('sync')
+    __salt__["cmd.run"]("sync")
 
     return new_checksum

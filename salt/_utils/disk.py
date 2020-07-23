@@ -28,21 +28,33 @@ class ParseException(Exception):
     pass
 
 
-def units(value, default='MB'):
-    '''
+def units(value, default="MB"):
+    """
     Split a value expressed (optionally) with units.
 
     Returns the tuple (value, unit)
-    '''
-    valid_units = ('s', 'B', 'kB', 'MB', 'MiB', 'GB', 'GiB', 'TB',
-                   'TiB', '%', 'cyl', 'chs', 'compact')
-    match = re.search(r'^([\d.]+)(\D*)$', str(value))
+    """
+    valid_units = (
+        "s",
+        "B",
+        "kB",
+        "MB",
+        "MiB",
+        "GB",
+        "GiB",
+        "TB",
+        "TiB",
+        "%",
+        "cyl",
+        "chs",
+        "compact",
+    )
+    match = re.search(r"^([\d.]+)(\D*)$", str(value))
     if match:
         value, unit = match.groups()
         unit = unit if unit else default
         if unit in valid_units:
             return (float(value), unit)
         else:
-            raise ParseException('{} not recognized as a valid '
-                                 'unit'.format(unit))
-    raise ParseException('{} cannot be parsed'.format(value))
+            raise ParseException("{} not recognized as a valid unit".format(unit))
+    raise ParseException("{} cannot be parsed".format(value))

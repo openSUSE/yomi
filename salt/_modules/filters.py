@@ -21,19 +21,19 @@
 # specific language governing permissions and limitations
 # under the License.
 
-'''
+"""
 :maintainer:    Alberto Planas <aplanas@suse.com>
 :maturity:      new
 :depends:       None
 :platform:      Linux
-'''
+"""
 from __future__ import absolute_import, print_function, unicode_literals
 import logging
 
 
 LOG = logging.getLogger(__name__)
 
-__virtualname__ = 'filters'
+__virtualname__ = "filters"
 
 
 # Define not exported variables from Salt, so this can be imported as
@@ -45,17 +45,17 @@ except NameError:
 
 
 def is_lvm(device):
-    '''Detect if a device name comes from a LVM volume.'''
-    devices = ['/dev/{}/'.format(i) for i in __pillar__.get('lvm', {})]
-    devices.extend(('/dev/mapper/', '/dev/dm-'))
+    """Detect if a device name comes from a LVM volume."""
+    devices = ["/dev/{}/".format(i) for i in __pillar__.get("lvm", {})]
+    devices.extend(("/dev/mapper/", "/dev/dm-"))
     return device.startswith(tuple(devices))
 
 
 def is_raid(device):
-    '''Detect if a device name comes from a RAID array.'''
-    return device.startswith('/dev/md')
+    """Detect if a device name comes from a RAID array."""
+    return device.startswith("/dev/md")
 
 
 def is_not_raid(device):
-    '''Detect if a device name comes from a RAID array.'''
+    """Detect if a device name comes from a RAID array."""
     return not is_raid(device)
