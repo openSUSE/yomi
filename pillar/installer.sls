@@ -12,6 +12,7 @@
 #   * swap = {True, False}
 #   * mode = {'single', 'lvm', 'raid{0, 1, 4, 5, 6, 10}', 'microos',
 #             'kubic', 'image', 'sles'}
+#   * network = {'auto', 'eth0', 'ens3', ... }
 #
 # This meta-pillar can be used as a template for new installers. This
 # template is expected to be adapted for production systems, as was
@@ -21,12 +22,13 @@
 # yet synchronized
 {% set efi = True %}
 {% set partition = 'gpt' %}
-{% set device_type = 'vd' %}
+{% set device_type = 'sd' %}
 {% set root_filesystem = 'btrfs' %}
 {% set home_filesystem = False %}
 {% set snapper = True %}
-{% set swap = True %}
-{% set mode = 'single' %}
+{% set swap = False %}
+{% set mode = 'microos' %}
+{% set network = 'auto' %}
 
 {% set arch = grains['cpuarch'] %}
 
@@ -109,6 +111,11 @@ services:
     - kubelet
 {% endif %}
     - salt-minion
+
+{% if network != 'auto' %}
+networks:
+  - interface: {{ network }}
+{% endif %}
 
 users:
   - username: root

@@ -1252,6 +1252,23 @@ services:
     - salt-minion
 ```
 
+## `networks` section
+
+We can list the networks available in the target system. If the list
+is not provided, Yomi will try to deduce the network configuration
+based on the current setup.
+
+* `interface`. String.
+
+  Name of the interface.
+
+Example:
+
+```yaml
+networks:
+  - interface: ens3
+```
+
 ## `users` section
 
 In this section we can list a simple list of users and passwords that
