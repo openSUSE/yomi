@@ -63,7 +63,6 @@ filesystems:
       prefix: '@'
       subvolume:
         - path: root
-        - path: tmp
         - path: home
         - path: opt
         - path: srv
