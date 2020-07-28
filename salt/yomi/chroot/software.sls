@@ -14,6 +14,7 @@ install_python3-base:
   pkg.installed:
     - name: python3-base
     - no_recommends: yes
+    - resolve_capabilities: yes
     - root: /mnt
     - require:
       - mount: mount_/mnt
