@@ -2,10 +2,14 @@
 
 {% set config = pillar['config'] %}
 
+# We execute the systemctl call inside the chroot, so we can guarantee
+# that will work on containers
 {{ macros.log('module', 'systemd_firstboot') }}
 systemd_firstboot:
   module.run:
-    - service.firstboot:
+    - chroot.call:
+      - root: /mnt
+      - function: service.firstboot
       - locale: {{ config.get('locale', 'en_US.utf8') }}
 {% if config.get('locale_messages') %}
       - locale_message: {{ config['locale_messages'] }}
@@ -18,7 +22,6 @@ systemd_firstboot:
 {% if config.get('machine_id') %}
       - machine_id: {{ config['machine_id'] }}
 {% endif %}
-      - root: /mnt
     - creates:
         - /mnt/etc/hostname
         - /mnt/etc/locale.conf

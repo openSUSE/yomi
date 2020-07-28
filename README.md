@@ -209,7 +209,6 @@ This package will install the states in
 `/usr/share/salt-formulas/states`, some pillar examples in
 `/usr/share/yomi/pillar` and configuration files in `/usr/share/yomi`.
 
-
 ## Looking for the pillar in Yomi
 
 Yomi expect from the pillar to be a normal YAML document, optionally
@@ -410,6 +409,45 @@ the current rules are:
 * The value from `minion_id` boot parameter.
 * The FQDN hostname of the system, if is different from localhost.
 * The MAC address of the first interface of the system.
+
+## Container
+
+Because the versatility of Salt, is possible to execute the modules
+that belong to the `salt-minion` service Yomi without the requirement
+of any `salt-master` nor `salt-minion` service running. We could
+launch the installation via only the `salt-call` command in local
+mode.
+
+Because of that, es possible to deliver Yomi as a single container,
+composed of the different Salt and Yomi modules and states.
+
+We can boot a machine using any mechanism, like a recovery image, and
+use `podman` to register the Yomi container. This container will be
+executed as a privileged one, mapping the external devices inside the
+container space.
+
+To register the container we can do:
+
+```bash
+podman pull registry.opensuse.org/systemsmanagement/yomi/images/opensuse/yomi:latest
+```
+
+Is recommended to create a local pillar directory;
+
+```bash
+mkdir pillar
+```
+
+Once we have the pillar data, we can launch the installer:
+
+```bash
+podman run --privileged --rm \
+  -v /dev:/dev \
+  -v /run/udev:/run/udev \
+  -v ./pillar:/srv/pillar \
+  <CONTAINER_ID> \
+  salt-call --local state.highstate
+```
 
 
 # Basic operations

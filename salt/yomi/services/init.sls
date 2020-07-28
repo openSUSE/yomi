@@ -9,12 +9,15 @@ include:
 {% endif %}
 
 {% for service in services.get('enabled', []) %}
+# We execute the systemctl call inside the chroot, so we can guarantee
+# that will work on containers
 {{ macros.log('module', 'enable_service_' ~ service) }}
 enable_service_{{ service }}:
   module.run:
-    - service.enable:
-      - name: {{ service }}
+    - chroot.call:
       - root: /mnt
+      - function: service.enable
+      - name: {{ service }}
     - unless: systemctl --root=/mnt --quiet is-enabled {{ service }} 2> /dev/null
 {% endfor %}
 
@@ -22,8 +25,9 @@ enable_service_{{ service }}:
 {{ macros.log('module', 'disable_service_' ~ service) }}
 disable_service_{{ service }}:
   module.run:
-    - service.disable:
-      - name: {{ service }}
+    - chroot.call:
       - root: /mnt
+      - function: service.disable
+      - name: {{ service }}
     - onlyif: systemctl --root=/mnt --quiet is-enabled {{ service }} 2> /dev/null
 {% endfor %}
