@@ -78,7 +78,6 @@ software:
     - pattern:microos_base
     - pattern:microos_defaults
     - pattern:microos_hardware
-    - pattern:microos_apparmor
   {% elif mode == 'kubic' %}
     - pattern:microos_base
     - pattern:microos_defaults
@@ -93,12 +92,11 @@ software:
     - pattern:x11_yast
     - pattern:x11
     - pattern:gnome_basic
-    - kernel-default
   {% else %}
     - pattern:enhanced_base
     - glibc-locale
-    - kernel-default
   {% endif %}
+    - kernel-default
 {% endif %}
 
 salt-minion:
