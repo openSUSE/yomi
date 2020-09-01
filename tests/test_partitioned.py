@@ -30,7 +30,7 @@ from states import partitioned
 class PartitionedTestCase(unittest.TestCase):
     @patch("states.partitioned.__salt__")
     def test_check_label(self, __salt__):
-        __salt__.__getitem__.return_value = lambda _: "Disklabel type: dos"
+        __salt__.__getitem__.return_value = lambda _: "Partition Table: msdos"
         self.assertTrue(partitioned._check_label("/dev/sda", "msdos"))
         self.assertTrue(partitioned._check_label("/dev/sda", "dos"))
         self.assertFalse(partitioned._check_label("/dev/sda", "gpt"))
@@ -44,7 +44,7 @@ class PartitionedTestCase(unittest.TestCase):
     def test_labeled(self, __salt__, __opts__):
         __opts__.__getitem__.return_value = False
 
-        __salt__.__getitem__.return_value = lambda _: "Disklabel type: dos"
+        __salt__.__getitem__.return_value = lambda _: "Partition Table: msdos"
         self.assertEqual(
             partitioned.labeled("/dev/sda", "msdos"),
             {
@@ -58,7 +58,7 @@ class PartitionedTestCase(unittest.TestCase):
         __salt__.__getitem__.side_effect = (
             lambda _: "",
             lambda _a, _b: True,
-            lambda _: "Disklabel type: dos",
+            lambda _: "Partition Table: msdos",
         )
         self.assertEqual(
             partitioned.labeled("/dev/sda", "msdos"),

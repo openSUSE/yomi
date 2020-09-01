@@ -70,9 +70,9 @@ def _check_label(device, label):
     Check if the label match with the device
 
     """
-    label = {"msdos": "dos"}.get(label, label)
-    res = __salt__["cmd.run"](["fdisk", "-l", device])
-    return "disklabel type: {}".format(label) in res.lower()
+    label = {"dos": "msdos"}.get(label, label)
+    res = __salt__["cmd.run"](["parted", "-l", device])
+    return "partition table: {}".format(label) in res.lower()
 
 
 def labeled(name, label):
