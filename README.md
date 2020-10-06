@@ -381,8 +381,8 @@ DNS service will resolve the `salt` name to the correct IP address.
 
 During boot time of the Yomi image we can change the address where is
 expected to find the master node. To do that we can enter under the
-GRUB menu the entry `master=my_master_address`. For example
-`master=10.0.2.2` will make the minion to search the master in the
+GRUB menu the entry `ym.master=my_master_address`. For example
+`ym.master=10.0.2.2` will make the minion to search the master in the
 address `10.0.2.2`.
 
 An internal systemd service in the image will detect this address and
@@ -398,17 +398,40 @@ find the master directly after the first boot.
 
 In a similar way, during the boot process we can set the minion ID
 that will be assigned to the `salt-minion`. Using the parameter
-`minion_id`. For example, `minion_id=worker01` will set the minion ID
-for this system as `worker01`.
+`ym.minion_id`. For example, `ym.minion_id=worker01` will set the
+minion ID for this system as `worker01`.
 
 The rules for the minion ID are a bit more complicated. Salt, by
 default, set the minion ID equal to the FQDN or the IP of the node if
 no ID is specified. This cannot be a good idea if the IP changes, so
 the current rules are:
 
-* The value from `minion_id` boot parameter.
+* The value from `ym.minion_id` boot parameter.
 * The FQDN hostname of the system, if is different from localhost.
 * The MAC address of the first interface of the system.
+
+## Adding user provided configuration
+
+Sometimes we need to inject in the `salt-minion` some extra
+configuration, before the service runs. For example, we might need to
+add some grains, or enable some feature in the `salt-minion` service
+running inside the image.
+
+To do that we have to options: we can pass an URL with the content, or
+we can add the full content as a parameter during the boot process.
+
+To pass an URL we should use `ym.config_url` parameter. For example,
+`ym.config_url=http://server.com/pub/myconfig.cfg` will download the
+configuration file, and will store it under the default name
+`config_url.cfg` in `/etc/salt/minion.d`. We can set a different name
+from the default via the parameter `ym.config_url_name`.
+
+In a similar way we can use the parameter `ym.config` to declare the
+full content of the user provided configuration file. You need to use
+quotes to mark the string and escaped control codes to indicate new
+lines or tabs, like `ym.config="grains:\n my_grain: my_value"`. This
+will create a file named `config.cfg`, and the name can be overwritten
+with the parameter `ym.config_name`.
 
 ## Container
 
