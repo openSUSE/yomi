@@ -59,6 +59,9 @@ suseconnect:
 software:
   config:
     minimal: {{ 'yes' if mode in ('microos', 'kubic') else 'no' }}
+    enabled: yes
+    autorefresh: yes
+    gpgcheck: yes
   repositories:
 {% if mode == 'sles' %}
     SUSE_SLE-15_GA: "http://download.suse.de/ibs/SUSE:/SLE-15:/GA/standard/"
@@ -66,7 +69,9 @@ software:
 {% elif arch == 'aarch64' %}
     repo-oss: "http://download.opensuse.org/ports/aarch64/tumbleweed/repo/oss/"
 {% else %}
-    repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss/"
+    repo-oss:
+      url: "http://download.opensuse.org/tumbleweed/repo/oss/"
+      name: openSUSE-Tumbleweed
 {% endif %}
 {% if mode == 'image' %}
   image:

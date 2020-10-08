@@ -13,20 +13,70 @@ software:
       $type: boolean
       $default: no
       $help: Exclude recommended, documentation and multi-version packages
+    enabled:
+      $type: boolean
+      $default: yes
+      $help: Enable the repository
+    refresh:
+      $type: boolean
+      $default: yes
+      $help: Enable auto-refresh of the repository
+    gpgcheck:
+      $type: boolean
+      $default: yes
+      $help: Enable the GPG check for the repositories
+    # gpgautoimport:
+    #   $type: boolean
+    #   $default: yes
+    #   $help: Automatically trust and import public GPG key
+    cache:
+      $type: boolean
+      $default: no
+      $help: Keep the RPM packages in the system
   repositories:
     $type: edit-group
     $minItems: 0
+    $itemName: Repository ${i}
     $help: List of registered repositories
     $prototype:
+      $type: group
       $key:
-        $name: Repository Name
+        $name: Alias
         $type: text
         $placeholder: repo-oss
-        $help: Short name of the repository
-      $name: Repository URL
-      $type: url
-      $placeholder: http://download.opensuse.org/tumbleweed/repo/oss
-      $help: URL of the repository
+        $help: Short name or alias of the repository
+      url:
+        $type: url
+        $placeholder: http://download.opensuse.org/tumbleweed/repo/oss
+        $required: yes
+        $help: URL of the repository
+      name:
+        $type: text
+        $optional: yes
+        $help: Descriptive name for the repository
+      enabled:
+        $type: boolean
+        $default: yes
+        $help: Enable the repository
+      refresh:
+        $type: boolean
+        $default: yes
+        $help: Enable auto-refresh of the repository
+      priority:
+        $type: number
+        $help: Set priority of the repository
+      gpgcheck:
+        $type: boolean
+        $default: yes
+        $help: Enable the GPG check for the repositories
+      # gpgautoimport:
+      #   $type: boolean
+      #   $default: yes
+      #   $help: Automatically trust and import public GPG key
+      cache:
+        $type: boolean
+        $default: no
+        $help: Keep the RPM packages in the system
   packages:
     $type: edit-group
     $minItems: 0

@@ -3,14 +3,27 @@
 {% set software = pillar['software'] %}
 {% set software_config = software.get('config', {}) %}
 
-{% for name, repo in software.get('repositories', {}).items() %}
-{{ macros.log('pkgrepo', 'add_repository_' ~ repo) }}
-add_repository_{{ repo }}:
+{% for alias, repository in software.get('repositories', {}).items() %}
+  {% if repository is mapping %}
+    {% set url = repository['url'] %}
+  {% else %}
+    {% set url = repository %}
+    {% set repository = {} %}
+  {% endif %}
+{{ macros.log('pkgrepo', 'add_repository_' ~ alias) }}
+add_repository_{{ alias }}:
   pkgrepo.managed:
-    - name: {{ name }}
-    - baseurl: {{ repo }}
-    - refresh: yes
-    - gpgautoimport: yes
+    - baseurl: {{ url }}
+    - name: {{ alias }}
+  {% if repository.get('name') %}
+    - humanname: {{ repository.name }}
+  {% endif %}
+    - enabled: {{ repository.get('enabled', software_config.get('enabled', 'yes')) }}
+    - refresh: {{ repository.get('refresh', software_config.get('refresh', 'yes')) }}
+    - priority: {{ repository.get('priority', 0) }}
+    - gpgcheck: {{ repository.get('gpgcheck', software_config.get('gpgcheck', 'yes')) }}
+    - gpgautoimport: {{ repository.get('gpgautoimport', software_config.get('gpgautoimport', 'yes')) }}
+    - cache: {{ repository.get('cache', software_config.get('cache', 'no')) }}
     - root: /mnt
     - require:
       - mount: mount_/mnt

@@ -1116,17 +1116,58 @@ installation, and the packages and patterns that will be installed.
 
 * `config`. Dictionary. Optional
 
-  Local configuration for the software section.
+  Local configuration for the software section. Except `minimal`, all
+  the options can be overwritten in each repository definition.
 
   * `minimal`: Boolean. Optional. Default: `no`
 
     Configure zypper to make a minimal installation, excluding
     recommended, documentation and multi-version packages.
 
+  * `enabled`: Boolean. Optional. Default: `yes`
+
+    If the repository is enabled, packages can be installed from
+    there. A disabled repository will not be removed.
+
+  * `refresh`: Boolean. Optional. Default: `yes`
+
+    Enable auto-refresh of the repository.
+
+  * `gpgcheck`: Boolean. Optional. Default: `yes`
+
+    Enable or disable the GPG check for the repositories.
+
+  * `gpgautoimport`: Boolean. Optional. Default: `yes`
+
+    If enabled, automatically trust and import public GPG key for the
+    repository.
+
+  * `cache`: Boolean. Optional. Default: `no`
+
+    If the cache is enabled, will keep the RPM packages.
+
 * `repositories`. Dictionary. Optional
 
-  Each key of the dictionary will be the name under where this
-  repository is registered, and the key is the URL associated with it.
+  Each key of the dictionary will be the alias under where this
+  repository is registered, and the key, if is a string, the URL
+  associated with it.
+
+  If the key is an dictionary, we can overwrite some of the default
+  configuration options set in the `config` section, with the
+  exception of `minimal`. There are some more elements that we can set
+  for the repository:
+
+  * `url`: String.
+
+    URL of the repository.
+
+  * `name`: String. Optional
+
+    Descriptive name for the repository.
+
+  * `priority`: Integer. Optional. Default: `0`
+
+    Set priority of the repository.
 
 * `packages`. Array. Optional
 
@@ -1138,12 +1179,12 @@ installation, and the packages and patterns that will be installed.
   generate by KIWI (or any other mechanism), that will be copied into
   the partition that have the root mount point assigned. This can be
   used to speed the installation process.
-  
+
   Those images needs to contain only the file system and the data. If
   the image contains a boot loader or partition information, the image
   will fail during the resize operation. To validate if the image is
   suitable, a simple `file image.raw` will do.
-  
+
   * `url`: String.
 
     URL of the image. As internally we are using curl to fetch the
@@ -1160,15 +1201,15 @@ installation, and the packages and patterns that will be installed.
     same URL given in the previous field. If the path contains an
     extension for a compression format, this will be replaced with the
     checksum type as a new extension.
-	
-	For example, if the URL is `http://example.com/image.xz`, the
+
+    For example, if the URL is `http://example.com/image.xz`, the
     checksum type is `md5`, and no value is provided, the checksum
     will be expected at `http://example.com/image.md5`.
-	
-	But if the URL is something like `http://example.com/image.ext4`,
+
+    But if the URL is something like `http://example.com/image.ext4`,
     the checksum will be expected in the URL
     `http://example.com/image.ext4.md5`.
-	
+
   If the checksum type is provided, the value for the last image will
   be stored in the Salt cache, and will be used to decide if the image
   in the URL is different from the one already copied in the
@@ -1182,6 +1223,9 @@ Example:
 software:
   repositories:
     repo-oss: "http://download.opensuse.org/tumbleweed/repo/oss"
+    update:
+	  url: http://download.opensuse.org/update/tumbleweed/
+	  name: openSUSE Update
   packages:
     - patterns-base-base
     - kernel-default
