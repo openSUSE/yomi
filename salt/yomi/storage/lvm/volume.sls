@@ -11,7 +11,7 @@
       {% set info = device %}
       {% set device = device['name'] %}
     {% endif %}
-  {% do devices.append(device) %}
+    {% do devices.append(device) %}
 {{ macros.log('lvm', 'create_physical_volume_' ~ device) }}
 create_physical_volume_{{ device }}:
   lvm.pv_present:
