@@ -30,21 +30,54 @@ from states import partitioned
 class PartitionedTestCase(unittest.TestCase):
     @patch("states.partitioned.__salt__")
     def test_check_label(self, __salt__):
-        __salt__.__getitem__.return_value = lambda _: "Partition Table: msdos"
+        fdisk_output = """Error: /dev/sda: unrecognised disk label
+BYT;
+/dev/sda:25.8GB:scsi:512:512:unknown:ATA QEMU HARDDISK:;
+
+Error: /dev/sdb: unrecognised disk label
+BYT;
+/dev/sdb:25.8GB:scsi:512:512:unknown:ATA QEMU HARDDISK:;
+
+"""
+        __salt__.__getitem__.return_value = lambda _: fdisk_output
+        self.assertFalse(partitioned._check_label("/dev/sda", "msdos"))
+        self.assertFalse(partitioned._check_label("/dev/sda", "dos"))
+        self.assertFalse(partitioned._check_label("/dev/sda", "gpt"))
+
+        fdisk_output = """BYT;
+/dev/sda:25.8GB:scsi:512:512:msdos:ATA QEMU HARDDISK:;
+
+Error: /dev/sdb: unrecognised disk label
+BYT;
+/dev/sdb:25.8GB:scsi:512:512:unknown:ATA QEMU HARDDISK:;
+"""
+        __salt__.__getitem__.return_value = lambda _: fdisk_output
         self.assertTrue(partitioned._check_label("/dev/sda", "msdos"))
         self.assertTrue(partitioned._check_label("/dev/sda", "dos"))
         self.assertFalse(partitioned._check_label("/dev/sda", "gpt"))
 
-        __salt__.__getitem__.return_value = lambda _: ""
+        fdisk_output = """BYT;
+/dev/sda:500GB:scsi:512:512:gpt:ATA ST3500413AS:pmbr_boot;
+1:1049kB:9437kB:8389kB:::bios_grub;
+2:9437kB:498GB:498GB:btrfs::legacy_boot;
+3:498GB:500GB:2147MB:linux-swap(v1)::swap;
+
+BYT;
+/dev/sdb:2000GB:scsi:512:4096:msdos:ATA ST2000DM001-1CH1:;
+1:1049kB:2000GB:2000GB:ext4::type=83;
+
+"""
+        __salt__.__getitem__.return_value = lambda _: fdisk_output
         self.assertFalse(partitioned._check_label("/dev/sda", "msdos"))
-        self.assertFalse(partitioned._check_label("/dev/sda", "gpt"))
+        self.assertFalse(partitioned._check_label("/dev/sda", "dos"))
+        self.assertTrue(partitioned._check_label("/dev/sda", "gpt"))
 
     @patch("states.partitioned.__opts__")
     @patch("states.partitioned.__salt__")
     def test_labeled(self, __salt__, __opts__):
         __opts__.__getitem__.return_value = False
 
-        __salt__.__getitem__.return_value = lambda _: "Partition Table: msdos"
+        __salt__.__getitem__.return_value = lambda _: "/dev/sda:msdos:"
         self.assertEqual(
             partitioned.labeled("/dev/sda", "msdos"),
             {
@@ -58,7 +91,7 @@ class PartitionedTestCase(unittest.TestCase):
         __salt__.__getitem__.side_effect = (
             lambda _: "",
             lambda _a, _b: True,
-            lambda _: "Partition Table: msdos",
+            lambda _: "/dev/sda:msdos:",
         )
         self.assertEqual(
             partitioned.labeled("/dev/sda", "msdos"),

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Author: Alberto Planas <aplanas@suse.com>
 #
@@ -27,14 +26,11 @@
 :depends:       None
 :platform:      Linux
 """
-from __future__ import absolute_import, print_function, unicode_literals
 import logging
 import re
 
-from salt.exceptions import CommandExecutionError
-
 import disk
-
+from salt.exceptions import CommandExecutionError
 
 log = logging.getLogger(__name__)
 
@@ -71,8 +67,9 @@ def _check_label(device, label):
 
     """
     label = {"dos": "msdos"}.get(label, label)
-    res = __salt__["cmd.run"](["parted", "-l", device])
-    return "partition table: {}".format(label) in res.lower()
+    res = __salt__["cmd.run"](["parted", "--list", "--machine", "--script"])
+    line = "".join((line for line in res.splitlines() if line.startswith(device)))
+    return ":{}:".format(label) in line
 
 
 def labeled(name, label):
@@ -450,14 +447,10 @@ def mkparted(name, part_type, fs_type=None, start=None, end=None, flags=None):
 
     if partition_match:
         ret["result"] = True
-        ret["comment"].append(
-            "Partition {}{} already in place".format(device, number)
-        )
+        ret["comment"].append("Partition {}{} already in place".format(device, number))
         return ret
     elif partition_match is None:
-        ret["changes"]["new"] = "Partition {}{} will be created".format(
-            device, number
-        )
+        ret["changes"]["new"] = "Partition {}{} will be created".format(device, number)
     elif partition_match is False:
         ret["comment"].append(
             "Partition {}{} cannot be replaced".format(device, number)
