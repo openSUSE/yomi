@@ -1,5 +1,8 @@
 {% import 'macros.yml' as macros %}
 
+{% set software = pillar['software'] %}
+{% set software_config = software.get('config', {}) %}
+
 {{ macros.log('module', 'freeze_chroot') }}
 freeze_chroot:
   module.run:
@@ -13,8 +16,14 @@ freeze_chroot:
 install_python3-base:
   pkg.installed:
     - name: python3-base
-    - no_recommends: yes
     - resolve_capabilities: yes
+  {% if software_config.get('minimal') %}
+    - no_recommends: yes
+  {% endif %}
+  {# TODO: We should migrate the rpm keys #}
+  {% if software_config.get('transfer') %}
+    - skip_verify: yes
+  {% endif %}
     - root: /mnt
     - require:
       - mount: mount_/mnt

@@ -13,6 +13,10 @@ software:
       $type: boolean
       $default: no
       $help: Exclude recommended, documentation and multi-version packages
+    transfer:
+      $type: boolean
+      $default: no
+      $help: Transfer the current repositories from the media
     enabled:
       $type: boolean
       $default: yes

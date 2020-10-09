@@ -3,6 +3,18 @@
 {% set software = pillar['software'] %}
 {% set software_config = software.get('config', {}) %}
 
+{% if software_config.get('transfer') %}
+{{ macros.log('module', 'transfer_repositories') }}
+transfer_repositories:
+  module.run:
+    - file.copy:
+      - src: /etc/zypp/repos.d
+      - dst: /mnt/etc/zypp/repos.d
+      - recurse: yes
+      - remove_existing: yes
+    - unless: "[ -e /mnt/etc/zypp/repos.d ]"
+{% endif %}
+
 {% for alias, repository in software.get('repositories', {}).items() %}
   {% if repository is mapping %}
     {% set url = repository['url'] %}
@@ -45,7 +57,13 @@ config_zypp_minimal_host:
 install_packages:
   pkg.installed:
     - pkgs: {{ software.packages }}
+  {% if software_config.get('minimal') %}
     - no_recommends: yes
+  {% endif %}
+  {# TODO: We should migrate the rpm keys #}
+  {% if software_config.get('transfer') %}
+    - skip_verify: yes
+  {% endif %}
     - includes: [product, pattern]
     - root: /mnt
 {% endif %}

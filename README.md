@@ -1116,13 +1116,21 @@ installation, and the packages and patterns that will be installed.
 
 * `config`. Dictionary. Optional
 
-  Local configuration for the software section. Except `minimal`, all
-  the options can be overwritten in each repository definition.
+  Local configuration for the software section. Except `minimal` and
+  `transfer`, all the options can be overwritten in each repository
+  definition.
 
   * `minimal`: Boolean. Optional. Default: `no`
 
     Configure zypper to make a minimal installation, excluding
     recommended, documentation and multi-version packages.
+
+  * `transfer`: Boolean. Optional. Default: `no`
+
+    Transfer the current repositories (maybe defined in the media
+    installation) into the installed system. If marked, this step will
+    be done early, so any future action could update or replace one of
+    the repositories.
 
   * `enabled`: Boolean. Optional. Default: `yes`
 
