@@ -10,8 +10,7 @@ install_lvm2:
   {% if software_config.get('minimal') %}
     - no_recommends: yes
   {% endif %}
-  {# TODO: We should migrate the rpm keys #}
-  {% if software_config.get('transfer') %}
+  {% if not software_config.get('verify') %}
     - skip_verify: yes
   {% endif %}
     - root: /mnt

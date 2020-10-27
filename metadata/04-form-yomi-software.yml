@@ -17,6 +17,10 @@ software:
       $type: boolean
       $default: no
       $help: Transfer the current repositories from the media
+    verify:
+      $type: boolean
+      $default: yes
+      $help: Verify the package key when installing
     enabled:
       $type: boolean
       $default: yes

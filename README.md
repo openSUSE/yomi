@@ -1116,9 +1116,9 @@ installation, and the packages and patterns that will be installed.
 
 * `config`. Dictionary. Optional
 
-  Local configuration for the software section. Except `minimal` and
-  `transfer`, all the options can be overwritten in each repository
-  definition.
+  Local configuration for the software section. Except `minimal`,
+  `transfer`, and `verify` all the options can be overwritten in each
+  repository definition.
 
   * `minimal`: Boolean. Optional. Default: `no`
 
@@ -1131,6 +1131,10 @@ installation, and the packages and patterns that will be installed.
     installation) into the installed system. If marked, this step will
     be done early, so any future action could update or replace one of
     the repositories.
+
+  * `verify`: Boolean. Optional. Default: `yes`
+
+    Verify the package key when installing.
 
   * `enabled`: Boolean. Optional. Default: `yes`
 
