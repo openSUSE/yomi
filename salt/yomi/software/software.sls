@@ -5,14 +5,22 @@
 
 {% if software_config.get('transfer') %}
 {{ macros.log('module', 'transfer_repositories') }}
-transfer_repositories:
+migrate_repositories:
+  pkgrepo.migrated:
+    - name: /mnt
+    - keys: yes
+
+  {% for cert_dir in ['/usr/share/pki/trust/anchors', '/usr/share/pki/trust/blacklist',
+                      '/etc/pki/trust/anchors', '/etc/pki/trust/blacklist'] %}
+migrate_{{ cert_dir }}:
   module.run:
     - file.copy:
-      - src: /etc/zypp/repos.d
-      - dst: /mnt/etc/zypp/repos.d
+      - src: {{ cert_dir }}
+      - dst: /mnt{{ cert_dir }}
       - recurse: yes
       - remove_existing: yes
-    - unless: "[ -e /mnt/etc/zypp/repos.d ]"
+    - unless: "[ -e /mnt{{ cert_dir }} ]"
+  {% endfor %}
 {% endif %}
 
 {% for alias, repository in software.get('repositories', {}).items() %}
