@@ -276,6 +276,7 @@ filesystems:
     mountpoint:
       $type: text
       $placeholder: /
+      $visibleIf: .filesystem != swap
       $help: Mount point of the partition
     fat:
       $name: FAT Type
