@@ -8,16 +8,10 @@ create_ifcfg_{{ network.interface }}:
   file.append:
     - name: /mnt/etc/sysconfig/network/ifcfg-{{ network.interface }}
     - text: |
-        BOOTPROTO='dhcp'
-        BROADCAST=''
-        ETHTOOL_OPTIONS=''
-        IPADDR=''
-        MTU=''
         NAME=''
-        NETMASK=''
-        NETWORK=''
-        REMOTE_IPADDR=''
+        BOOTPROTO='dhcp'
         STARTMODE='auto'
+        ZONE=''
   {% endfor %}
 {% else %}
 # This assume that the image used for deployment is under a
@@ -33,16 +27,10 @@ create_ifcfg_{{ interface }}:
   file.append:
     - name: /mnt/etc/sysconfig/network/ifcfg-{{ interface }}
     - text: |
-        BOOTPROTO='dhcp'
-        BROADCAST=''
-        ETHTOOL_OPTIONS=''
-        IPADDR=''
-        MTU=''
         NAME=''
-        NETMASK=''
-        NETWORK=''
-        REMOTE_IPADDR=''
+        BOOTPROTO='dhcp'
         STARTMODE='auto'
+        ZONE=''
     - unless: "[ -e /mnt/usr/lib/udev/rules.d/75-persistent-net-generator.rules ]"
 
 {{ macros.log('file', 'create_ifcfg_eth' ~ loop.index0) }}
@@ -50,16 +38,20 @@ create_ifcfg_eth{{ loop.index0 }}:
   file.append:
     - name: /mnt/etc/sysconfig/network/ifcfg-eth{{ loop.index0 }}
     - text: |
-        BOOTPROTO='dhcp'
-        BROADCAST=''
-        ETHTOOL_OPTIONS=''
-        IPADDR=''
-        MTU=''
         NAME=''
-        NETMASK=''
-        NETWORK=''
-        REMOTE_IPADDR=''
+        BOOTPROTO='dhcp'
         STARTMODE='auto'
+        ZONE=''
+    - onlyif: "[ -e /mnt/usr/lib/udev/rules.d/75-persistent-net-generator.rules ]"
+
+{{ macros.log('cmd', 'write_net_rules_eth' ~ loop.index0) }}
+write_net_rules_eth{{ loop.index0 }}:
+  cmd.run:
+    - name: /usr/lib/udev/write_net_rules
+    - env:
+        - INTERFACE: eth{{ loop.index0 }}
+        - MATCHADDR: "{{ interfaces[interface].hwaddr }}"
+    - root: /mnt
     - onlyif: "[ -e /mnt/usr/lib/udev/rules.d/75-persistent-net-generator.rules ]"
   {% endfor %}
 {% endif %}
