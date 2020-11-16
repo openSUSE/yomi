@@ -7,6 +7,7 @@ include:
   - ..storage.fstab
   - ..storage.mount
 {% endif %}
+  - .repository
   - .software
 {% if pillar.get('suseconnect', {}).get('config', {}).get('regcode') %}
   - .suseconnect
