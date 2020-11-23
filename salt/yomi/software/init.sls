@@ -16,3 +16,4 @@ include:
   - ..bootloader.software
   - ..services.software
   - ..chroot.software
+  - .recreatedb
