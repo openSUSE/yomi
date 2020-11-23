@@ -23,6 +23,21 @@ migrate_{{ cert_dir }}:
   {% endfor %}
 {% endif %}
 
+# TODO: boo#1178910 - This zypper bug creates /var/lib/rpm and
+# /usr/lib/sysimage/rpm independently, and not linked together
+{{ macros.log('file', 'create_usr_lib_sysimage_rpm') }}
+create_usr_lib_sysimage_rpm:
+  file.directory:
+    - name: /mnt/usr/lib/sysimage/rpm
+    - makedirs: yes
+
+{{ macros.log('file', 'symlink_var_lib_rpm') }}
+symlink_var_lib_rpm:
+  file.symlink:
+    - name: /mnt/var/lib/rpm
+    - target: ../../usr/lib/sysimage/rpm
+    - makedirs: yes
+
 {% for alias, repository in software.get('repositories', {}).items() %}
   {% if repository is mapping %}
     {% set url = repository['url'] %}
