@@ -1,5 +1,46 @@
 # Yomi - Yet one more installer
 
+Table of contents
+=================
+* [Yomi - Yet one more installer](#yomi---yet-one-more-installer)
+   * [What is Yomi](#what-is-yomi)
+   * [Overview](#overview)
+   * [Installing and configuring salt-master](#installing-and-configuring-salt-master)
+      * [Other ways to install salt-master](#other-ways-to-install-salt-master)
+      * [Looking for the pillar](#looking-for-the-pillar)
+      * [Enabling auto-sign](#enabling-auto-sign)
+      * [Salt API](#salt-api)
+   * [The Yomi formula](#the-yomi-formula)
+      * [Looking for the pillar in Yomi](#looking-for-the-pillar-in-yomi)
+      * [Enabling auto-sing in Yomi](#enabling-auto-sing-in-yomi)
+      * [Salt API in Yomi](#salt-api-in-yomi)
+         * [Real time monitoring in Yomi](#real-time-monitoring-in-yomi)
+   * [Booting a new machine](#booting-a-new-machine)
+      * [The ISO image](#the-iso-image)
+      * [PXE Boot](#pxe-boot)
+      * [Finding the master node](#finding-the-master-node)
+      * [Setting the minion ID](#setting-the-minion-id)
+      * [Adding user provided configuration](#adding-user-provided-configuration)
+      * [Container](#container)
+   * [Basic operations](#basic-operations)
+      * [Getting hardware information](#getting-hardware-information)
+      * [Configuring the pillar](#configuring-the-pillar)
+      * [Cleaning the disks](#cleaning-the-disks)
+      * [Applying the yomi state](#applying-the-yomi-state)
+   * [Pillar reference for Yomi](#pillar-reference-for-yomi)
+      * [config section](#config-section)
+      * [partitions section](#partitions-section)
+      * [lvm section](#lvm-section)
+      * [raid section](#raid-section)
+      * [filesystems section](#filesystems-section)
+      * [bootloader section](#bootloader-section)
+      * [software section](#software-section)
+      * [suseconnect section](#suseconnect-section)
+      * [salt-minion section](#salt-minion-section)
+      * [services section](#services-section)
+      * [networks section](#networks-section)
+      * [users section](#users-section)
+
 # What is Yomi
 
 Yomi (yet one more installer) is a new proposal for an installer for
