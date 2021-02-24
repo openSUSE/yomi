@@ -154,7 +154,7 @@ def wipe(device):
 
     .. code-block:: bash
 
-       salt '*' devices.wipeout /dev/sda
+       salt '*' devices.wipe /dev/sda
 
     """
 
