@@ -28,6 +28,7 @@ add_fstab_{{ fs_file }}:
   {% if not salt.filters.is_lvm(device) %}
     - mount_by: uuid
   {% endif %}
+    - mount: no
     - not_change: yes
     - config: /mnt/etc/fstab
     - require:

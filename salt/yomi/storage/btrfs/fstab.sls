@@ -34,6 +34,7 @@ add_fstab_{{ fs_file }}:
     - fs_freq: 0
     - fs_passno: 0
     - mount_by: uuid
+    - mount: no
     - not_change: yes
     - config: /mnt/etc/fstab
     - require:
