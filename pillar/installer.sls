@@ -27,7 +27,7 @@
 {% set home_filesystem = False %}
 {% set snapper = True %}
 {% set swap = False %}
-{% set mode = 'microos' %}
+{% set mode = 'sles' %}
 {% set network = 'auto' %}
 
 {% set arch = grains['cpuarch'] %}
@@ -49,7 +49,7 @@ config:
 suseconnect:
   config:
     regcode: REGISTRATION-CODE
-    version: '15.1'
+    version: '15.2'
     arch: {{ arch }}
   products:
     - sle-module-basesystem
@@ -65,7 +65,11 @@ software:
   repositories:
 {% if mode == 'sles' %}
     SUSE_SLE-15_GA: "http://download.suse.de/ibs/SUSE:/SLE-15:/GA/standard/"
+    SUSE_SLE-15_Update: "http://download.suse.de/ibs/SUSE:/SLE-15:/Update/standard/"
     SUSE_SLE-15-SP1_GA: "http://download.suse.de/ibs/SUSE:/SLE-15-SP1:/GA/standard/"
+    SUSE_SLE-15-SP1_Update: "http://download.suse.de/ibs/SUSE:/SLE-15-SP1:/Update/standard/"
+    SUSE_SLE-15-SP2_GA: "http://download.suse.de/ibs/SUSE:/SLE-15-SP2:/GA/standard/"
+    SUSE_SLE-15-SP2_Update: "http://download.suse.de/ibs/SUSE:/SLE-15-SP2:/Update/standard/"
 {% elif arch == 'aarch64' %}
     repo-oss: "http://download.opensuse.org/ports/aarch64/tumbleweed/repo/oss/"
 {% else %}
