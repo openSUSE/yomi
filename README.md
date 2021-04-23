@@ -377,6 +377,13 @@ the last version can be always be downloaded from:
 wget https://download.opensuse.org/repositories/systemsmanagement:/yomi/images/iso/openSUSE-Tumbleweed-Yomi.x86_64-livecd.iso
 ```
 
+This image do not have root password, so if we have physical access to
+the node we can become root locally.  The `sshd` service is enabled
+during boot time but for security reasons the user `root` cannot
+access via SSH (`PermitEmptyPasswords` is not set).  To gain remote
+access to `root` we need to set the kernel command line parameter
+`ym.sshd=1` (for example, via PXE Boot).
+
 ## PXE Boot
 
 The second image available is a OEM ramdisk that can be booted from

@@ -27,14 +27,14 @@
 {% set home_filesystem = False %}
 {% set snapper = True %}
 {% set swap = False %}
-{% set mode = 'sles' %}
+{% set mode = 'microos' %}
 {% set network = 'auto' %}
 
 {% set arch = grains['cpuarch'] %}
 
 config:
   events: no
-  reboot: yes
+  reboot: no
 {% if snapper and root_filesystem == 'btrfs' %}
   snapper: yes
 {% endif %}
@@ -48,7 +48,7 @@ config:
 {% if mode == 'sles' %}
 suseconnect:
   config:
-    regcode: REGISTRATION-CODE
+    regcode: INTERNAL-USE-ONLY-f7fe-e9d9
     version: '15.2'
     arch: {{ arch }}
   products:
