@@ -28,6 +28,7 @@
 :platform:      Linux
 """
 from __future__ import absolute_import, print_function, unicode_literals
+
 import logging
 import re
 
@@ -88,7 +89,7 @@ def _is_registered(product, root):
     return False
 
 
-def registered(name, regcode, product=None, email=None, url=None, root=None):
+def registered(name, regcode=None, product=None, email=None, url=None, root=None):
     """
     .. versionadded:: TBD
 
@@ -102,7 +103,7 @@ def registered(name, regcode, product=None, email=None, url=None, root=None):
     regcode
        Subscription registration code for the product to be
        registered. Relates that product to the specified subscription,
-       and enalbes software repositories for that product.
+       and enables software repositories for that product.
 
     product
        Specify a product for activation/deactivation. Only one product
@@ -139,9 +140,7 @@ def registered(name, regcode, product=None, email=None, url=None, root=None):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"].append(
-            "Product or module {} would be registered".format(name)
-        )
+        ret["comment"].append("Product or module {} would be registered".format(name))
         ret["changes"][name] = True
         return ret
 
@@ -204,16 +203,12 @@ def deregistered(name, product=None, url=None, root=None):
 
     if not _is_registered(product, root):
         ret["result"] = True
-        ret["comment"].append(
-            "Product or module {} already deregistered".format(name)
-        )
+        ret["comment"].append("Product or module {} already deregistered".format(name))
         return ret
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"].append(
-            "Product or module {} would be deregistered".format(name)
-        )
+        ret["comment"].append("Product or module {} would be deregistered".format(name))
         ret["changes"][name] = True
         return ret
 
@@ -229,8 +224,6 @@ def deregistered(name, product=None, url=None, root=None):
         ret["result"] = True
         ret["comment"].append("Product or module {} deregistered".format(name))
     else:
-        ret["comment"].append(
-            "Product or module {} failed to deregister".format(name)
-        )
+        ret["comment"].append("Product or module {} failed to deregister".format(name))
 
     return ret

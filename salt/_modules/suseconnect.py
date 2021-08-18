@@ -28,6 +28,7 @@
 :platform:      Linux
 """
 from __future__ import absolute_import, print_function, unicode_literals
+
 import json
 import logging
 import re
@@ -65,7 +66,7 @@ def _cmd(cmd):
     return result["stdout"]
 
 
-def register(regcode, product=None, email=None, url=None, root=None):
+def register(regcode=None, product=None, email=None, url=None, root=None):
     """
     .. versionadded:: TBD
 
@@ -75,7 +76,7 @@ def register(regcode, product=None, email=None, url=None, root=None):
     regcode
        Subscription registration code for the product to be
        registered. Relates that product to the specified subscription,
-       and enalbes software repositories for that product.
+       and enables software repositories for that product.
 
     product
        Specify a product for activation/deactivation. Only one product
@@ -97,13 +98,19 @@ def register(regcode, product=None, email=None, url=None, root=None):
 
     .. code-block:: bash
 
-       salt '*' suseconnect.register xxxx-yyy-zzzz
-       salt '*' suseconnect.register xxxx-yyy-zzzz product='sle-ha/15.2/x86_64'
+       salt '*' suseconnect.register regcode='xxxx-yyy-zzzz'
+       salt '*' suseconnect.register product='sle-ha/15.2/x86_64'
 
     """
-    cmd = ["SUSEConnect", "--regcode", regcode]
+    cmd = ["SUSEConnect"]
 
-    parameters = [("product", product), ("email", email), ("url", url), ("root", root)]
+    parameters = [
+        ("regcode", regcode),
+        ("product", product),
+        ("email", email),
+        ("url", url),
+        ("root", root),
+    ]
 
     for parameter, value in parameters:
         if value:
