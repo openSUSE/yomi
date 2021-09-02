@@ -29,7 +29,7 @@ set_password_user_{{ user.username }}:
 
   {% for certificate in user.get('certificates', []) %}
 {{ macros.log('module', 'add_certificate_user_' ~ user.username ~ '_' ~ loop.index) }}
-add_certificate_users_{{ user.username }}_{{ loop.index }}:
+add_certificate_user_{{ user.username }}_{{ loop.index }}:
   module.run:
     - chroot.call:
       - root: /mnt

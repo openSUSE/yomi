@@ -23,7 +23,7 @@ synchronize_salt-minion_var:
       - remove_existing: yes
     - unless: "[ -e /mnt/var/cache/salt/minion/extmods ]"
 
-{{ macros.log('module', 'clean_salt-minion_var') }}
+{{ macros.log('file', 'clean_salt-minion_var') }}
 clean_salt-minion_var:
   file.tidied:
     - name: /mnt/var/cache/salt/minion
