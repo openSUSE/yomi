@@ -378,7 +378,7 @@ the last version can be always be downloaded from:
 wget https://download.opensuse.org/repositories/systemsmanagement:/yomi/images/iso/openSUSE-Tumbleweed-Yomi.x86_64-livecd.iso
 ```
 
-This image do not have root password, so if we have physical access to
+This image does not have a root password, so if we have physical access to
 the node we can become root locally.  The `sshd` service is enabled
 during boot time but for security reasons the user `root` cannot
 access via SSH (`PermitEmptyPasswords` is not set).  To gain remote
@@ -431,7 +431,7 @@ DNS service will resolve the `salt` name to the correct IP address.
 During boot time of the Yomi image we can change the address where is
 expected to find the master node. To do that we can enter under the
 GRUB menu the entry `ym.master=my_master_address`. For example
-`ym.master=10.0.2.2` will make the minion to search the master in the
+`ym.master=10.0.2.2` will make the minion to search the master at the
 address `10.0.2.2`.
 
 An internal systemd service in the image will detect this address and
@@ -461,12 +461,12 @@ the current rules are:
 
 ## Adding user provided configuration
 
-Sometimes we need to inject in the `salt-minion` some extra
-configuration, before the service runs. For example, we might need to
-add some grains, or enable some feature in the `salt-minion` service
-running inside the image.
+Sometimes we need to inject some extra configuration into `salt-minion` 
+before the service runs. For example, we might need to add some grains,
+or enable some feature in the `salt-minion` service running inside the
+image.
 
-To do that we have to options: we can pass an URL with the content, or
+To do that we have two options: we can pass an URL with the content, or
 we can add the full content as a parameter during the boot process.
 
 To pass an URL we should use `ym.config_url` parameter. For example,
@@ -484,13 +484,13 @@ with the parameter `ym.config_name`.
 
 ## Container
 
-Because the versatility of Salt, is possible to execute the modules
+Because the versatility of Salt, it's possible to execute the modules
 that belong to the `salt-minion` service Yomi without the requirement
 of any `salt-master` nor `salt-minion` service running. We could
 launch the installation via only the `salt-call` command in local
 mode.
 
-Because of that, es possible to deliver Yomi as a single container,
+Because of that, it is possible to deliver Yomi as a single container,
 composed of the different Salt and Yomi modules and states.
 
 We can boot a machine using any mechanism, like a recovery image, and
@@ -552,9 +552,9 @@ salt node grains.items
 We can get more detailed information using other Salt modules, like
 `partition.list`, `network.interfaces` or `udev.info`.
 
-With Yomi we provided a simple interface to `hwinfo` that provides in
-a single report some of the information that is required to make
-decisions about the pillar.
+With Yomi we provided a simple interface to `hwinfo` that provides
+some of the information that is required to make decisions about the
+pillar in a single report:
 
 ```bash
 # Synchronize all the modules to the minion
@@ -623,8 +623,8 @@ layout.
 
 ## Cleaning the disks
 
-Yomi try to be careful with the current data stored in the disks. By
-default will not remove any partition, nor will make an implicit
+Yomi tries to be careful with the current data stored on the disks. By
+default, it will not remove any partition nor will make an implicit
 decision about the device where the installation will run.
 
 If we want to remove the data from the device, we can use the provided
