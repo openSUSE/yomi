@@ -48,7 +48,7 @@ config:
 {% if mode == 'sles' %}
 suseconnect:
   config:
-    regcode: INTERNAL-USE-ONLY-f7fe-e9d9
+    regcode: {{ regcode }}
     version: '15.2'
     arch: {{ arch }}
   products:
