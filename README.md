@@ -348,7 +348,7 @@ installation.
 
 We can deploy all the requirements using different mechanisms. One,
 for example, is via PXE boot. We can build a server that will deliver
-the Linux `kernel` and an `initrd` will all the required
+the Linux `kernel` and an `initrd` with all the required
 software. Another alternative is to have an already live ISO image
 that you use to boot from the USB port.
 
